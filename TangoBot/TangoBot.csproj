@@ -12,4 +12,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DatabaseLib\DatabaseLib.csproj" />
+    <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
+    <ProjectReference Include="..\IndicatorsLib\IndicatorsLib.csproj" />
+  </ItemGroup>
+
 </Project>
