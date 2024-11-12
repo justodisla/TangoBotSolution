@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
 
@@ -8,25 +9,24 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Starting TangoBot...");
+            var httpClient = new HttpClient { BaseAddress = new Uri("https://api.cert.tastyworks.com") };
 
-            // Initialize the API client
-            var apiClient = new TastyTradeApiClient();
+            // Use the provided credentials
+            string username = "tangobotsandboxuser";
+            string password = "TTTangoBotSandBoxPass";
+            var tokenProvider = new TokenProvider(httpClient, username, password);
 
-            // Sandbox credentials
-            var username = "sandboxuser";  // Replace with your sandbox username
-            var password = "TTTangoBotSandBoxPass";  // Replace with your sandbox password
+            // Get a valid session token
+            string sessionToken = await tokenProvider.GetValidTokenAsync();
 
-            // Authenticate
-            bool isAuthenticated = await apiClient.AuthenticateAsync(username, password);
-
-            if (isAuthenticated)
+            if (!string.IsNullOrEmpty(sessionToken))
             {
-                Console.WriteLine("TangoBot is authenticated and ready to proceed.");
+                Console.WriteLine("Successfully obtained a valid session token.");
+                // Proceed with additional API calls using this token
             }
             else
             {
-                Console.WriteLine("Authentication failed. Please check your credentials.");
+                Console.WriteLine("Failed to obtain a valid session token.");
             }
         }
     }
