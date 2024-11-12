@@ -1,9 +1,6 @@
-﻿using TangoBot.HttpClientLib;
-using TangoBot.DatabaseLib;
-using TangoBot.IndicatorsLib;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
+using TangoBot.HttpClientLib;
 
 namespace TangoBot
 {
@@ -13,26 +10,24 @@ namespace TangoBot
         {
             Console.WriteLine("Starting TangoBot...");
 
-            // Initialize database
-            var dbPath = "TangoBotData.db";
-            var dbManager = new DatabaseManager(dbPath);
-            dbManager.InitializeDatabase();
+            // Initialize the API client
+            var apiClient = new TastyTradeApiClient();
 
-            // Initialize API client
-            var apiKey = "YOUR_API_KEY";
-            var apiBaseUrl = "https://api.tastytrade.com";
-            var apiClient = new TastyTradeApiClient(apiBaseUrl, apiKey);
+            // Sandbox credentials
+            var username = "sandboxuser";  // Replace with your sandbox username
+            var password = "TTTangoBotSandBoxPass";  // Replace with your sandbox password
 
-            // Test API connection
-            var symbol = "SPY";
-            var marketData = await apiClient.GetMarketDataAsync(symbol);
-            Console.WriteLine($"Market data for {symbol}: {marketData}");
+            // Authenticate
+            bool isAuthenticated = await apiClient.AuthenticateAsync(username, password);
 
-            // Test SMA calculation
-            var smaCalculator = new SmaCalculator();
-            var samplePrices = new List<decimal> { 100, 102, 101, 103, 104 };
-            var sma = smaCalculator.CalculateSMA(samplePrices, 3);
-            Console.WriteLine($"Sample SMA: {sma}");
+            if (isAuthenticated)
+            {
+                Console.WriteLine("TangoBot is authenticated and ready to proceed.");
+            }
+            else
+            {
+                Console.WriteLine("Authentication failed. Please check your credentials.");
+            }
         }
     }
 }

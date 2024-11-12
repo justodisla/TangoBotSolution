@@ -1,0 +1,4 @@
+﻿//Sandbox pass: TTTangoBotSandBoxPass
+//Sandbox user: sandboxuser
+
+https://developer.tastytrade.com/
