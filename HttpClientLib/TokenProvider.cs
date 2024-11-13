@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -80,19 +81,20 @@ namespace TangoBot.HttpClientLib
                 if (isValid)
                 {
                     Console.WriteLine("[Debug] Token is valid.");
-                }
+            }
                 else
-                {
+            {
                     Console.WriteLine($"[Debug] Token validation failed with status code: {response.StatusCode}");
-                }
+        }
 
                 return isValid;
-            }
+        }
             catch (Exception ex)
-            {
+        {
                 Console.WriteLine($"[Error] Exception during token validation: {ex.Message}");
                 return false;
             }
+            return null;
         }
 
         /// <summary>
@@ -104,42 +106,60 @@ namespace TangoBot.HttpClientLib
             var credentials = new { email = Email, password = Password };
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
 
-            try
+            int maxRetries = 3;
+            int delay = 2000; // Start with a 2-second delay
+
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
+                try
+                {
                 Console.WriteLine("[Debug] Sending authentication request.");
                 var response = await _httpClient.PostAsync(LoginUrl, content);
 
                 if (response.IsSuccessStatusCode)
-                {
-                    var responseBody = await response.Content.ReadAsStringAsync();
+                    {
+                        var responseBody = await response.Content.ReadAsStringAsync();
                     Console.WriteLine("[Debug] Authentication response received.");
                     Console.WriteLine($"[Debug] Response body: {responseBody}");
 
                     // Use TokenParser to extract the token
                     _sessionToken = _tokenParser.ParseToken(responseBody);
 
-                    if (!string.IsNullOrEmpty(_sessionToken))
-                    {
+                        if (!string.IsNullOrEmpty(_sessionToken))
+                        {
                         Console.WriteLine("[Info] Authentication successful. Session token obtained.");
-                        return true;
+                            return true;
+                        }
+                        else
+                        {
+                        Console.WriteLine("[Error] Session token is missing in the response.");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("[Error] Session token is missing in the response.");
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[Error] Authentication failed with status code {response.StatusCode}. Error: {errorContent}");
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[Error] Authentication failed with status code {response.StatusCode}. Error: {errorContent}");
-                }
-            }
-            catch (Exception ex)
-            {
                 Console.WriteLine($"[Error] Exception during authentication: {ex.Message}");
             }
 
             return false;
         }
+
+        // Classes to represent the JSON response structure
+        private class SessionResponse
+        {
+            public SessionData data { get; set; }
+        }
+
+        private class SessionData
+        {
+            public string session_token { get; set; }
+            public string remember_token { get; set; }
+        }
+
     }
 }
