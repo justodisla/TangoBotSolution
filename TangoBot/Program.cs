@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
 
@@ -8,25 +9,37 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Starting TangoBot...");
+            var httpClient = new HttpClient();
 
-            // Initialize the API client
-            var apiClient = new TastyTradeApiClient();
+            var tokenProvider = new TokenProvider(httpClient);
 
-            // Sandbox credentials
-            var username = "sandboxuser";  // Replace with your sandbox username
-            var password = "TTTangoBotSandBoxPass";  // Replace with your sandbox password
+            // Obtain a valid session token
+            string sessionToken = await tokenProvider.GetValidTokenAsync();
 
-            // Authenticate
-            bool isAuthenticated = await apiClient.AuthenticateAsync(username, password);
-
-            if (isAuthenticated)
+            if (!string.IsNullOrEmpty(sessionToken))
             {
-                Console.WriteLine("TangoBot is authenticated and ready to proceed.");
+                Console.WriteLine("[Info] Successfully obtained a valid session token.");
+
+                // Make an authenticated API call using the token
+                var request = new HttpRequestMessage(HttpMethod.Get, "https://reqres.in/api/users/2");
+                request.Headers.Add("Authorization", $"Bearer {sessionToken}");
+
+                try
+                {
+                    var response = await httpClient.SendAsync(request);
+                    var responseBody = await response.Content.ReadAsStringAsync();
+
+                    Console.WriteLine("[Info] API call response:");
+                    Console.WriteLine(responseBody);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Exception during API call: {ex.Message}");
+                }
             }
             else
             {
-                Console.WriteLine("Authentication failed. Please check your credentials.");
+                Console.WriteLine("[Error] Failed to obtain a valid session token.");
             }
         }
     }
