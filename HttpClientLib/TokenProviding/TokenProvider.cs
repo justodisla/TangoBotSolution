@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using static TangoBot.HttpClientLib.TastyTradeApiClient;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib.TokenProviding
 {
     /// <summary>
     /// Provides a valid session token by handling authentication and validation.

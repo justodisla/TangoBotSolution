@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib.TokenProviding
 {
     /// <summary>
     /// Handles the storage and retrieval of the session token from a file.

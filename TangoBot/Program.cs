@@ -1,5 +1,7 @@
-﻿using System;
+﻿using HttpClientLib.TokenProviding;
+using System;
 using System.Net.Http;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
 
@@ -9,51 +11,91 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
-            try
+            var httpClient = new HttpClient();
+            var tokenProvider = new TokenProvider(httpClient);
+            var customerComponent = new CustomerComponent(httpClient, tokenProvider);
+
+            // Test 1: Get Customer Info
+            Console.WriteLine("[Test 1] Fetching customer information...");
+            var customerInfo = await customerComponent.GetCustomerInfoAsync();
+            if (customerInfo != null)
             {
-                var httpClient = new HttpClient();
-
-                var tokenProvider = new TokenProvider(httpClient);
-
-                // Obtain a valid session token  
-                string? sessionToken = await tokenProvider.GetValidTokenAsync();
-
-                if (!string.IsNullOrEmpty(sessionToken))
+                Console.WriteLine("Customer Info:");
+                Console.WriteLine($"ID: {customerInfo.Id}");
+                Console.WriteLine($"Name: {customerInfo.FirstName} {customerInfo.LastName}");
+                Console.WriteLine($"Mobile: {customerInfo.MobilePhoneNumber}");
+                Console.WriteLine($"Birth Date: {customerInfo.BirthDate}");
+                Console.WriteLine($"Email: {customerInfo.Email}");
+                Console.WriteLine("Permitted Account Types:");
+                foreach (var accountType in customerInfo.PermittedAccountTypes)
                 {
-                    Console.WriteLine("[Info] Successfully obtained a valid session token.");
+                    Console.WriteLine($"  - {accountType.Name} (Tax-Advantaged: {accountType.IsTaxAdvantaged})");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[Error] Failed to retrieve customer information.");
+            }
 
-                    string TestApiUrl = "https://api.cert.tastyworks.com/instruments/equities/SO"; // Test endpoint to validate token  
+            // Test 2: Get Customer Accounts
+            Console.WriteLine("\n[Test 2] Fetching customer accounts...");
+            var accounts = await customerComponent.GetCustomerAccountsAsync();
+            if (accounts != null && accounts.Length > 0)
+            {
+                foreach (var account in accounts)
+                {
+                    Console.WriteLine("Account Info:");
+                    Console.WriteLine($"Account Number: {account.AccountNumber}");
+                    Console.WriteLine($"Account Type: {account.AccountTypeName}");
+                    Console.WriteLine($"Day Trader Status: {account.DayTraderStatus}");
+                    Console.WriteLine($"Investment Objective: {account.InvestmentObjective}");
+                    Console.WriteLine($"Opened At: {account.OpenedAt}");
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("[Error] Failed to retrieve customer accounts.");
+            }
 
-                    // Make an authenticated API call using the token  
-                    var request = new HttpRequestMessage(HttpMethod.Get, TestApiUrl);
-                    request.Headers.Add("Authorization", sessionToken);
-
-                    try
-                    {
-                        var response = await httpClient.SendAsync(request);
-                        var responseBody = await response.Content.ReadAsStringAsync();
-
-                        Console.WriteLine("[Info] API call response:");
-                        Console.WriteLine(responseBody);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Error] Exception during API call: {ex.Message}");
-                    }
+            // Test 3: Get Specific Account Details
+            if (accounts != null && accounts.Length > 0)
+            {
+                string accountNumber = accounts[0].AccountNumber;
+                Console.WriteLine($"\n[Test 3] Fetching details for account {accountNumber}...");
+                //var accountDetails = await customerComponent.GetAccountDetailsAsync(account
+                var accountDetails = await customerComponent.GetAccountDetailsAsync(accountNumber);
+                if (accountDetails != null)
+                {
+                    Console.WriteLine("Account Details:");
+                    Console.WriteLine($"Account Number: {accountDetails.AccountNumber}");
+                    Console.WriteLine($"Account Type: {accountDetails.AccountTypeName}");
+                    Console.WriteLine($"Day Trader Status: {accountDetails.DayTraderStatus}");
+                    Console.WriteLine($"Investment Objective: {accountDetails.InvestmentObjective}");
+                    Console.WriteLine($"Margin or Cash: {accountDetails.MarginOrCash}");
+                    Console.WriteLine($"Suitable Options Level: {accountDetails.SuitableOptionsLevel}");
+                    Console.WriteLine($"Nickname: {accountDetails.Nickname}");
+                    Console.WriteLine($"Authority Level: {accountDetails.AuthorityLevel}");
+                    Console.WriteLine($"Opened At: {accountDetails.OpenedAt}");
+                    Console.WriteLine($"Is Closed: {accountDetails.IsClosed}");
+                    Console.WriteLine($"Is Firm Error: {accountDetails.IsFirmError}");
+                    Console.WriteLine($"Is Firm Proprietary: {accountDetails.IsFirmProprietary}");
+                    Console.WriteLine($"Is Foreign: {accountDetails.IsForeign}");
+                    Console.WriteLine($"Is Futures Approved: {accountDetails.IsFuturesApproved}");
+                    Console.WriteLine($"Is Test Drive: {accountDetails.IsTestDrive}");
+                    Console.WriteLine();
                 }
                 else
                 {
-                    Console.WriteLine("[Error] Failed to obtain a valid session token.");
+                    Console.WriteLine("[Error] Failed to retrieve account details.");
                 }
             }
-            catch (Exception)
+            else
             {
-                throw;
+                Console.WriteLine("[Error] No accounts found for testing account details retrieval.");
             }
 
-            // Wait for user input before closing  
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+            Console.WriteLine("\n[Info] Testing completed.");
         }
     }
 }

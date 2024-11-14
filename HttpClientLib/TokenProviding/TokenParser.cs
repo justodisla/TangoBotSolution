@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib.TokenProviding
 {
     /// <summary>
     /// Parses the session token from the Tastytrade API response body.
@@ -16,7 +16,7 @@ namespace TangoBot.HttpClientLib
         public string ParseToken(string responseBody)
         {
             responseBody = responseBody.Replace("-", "_"); // Fix invalid JSON property names
-            
+
             try
             {
                 Console.WriteLine("[Debug] Parsing session token from Tastytrade response body.");
