@@ -22,7 +22,7 @@ namespace TangoBot
                 {
                     Console.WriteLine("[Info] Successfully obtained a valid session token.");
 
-                    string TestApiUrl = "https://api.cert.tastyworks.com/instruments/equities/SPY"; // Test endpoint to validate token  
+                    string TestApiUrl = "https://api.cert.tastyworks.com/instruments/equities/SO"; // Test endpoint to validate token  
 
                     // Make an authenticated API call using the token  
                     var request = new HttpRequestMessage(HttpMethod.Get, TestApiUrl);
