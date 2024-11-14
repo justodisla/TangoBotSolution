@@ -2,11 +2,13 @@
 
 public class AccountListResponse
 {
+    [JsonPropertyName("data")]
     public AccountList data { get; set; }
 }
 
 public class AccountList
 {
+    [JsonPropertyName("items")]
     public AccountInfo[] items { get; set; }
 }
 
@@ -63,5 +65,6 @@ public class AccountInfo
 
 public class AccountDetailsResponse
 {
+    [JsonPropertyName("data")]
     public AccountInfo data { get; set; }
 }

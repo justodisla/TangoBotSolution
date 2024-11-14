@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace HttpClientLib.TokenProviding
+namespace HttpClientLib.TokenManagement
 {
     /// <summary>
     /// Handles the storage and retrieval of the session token from a file.

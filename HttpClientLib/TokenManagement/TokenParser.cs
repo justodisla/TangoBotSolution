@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace HttpClientLib.TokenProviding
+namespace HttpClientLib.TokenManagement
 {
     /// <summary>
     /// Parses the session token from the Tastytrade API response body.

@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HttpClientLib.TokenProviding;
+using HttpClientLib.TokenManagement;
 using TangoBot.HttpClientLib;
 
 namespace HttpClientLib.AccountApi

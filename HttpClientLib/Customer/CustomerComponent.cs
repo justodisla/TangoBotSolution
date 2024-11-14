@@ -1,4 +1,4 @@
-﻿using HttpClientLib.TokenProviding;
+﻿using HttpClientLib.TokenManagement;
 using System;
 using System.Net.Http;
 using System.Text.Json;
@@ -53,6 +53,7 @@ namespace TangoBot.HttpClientLib
 
                 var accountData = JsonSerializer.Deserialize<AccountListResponse>(responseBody);
                 return accountData?.data?.items;
+
             }
             else
             {

@@ -1,4 +1,4 @@
-﻿using HttpClientLib.TokenProviding;
+﻿using HttpClientLib.TokenManagement;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;

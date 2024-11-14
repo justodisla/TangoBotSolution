@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using HttpClientLib.TokenProviding;
+using HttpClientLib.TokenManagement;
 using Moq;
 using Moq.Protected;
 using TangoBot.HttpClientLib;
