@@ -9,38 +9,51 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
-            var httpClient = new HttpClient();
-
-            var tokenProvider = new TokenProvider(httpClient);
-
-            // Obtain a valid session token
-            string sessionToken = await tokenProvider.GetValidTokenAsync();
-
-            if (!string.IsNullOrEmpty(sessionToken))
+            try
             {
-                Console.WriteLine("[Info] Successfully obtained a valid session token.");
+                var httpClient = new HttpClient();
 
-                // Make an authenticated API call using the token
-                var request = new HttpRequestMessage(HttpMethod.Get, "https://reqres.in/api/users/2");
-                request.Headers.Add("Authorization", $"Bearer {sessionToken}");
+                var tokenProvider = new TokenProvider(httpClient);
 
-                try
+                // Obtain a valid session token  
+                string? sessionToken = await tokenProvider.GetValidTokenAsync();
+
+                if (!string.IsNullOrEmpty(sessionToken))
                 {
-                    var response = await httpClient.SendAsync(request);
-                    var responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("[Info] Successfully obtained a valid session token.");
 
-                    Console.WriteLine("[Info] API call response:");
-                    Console.WriteLine(responseBody);
+                    string TestApiUrl = "https://api.cert.tastyworks.com/instruments/equities/SPY"; // Test endpoint to validate token  
+
+                    // Make an authenticated API call using the token  
+                    var request = new HttpRequestMessage(HttpMethod.Get, TestApiUrl);
+                    request.Headers.Add("Authorization", sessionToken);
+
+                    try
+                    {
+                        var response = await httpClient.SendAsync(request);
+                        var responseBody = await response.Content.ReadAsStringAsync();
+
+                        Console.WriteLine("[Info] API call response:");
+                        Console.WriteLine(responseBody);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Error] Exception during API call: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"[Error] Exception during API call: {ex.Message}");
+                    Console.WriteLine("[Error] Failed to obtain a valid session token.");
                 }
             }
-            else
+            catch (Exception)
             {
-                Console.WriteLine("[Error] Failed to obtain a valid session token.");
+                throw;
             }
+
+            // Wait for user input before closing  
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }

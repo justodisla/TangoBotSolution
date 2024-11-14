@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static TangoBot.HttpClientLib.TastyTradeApiClient;
 
 namespace TangoBot.HttpClientLib
 {
@@ -12,16 +13,17 @@ namespace TangoBot.HttpClientLib
     /// </summary>
     public class TokenProvider
     {
-        // Endpoint URLs and credentials (constants for this example)
-        private const string LoginUrl = "https://reqres.in/api/login";
-        private const string TestApiUrl = "https://reqres.in/api/users/2";
-        private const string Email = "eve.holt@reqres.in";
-        private const string Password = "cityslicka";
+        
+        // Endpoint URLs and credentials for Tastytrade API
+        private const string LoginUrl = "https://api.cert.tastyworks.com/sessions"; // Sandbox login endpoint
+        private const string TestApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; // Test endpoint to validate token
+        private const string Username = "tangobotsandboxuser"; // Replace with your TT sandbox username
+        private const string Password = "TTTangoBotSandBoxPass"; // Replace with your TT sandbox password
 
         private readonly HttpClient _httpClient;
         private readonly TokenParser _tokenParser;
         private readonly TokenFileHandler _tokenFileHandler;
-        private string _sessionToken;
+        private string? _sessionToken;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenProvider"/> class.
@@ -38,7 +40,7 @@ namespace TangoBot.HttpClientLib
         /// Retrieves a valid session token, either from storage or by authenticating.
         /// </summary>
         /// <returns>The valid session token if successful; otherwise, null.</returns>
-        public async Task<string> GetValidTokenAsync()
+        public async Task<string?> GetValidTokenAsync()
         {
             // Attempt to load the token from file
             _sessionToken = await _tokenFileHandler.LoadTokenFromFileAsync();
@@ -73,7 +75,8 @@ namespace TangoBot.HttpClientLib
             {
                 Console.WriteLine("[Debug] Validating the token by making a test API call.");
                 var request = new HttpRequestMessage(HttpMethod.Get, TestApiUrl);
-                request.Headers.Add("Authorization", $"Bearer {_sessionToken}");
+                //request.Headers.Add("Authorization", $"Bearer {_sessionToken}");
+                request.Headers.Add("Authorization", _sessionToken);
 
                 var response = await _httpClient.SendAsync(request);
                 bool isValid = response.IsSuccessStatusCode;
@@ -81,20 +84,22 @@ namespace TangoBot.HttpClientLib
                 if (isValid)
                 {
                     Console.WriteLine("[Debug] Token is valid.");
-            }
+                }
                 else
-            {
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    var responseJson = JsonSerializer.Deserialize<SessionResponse>(responseBody);
+
                     Console.WriteLine($"[Debug] Token validation failed with status code: {response.StatusCode}");
-        }
+                }
 
                 return isValid;
-        }
+            }
             catch (Exception ex)
-        {
+            {
                 Console.WriteLine($"[Error] Exception during token validation: {ex.Message}");
                 return false;
             }
-            return null;
         }
 
         /// <summary>
@@ -103,56 +108,45 @@ namespace TangoBot.HttpClientLib
         /// <returns>True if authentication is successful; otherwise, false.</returns>
         private async Task<bool> AuthenticateAsync()
         {
-            var credentials = new { email = Email, password = Password };
+            var credentials = new { login = Username, password = Password};
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
 
-            int maxRetries = 3;
-            int delay = 2000; // Start with a 2-second delay
-
-            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            try
             {
-                try
-                {
-                Console.WriteLine("[Debug] Sending authentication request.");
+                Console.WriteLine("[Debug] Sending authentication request to Tastytrade.");
                 var response = await _httpClient.PostAsync(LoginUrl, content);
 
                 if (response.IsSuccessStatusCode)
-                    {
-                        var responseBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("[Debug] Authentication response received.");
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("[Debug] Authentication response received from Tastytrade.");
                     Console.WriteLine($"[Debug] Response body: {responseBody}");
 
                     // Use TokenParser to extract the token
                     _sessionToken = _tokenParser.ParseToken(responseBody);
 
-                        if (!string.IsNullOrEmpty(_sessionToken))
-                        {
-                        Console.WriteLine("[Info] Authentication successful. Session token obtained.");
-                            return true;
-                        }
-                        else
-                        {
-                        Console.WriteLine("[Error] Session token is missing in the response.");
-                        }
+                    if (!string.IsNullOrEmpty(_sessionToken))
+                    {
+                        Console.WriteLine("[Info] Authentication successful. Session token obtained from Tastytrade.");
+                        return true;
                     }
                     else
                     {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[Error] Authentication failed with status code {response.StatusCode}. Error: {errorContent}");
+                        Console.WriteLine("[Error] Session token is missing in the response from Tastytrade.");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                Console.WriteLine($"[Error] Exception during authentication: {ex.Message}");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[Error] Authentication failed with status code {response.StatusCode} from Tastytrade. Error: {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Exception during authentication with Tastytrade: {ex.Message}");
             }
 
             return false;
-        }
-
-        // Classes to represent the JSON response structure
-        private class SessionResponse
-        {
-            public SessionData data { get; set; }
         }
 
         private class SessionData
