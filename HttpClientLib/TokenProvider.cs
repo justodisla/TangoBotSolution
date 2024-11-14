@@ -13,7 +13,7 @@ namespace TangoBot.HttpClientLib
     /// </summary>
     public class TokenProvider
     {
-        
+
         // Endpoint URLs and credentials for Tastytrade API
         private const string LoginUrl = "https://api.cert.tastyworks.com/sessions"; // Sandbox login endpoint
         private const string TestApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; // Test endpoint to validate token
@@ -108,8 +108,19 @@ namespace TangoBot.HttpClientLib
         /// <returns>True if authentication is successful; otherwise, false.</returns>
         private async Task<bool> AuthenticateAsync()
         {
-            var credentials = new { login = Username, password = Password};
+
+            var credentials = new Dictionary<string, object>
+            {
+                { "login", Username },
+                { "password", Password },
+                { "remember-me", true }
+            };
+
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
+
+
+            //var credentials = new { login = Username, password = Password, remember-me: true };
+            //var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
 
             try
             {
