@@ -2,17 +2,23 @@
 
 public class AccountListResponse
 {
-    [JsonPropertyName("data")]
-    public AccountList data { get; set; }
+    public AccountListData data { get; set; }
 }
 
-public class AccountList
+public class AccountListData
 {
-    [JsonPropertyName("items")]
-    public AccountInfo[] items { get; set; }
+    public List<AccountItem> items { get; set; }
 }
 
-public class AccountInfo
+public class AccountItem
+{
+    public AccountInfo account { get; set; }
+
+    [JsonPropertyName("authority-level")]
+    public string AuthorityLevel { get; set; }
+}
+
+public class AccountInfo // Previously named AccountDetails
 {
     [JsonPropertyName("account-number")]
     public string AccountNumber { get; set; }
@@ -21,7 +27,7 @@ public class AccountInfo
     public string AccountTypeName { get; set; }
 
     [JsonPropertyName("created-at")]
-    public string CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     [JsonPropertyName("day-trader-status")]
     public bool DayTraderStatus { get; set; }
@@ -50,21 +56,11 @@ public class AccountInfo
     [JsonPropertyName("margin-or-cash")]
     public string MarginOrCash { get; set; }
 
-    [JsonPropertyName("nickname")]
     public string Nickname { get; set; }
 
     [JsonPropertyName("opened-at")]
-    public string OpenedAt { get; set; }
+    public DateTime? OpenedAt { get; set; }
 
     [JsonPropertyName("suitable-options-level")]
     public string SuitableOptionsLevel { get; set; }
-
-    [JsonPropertyName("authority-level")]
-    public string AuthorityLevel { get; set; }
-}
-
-public class AccountDetailsResponse
-{
-    [JsonPropertyName("data")]
-    public AccountInfo data { get; set; }
 }

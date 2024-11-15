@@ -52,13 +52,12 @@ namespace TangoBot.HttpClientLib
                 Console.WriteLine("[Info] Customer accounts retrieved successfully.");
 
                 var accountData = JsonSerializer.Deserialize<AccountListResponse>(responseBody);
-                return accountData?.data?.items;
-
+                return accountData?.data?.items?.Select(item => item.account).ToArray() ?? Array.Empty<AccountInfo>();
             }
             else
             {
                 Console.WriteLine($"[Error] Failed to retrieve customer accounts. Status code: {response?.StatusCode}");
-                return null;
+                return Array.Empty<AccountInfo>();
             }
         }
 
