@@ -1,10 +1,8 @@
-﻿using HttpClientLib.AccountApi;
-using HttpClientLib.TokenManagement;
-using System;
+﻿using System;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
+using HttpClientLib.TokenManagement;
 
 namespace TangoBot
 {
@@ -12,23 +10,34 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
-            HttpClient httpClient = new HttpClient();
-            TokenProvider tokenProvider = new TokenProvider(httpClient);
-            AccountComponent accountComponent = new AccountComponent(httpClient, tokenProvider);
+            // Create HttpClient instance
+            using var httpClient = new HttpClient();
 
+            // Create a TokenProvider instance (assuming you have a suitable constructor)
+            var tokenProvider = new TokenProvider(httpClient);
+
+            // Create AccountComponent instance
+            var accountComponent = new AccountComponent(httpClient, tokenProvider);
+
+            // Test account number
             string accountNumber = "5WU34986";
 
-            // Test GetAccountBalanceAsync
-            var accountBalance = await accountComponent.GetAccountBalanceAsync(accountNumber);
-            Console.WriteLine($"Account Balance: {accountBalance?.NetLiquidatingValue}");
+            // Fetch account information
+            var accountInfo = await accountComponent.GetAccountInfoAsync(accountNumber);
 
-            // Test GetBalanceSnapshotsAsync
-            var balanceSnapshots = await accountComponent.GetBalanceSnapshotsAsync(accountNumber);
-            Console.WriteLine($"Balance Snapshots: {balanceSnapshots?.items.Length}");
-
-            // Test GetPositionsAsync
-            var positions = await accountComponent.GetPositionsAsync(accountNumber);
-            Console.WriteLine($"Positions: {positions?.items.Length}");
+            // Print account information
+            if (accountInfo != null)
+            {
+                Console.WriteLine("Account Information:");
+                foreach (var kvp in accountInfo)
+                {
+                    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Failed to retrieve account information.");
+            }
         }
     }
 }

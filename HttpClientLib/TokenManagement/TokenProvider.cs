@@ -18,7 +18,7 @@ namespace HttpClientLib.TokenManagement
         private const string LoginUrl = "https://api.cert.tastyworks.com/sessions"; // Sandbox login endpoint
         private const string TestApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; // Test endpoint to validate token
         private const string Username = "tangobotsandboxuser"; // Replace with your TT sandbox username
-        private const string Password = "TTTangoBotSandBoxPass"; // Replace with your TT sandbox password
+        private const string Password = "HyperBerserker?3000";//"TTTangoBotSandBoxPass"; // Replace with your TT sandbox password
 
         private readonly HttpClient _httpClient;
         private readonly TokenParser _tokenParser;
@@ -91,6 +91,7 @@ namespace HttpClientLib.TokenManagement
                     var responseJson = JsonSerializer.Deserialize<SessionResponse>(responseBody);
 
                     Console.WriteLine($"[Debug] Token validation failed with status code: {response.StatusCode}");
+                    Console.WriteLine($"[Debug] Response body: {responseBody}");
                 }
 
                 return isValid;
@@ -118,18 +119,28 @@ namespace HttpClientLib.TokenManagement
 
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
 
-
             //var credentials = new { login = Username, password = Password, remember-me: true };
             //var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
 
             try
             {
                 Console.WriteLine("[Debug] Sending authentication request to Tastytrade.");
-                var response = await _httpClient.PostAsync(LoginUrl, content);
+
+                var request = new HttpRequestMessage(HttpMethod.Post, LoginUrl)
+                {
+                    Content = content
+                };
+                request.Headers.Add("User-Agent", "tangobot/1.0");
+
+                var response = await _httpClient.SendAsync(request);
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                //var response = await _httpClient.PostAsync(LoginUrl, content);
+                //var responseBody = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseBody = await response.Content.ReadAsStringAsync();
+                    
                     Console.WriteLine("[Debug] Authentication response received from Tastytrade.");
                     Console.WriteLine($"[Debug] Response body: {responseBody}");
 
@@ -150,6 +161,7 @@ namespace HttpClientLib.TokenManagement
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"[Error] Authentication failed with status code {response.StatusCode} from Tastytrade. Error: {errorContent}");
+                    //Console.WriteLine($"[Error] Response body: {responseBody}");
                 }
             }
             catch (Exception ex)
