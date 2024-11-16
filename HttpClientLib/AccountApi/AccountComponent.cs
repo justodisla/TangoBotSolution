@@ -19,7 +19,7 @@ namespace TangoBot.HttpClientLib
         /// <summary>
         /// Fetches account information as a dictionary based on the account number.
         /// </summary>
-        public async Task<Dictionary<string, object>> GetAccountInfoAsync(string accountNumber)
+        public async Task<Dictionary<string, object>> GetAccountBalancesAsync(string accountNumber)
         {
             string url = $"{BaseAccountUrl}/{accountNumber}/balances";
             var response = await SendGetRequestAsync(url);
@@ -28,11 +28,19 @@ namespace TangoBot.HttpClientLib
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
 
-                // Deserialize JSON into AccountResponse
-                var accountResponse = JsonSerializer.Deserialize<AccountResponse>(responseBody);
+                Dictionary<string, object> accountBalances = null;
+                string context = null;
+                bool successful = AccountInfoDeserializer.DeserializeAccountBalances(responseBody, ref accountBalances, ref context);
 
-                // Return the data dictionary
-                return accountResponse?.Data;
+                if (successful)
+                {
+                    return accountBalances;
+                }
+                else
+                {
+                    Console.WriteLine("[Error] Failed to deserialize account information.");
+                    return null;
+                }
             }
             else
             {
@@ -40,5 +48,6 @@ namespace TangoBot.HttpClientLib
                 return null;
             }
         }
+
     }
 }

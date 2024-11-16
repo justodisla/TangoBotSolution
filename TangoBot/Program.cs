@@ -23,7 +23,7 @@ namespace TangoBot
             string accountNumber = "5WU34986";
 
             // Fetch account information
-            var accountInfo = await accountComponent.GetAccountInfoAsync(accountNumber);
+            var accountInfo = await accountComponent.GetAccountBalancesAsync(accountNumber);
 
             // Print account information
             if (accountInfo != null)
