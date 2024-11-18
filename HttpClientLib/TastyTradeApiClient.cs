@@ -4,13 +4,13 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib
 {
     public class TastyTradeApiClient
     {
         private readonly HttpClient _httpClient;
-        private string _sessionToken;
-        private string _rememberToken;
+        private string? _sessionToken;
+        private string? _rememberToken;
 
         public TastyTradeApiClient()
         {
@@ -22,7 +22,7 @@ namespace TangoBot.HttpClientLib
             var credentials = new
             {
                 login = username,
-                password = password,
+                password,
                 remember_me = rememberMe
             };
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");

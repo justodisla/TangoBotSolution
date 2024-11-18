@@ -13,7 +13,7 @@ namespace HttpClientLib.TokenManagement
         /// </summary>
         /// <param name="responseBody">The JSON response body containing the token.</param>
         /// <returns>The extracted session token; otherwise, null.</returns>
-        public string ParseToken(string responseBody)
+        public string? ParseToken(string responseBody)
         {
             responseBody = responseBody.Replace("-", "_"); // Fix invalid JSON property names
 
@@ -22,7 +22,7 @@ namespace HttpClientLib.TokenManagement
                 Console.WriteLine("[Debug] Parsing session token from Tastytrade response body.");
                 var responseJson = JsonSerializer.Deserialize<SessionResponse>(responseBody);
 
-                string token = responseJson?.data?.session_token;
+                string? token = responseJson?.data?.session_token;
 
                 if (!string.IsNullOrEmpty(token))
                 {
@@ -47,12 +47,12 @@ namespace HttpClientLib.TokenManagement
         /// </summary>
         private class SessionResponse
         {
-            public SessionData data { get; set; }
+            public SessionData? data { get; set; }
         }
 
         private class SessionData
         {
-            public string session_token { get; set; }
+            public string? session_token { get; set; }
         }
     }
 }

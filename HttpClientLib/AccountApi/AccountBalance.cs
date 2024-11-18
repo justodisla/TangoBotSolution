@@ -2,19 +2,19 @@
 
 public class AccountBalanceResponse
 {
-    public AccountBalance data { get; set; }
+    public AccountBalance? data { get; set; }
 }
 
 public class AccountBalance
 {
     [JsonPropertyName("account-number")]
-    public string AccountNumber { get; set; }
+    public string? AccountNumber { get; set; }
 
     [JsonPropertyName("available-trading-funds")]
-    public string AvailableTradingFunds { get; set; }
+    public string? AvailableTradingFunds { get; set; }
 
     [JsonPropertyName("cash-available-to-withdraw")]
-    public string CashAvailableToWithdraw { get; set; }
+    public string? CashAvailableToWithdraw { get; set; }
 
     [JsonPropertyName("cash-balance")]
     public string CashBalance { get; set; }

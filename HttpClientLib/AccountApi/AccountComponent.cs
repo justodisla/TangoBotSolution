@@ -1,4 +1,5 @@
-﻿using HttpClientLib.TokenManagement;
+﻿using HttpClientLib;
+using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -11,8 +12,8 @@ namespace TangoBot.HttpClientLib
     {
         private const string BaseAccountUrl = "https://api.cert.tastyworks.com/accounts";
 
-        public AccountComponent(HttpClient httpClient, TokenProvider tokenProvider)
-            : base(httpClient, tokenProvider)
+        public AccountComponent()
+            : base()
         {
         }
 
@@ -28,8 +29,8 @@ namespace TangoBot.HttpClientLib
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
 
-                Dictionary<string, object> accountBalances = null;
-                string context = null;
+                Dictionary<string, object>? accountBalances = null;
+                string? context = null;
                 bool successful = AccountInfoDeserializer.DeserializeAccountBalances(responseBody, ref accountBalances, ref context);
 
                 if (successful)
@@ -49,5 +50,70 @@ namespace TangoBot.HttpClientLib
             }
         }
 
+        /// <summary>
+        /// Fetches balance snapshots for a specific account.
+        /// </summary>
+        public async Task<Dictionary<string, object>[]?> GetBalanceSnapshotAsync(string accountNumber)
+        {
+            string url = $"{BaseAccountUrl}/{accountNumber}/balance-snapshots";
+            var response = await SendGetRequestAsync(url);
+
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                Dictionary<string, object>[]? balanceSnapshots = null;
+                string? context = null;
+                bool successful = AccountInfoDeserializer.DeserializeBalanceSnapshots(responseBody, ref balanceSnapshots, ref context);
+
+                if (successful)
+                {
+                    return balanceSnapshots;
+                }
+                else
+                {
+                    Console.WriteLine("[Error] Failed to deserialize balance snapshots.");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"[Error] Failed to retrieve balance snapshots. Status code: {response?.StatusCode}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Fetches account positions for a specific account.
+        /// </summary>
+        public async Task<Dictionary<string, object>[]> GetAccountPositionsAsync(string accountNumber)
+        {
+            string url = $"{BaseAccountUrl}/{accountNumber}/positions";
+            var response = await SendGetRequestAsync(url);
+
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                Dictionary<string, object>[]? accountPositions = null;
+                string? context = null;
+                bool successful = AccountInfoDeserializer.DeserializeAccountPositions(responseBody, ref accountPositions, ref context);
+
+                if (successful)
+                {
+                    return accountPositions;
+                }
+                else
+                {
+                    Console.WriteLine("[Error] Failed to deserialize account positions.");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"[Error] Failed to retrieve account positions. Status code: {response?.StatusCode}");
+                return null;
+            }
+        }
     }
 }
