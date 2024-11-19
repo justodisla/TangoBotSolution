@@ -1,13 +1,13 @@
 ﻿using HttpClientLib;
-using HttpClientLib.CustomerApi;
 using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBot.HttpClientLib;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib.CustomerApi
 {
     public class CustomerComponent : BaseApiComponent
     {
@@ -26,7 +26,7 @@ namespace TangoBot.HttpClientLib
         public async Task<Customer> GetCustomerInfoAsync()
         {
             string url = BaseCustomerUrl;
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -50,7 +50,7 @@ namespace TangoBot.HttpClientLib
         public async Task<List<AccountInfo>> GetCustomerAccountsAsync()
         {
             string url = CustomerAccountsUrl;
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -75,7 +75,7 @@ namespace TangoBot.HttpClientLib
         public async Task<Account> GetAccountAsync(string customerId, string accountNumber)
         {
             string url = $"{BaseCustomersUrl}/{customerId}/accounts/{accountNumber}";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {

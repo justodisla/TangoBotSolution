@@ -1,0 +1,8 @@
+﻿{
+  "data": {
+    "dxlink-url": "wss://tasty-openapi-ws.dxfeed.com/realtime",
+    "level": "api",
+    "token": "dGFzdHksYXBpLCwxNzMyMDIwMzkzLDE3MzE5MzM5OTMsVWNhMzJiYzg2LTIyOTgtNDlhYS1iYmY0LThjNDYxMTMwNjdlOQ.pqVr1mdg-HjNcWVtuVt6y9aB3V-t849JyLmh20VrO6w"
+  },
+  "context": "/api-quote-tokens"
+}

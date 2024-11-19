@@ -16,6 +16,7 @@
     <ProjectReference Include="..\DatabaseLib\DatabaseLib.csproj" />
     <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
     <ProjectReference Include="..\IndicatorsLib\IndicatorsLib.csproj" />
+    <ProjectReference Include="..\TangoBotStreaming\TangoBotStreaming.csproj" />
   </ItemGroup>
 
 </Project>

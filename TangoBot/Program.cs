@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TangoBot.HttpClientLib;
 using HttpClientLib.TokenManagement;
 using HttpClientLib.OrderApi;
 using HttpClientLib.InstrumentApi;
+using HttpClientLib.AccountApi;
+using HttpClientLib.CustomerApi;
+using TangoBotStreaming.Services;
+using TangoBotAPI.Streaming;
 
 namespace TangoBot
 {
@@ -12,6 +15,10 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
+            TestStreaming().Wait();
+
+            return;
+
             // Create HttpClient instance
             using var httpClient = new HttpClient();
 
@@ -68,7 +75,7 @@ namespace TangoBot
             await TestGetActiveInstrumentsAsync(instrumentComponent);
 
             // Create OrderComponent instance
-            var orderComponent = new OrderComponent(httpClient, tokenProvider, "https://api.cert.tastyworks.com");
+            var orderComponent = new OrderComponent( "https://api.cert.tastyworks.com");
             await TestGetAccountOrdersAsync(accountNumber, orderComponent);
             await TestGetAccountLiveOrdersAsync(accountNumber, orderComponent);
             await TestGetOrderByIdAsync(accountNumber, 155008, orderComponent);
@@ -120,6 +127,26 @@ namespace TangoBot
 
         }
 
+        private static async Task TestStreaming()
+        {
+            // Replace these values with valid ones
+            string apiQuoteToken = "dGFzdHksYXBpLCwxNzMyMDIwMzkzLDE3MzE5MzM5OTMsVWNhMzJiYzg2LTIyOTgtNDlhYS1iYmY0LThjNDYxMTMwNjdlOQ.pqVr1mdg-HjNcWVtuVt6y9aB3V-t849JyLmh20VrO6w";
+            string webSocketUrl = "wss://tasty-openapi-ws.dxfeed.com/realtime";
+
+            IStreamService streamService = new StreamingService(webSocketUrl, apiQuoteToken);
+
+            // Invoke StreamHistoricData method
+            //var objs = streamService.StreamHistoricData("SPY", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
+
+            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
+
+            return;
+
+            var streamer = new StreamingService(webSocketUrl, apiQuoteToken);
+
+            Console.WriteLine("[Info] Starting streaming service...");
+            await streamer.StartStreamingAsync();
+        }
         private static async Task TestGetAccountLiveOrdersAsync(string accountNumber, OrderComponent orderComponent)
         {
             Console.WriteLine("\nFetching live orders...\n");

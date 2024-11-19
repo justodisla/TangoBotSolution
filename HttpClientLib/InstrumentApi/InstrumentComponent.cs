@@ -23,7 +23,7 @@ namespace HttpClientLib.InstrumentApi
         public async Task<Instrument> GetInstrumentBySymbolAsync(string symbol)
         {
             string url = $"{BaseInstrumentUrl}/equities/{symbol}";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -47,7 +47,7 @@ namespace HttpClientLib.InstrumentApi
         public async Task<List<Instrument>> GetActiveInstrumentsAsync()
         {
             string url = $"{BaseInstrumentUrl}/equities/active";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {

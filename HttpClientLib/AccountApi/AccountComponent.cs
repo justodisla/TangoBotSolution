@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBot.HttpClientLib;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib.AccountApi
 {
     public class AccountComponent : BaseApiComponent
     {
@@ -23,7 +24,10 @@ namespace TangoBot.HttpClientLib
         public async Task<Dictionary<string, object>> GetAccountBalancesAsync(string accountNumber)
         {
             string url = $"{BaseAccountUrl}/{accountNumber}/balances";
-            var response = await SendGetRequestAsync(url);
+            //var response = await SendGetRequestAsync(url);
+
+            var response = await SendRequestAsync(url, HttpMethod.Get);
+
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -56,7 +60,7 @@ namespace TangoBot.HttpClientLib
         public async Task<Dictionary<string, object>[]?> GetBalanceSnapshotAsync(string accountNumber)
         {
             string url = $"{BaseAccountUrl}/{accountNumber}/balance-snapshots";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -89,7 +93,7 @@ namespace TangoBot.HttpClientLib
         public async Task<Dictionary<string, object>[]> GetAccountPositionsAsync(string accountNumber)
         {
             string url = $"{BaseAccountUrl}/{accountNumber}/positions";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {

@@ -12,7 +12,7 @@ namespace HttpClientLib.OrderApi
     {
         private readonly string _baseUrl;
 
-        public OrderComponent(HttpClient httpClient, TokenProvider tokenProvider, string baseUrl)
+        public OrderComponent(string baseUrl)
             : base()
         {
             _baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
@@ -26,7 +26,7 @@ namespace HttpClientLib.OrderApi
             }
 
             var url = $"{_baseUrl}/accounts/{accountNumber}/orders";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -48,7 +48,7 @@ namespace HttpClientLib.OrderApi
             }
 
             var url = $"{_baseUrl}/accounts/{accountNumber}/orders/live";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -65,7 +65,7 @@ namespace HttpClientLib.OrderApi
         public async Task<Order> GetOrderByIdAsync(string accountNumber, int orderId)
         {
             var url = $"{_baseUrl}/accounts/{accountNumber}/orders/{orderId}";
-            var response = await SendGetRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -91,7 +91,9 @@ namespace HttpClientLib.OrderApi
 
             var url = isDryRun ? $"{_baseUrl}/accounts/{accountNumber}/orders/dry-run" : $"{_baseUrl}/accounts/{accountNumber}/orders";
             var stringContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-            var response = await SendPostRequestAsync(url, stringContent);
+            //var response = await SendPostRequestAsync(url, stringContent);
+
+            var response = await SendRequestAsync(url, HttpMethod.Post, stringContent);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -115,7 +117,7 @@ namespace HttpClientLib.OrderApi
             }
 
             var url = $"{_baseUrl}/accounts/{accountNumber}/orders/{orderId}";
-            var response = await SendDeleteRequestAsync(url);
+            var response = await SendRequestAsync(url, HttpMethod.Delete);
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -130,6 +132,11 @@ namespace HttpClientLib.OrderApi
                 throw new HttpRequestException($"Failed to delete order with ID {orderId}. Status code: {response?.StatusCode}");
             }
         }
+
+        //TODO: Implement ReplaceOrderByIdAsync method
+        //TODO: Implement UpdateOrderByIdAsync method
+        //TODO: Implement EditOrderDryRun method
+
     }
 
 }
