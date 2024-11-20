@@ -15,6 +15,9 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
+
+            MainManu();
+
             TestStreaming().Wait();
 
             return;
@@ -127,10 +130,174 @@ namespace TangoBot
 
         }
 
+        private static async void MainManu()
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Welcome to TangoBot!");
+                Console.WriteLine("1. Create Instrument");
+                Console.WriteLine("2. Catch Historic Data");
+                Console.WriteLine("3. Tests");
+                Console.WriteLine("4. Exit");
+                Console.Write("Please select an option: ");
+
+                var choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        await CreateInstrumentAsync();
+                        break;
+                    case "2":
+                        await CatchHistoricDataAsync();
+                        break;
+                    case "3":
+                        await OperateMenu();
+                        break;
+                    case "4":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid option. Please try again.");
+                        break;
+                }
+            }
+        }
+
+        private static async Task OperateMenu()
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Tests Submenu");
+                Console.WriteLine("1. Test Streaming");
+                Console.WriteLine("2. Test Get Account Live Orders");
+                Console.WriteLine("3. Test Get Account Orders");
+                Console.WriteLine("4. Test Get Active Instruments");
+                Console.WriteLine("5. Test Get Instrument By Symbol");
+                Console.WriteLine("6. Test Get Account");
+                Console.WriteLine("7. Test Get Customer Account");
+                Console.WriteLine("8. Test Get Customer Info");
+                Console.WriteLine("9. Test Get Account Position");
+                Console.WriteLine("10. Test Get Balance Snapshot");
+                Console.WriteLine("11. Test Get Account Balance");
+                Console.WriteLine("12. Test Get Order By Id");
+                Console.WriteLine("13. Test Post Equity Dry Run Order");
+                Console.WriteLine("14. Test Post Equity Order");
+                Console.WriteLine("15. Test Cancel Order By Id");
+                Console.WriteLine("16. Back to Main Menu");
+                Console.Write("Please select an option: ");
+
+                var choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        await TestStreaming();
+                        break;
+                    case "2":
+                        await TestGetAccountLiveOrdersAsync("accountNumber", new OrderComponent("baseUrl"));
+                        break;
+                    case "3":
+                        await TestGetAccountOrdersAsync("accountNumber", new OrderComponent("baseUrl"));
+                        break;
+                    case "4":
+                        await TestGetActiveInstrumentsAsync(new InstrumentComponent());
+                        break;
+                    case "5":
+                        await TestGetInstrumentBySymbolAsync(new InstrumentComponent(), "instrumentSymbol");
+                        break;
+                    case "6":
+                        await TestGetAccountAsync(new CustomerComponent(), "customerId", "testAccountNumber");
+                        break;
+                    case "7":
+                        await TestGetCustomerAccountAsync(new CustomerComponent());
+                        break;
+                    case "8":
+                        await TestGetCustomerInfoAsync(new CustomerComponent());
+                        break;
+                    case "9":
+                        await TestGetAccountPositionAsync(new AccountComponent(), "accountNumber");
+                        break;
+                    case "10":
+                        await TestGetBalanceSnapshotAsync(new AccountComponent(), "accountNumber");
+                        break;
+                    case "11":
+                        TestGetAccountBalanceAsync(new AccountComponent(), "accountNumber");
+                        break;
+                    case "12":
+                        await TestGetOrderByIdAsync("accountNumber", 123, new OrderComponent("baseUrl"));
+                        break;
+                    case "13":
+                        await TestPostEquityDryRunOrderAsync(new OrderComponent("baseUrl"), "accountNumber", new OrderRequest());
+                        break;
+                    case "14":
+                        await TestPostEquityOrderAsync(new OrderComponent("baseUrl"), "accountNumber", new OrderRequest());
+                        break;
+                    case "15":
+                        await TestCancelOrderByIdAsync(new OrderComponent("baseUrl"), "accountNumber", 123);
+                        break;
+                    case "16":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid option. Please try again.");
+                        break;
+                }
+            }
+        }
+
+        #region Main Menu
+
+        private static async Task CreateInstrumentAsync()
+        {
+            Console.Write("Enter symbol: ");
+            var symbol = Console.ReadLine();
+
+            Console.Write("Enter from date (yyyy-MM-dd): ");
+            var fromDateInput = Console.ReadLine();
+            DateTime fromDate = DateTime.Parse(fromDateInput);
+
+            Console.Write("Enter to date (yyyy-MM-dd): ");
+            var toDateInput = Console.ReadLine();
+            DateTime toDate = DateTime.Parse(toDateInput);
+
+            Console.Write("Enter timeframe (D, W, M): ");
+            var timeframeInput = Console.ReadLine();
+            Timeframe timeframe = timeframeInput.ToUpper() switch
+            {
+                "D" => Timeframe.Daily,
+                "W" => Timeframe.Weekly,
+                "M" => Timeframe.Monthly,
+                _ => throw new ArgumentOutOfRangeException(nameof(timeframeInput), $"Unsupported timeframe: {timeframeInput}")
+            };
+
+            // Assuming you have a method to create an instrument
+            // await CreateInstrumentAsync(symbol, fromDate, toDate, timeframe);
+
+            Console.WriteLine("Instrument created successfully.");
+            Console.WriteLine("Press any key to return to the menu...");
+            Console.ReadKey();
+        }
+
+        private static async Task CatchHistoricDataAsync()
+        {
+            Console.Write("Enter symbol: ");
+            var symbol = Console.ReadLine();
+
+            // Assuming you have a method to catch historic data
+            // await CatchHistoricDataAsync(symbol);
+
+            Console.WriteLine("Historic data caught successfully.");
+            Console.WriteLine("Press any key to return to the menu...");
+            Console.ReadKey();
+        }
+
+        #endregion
+
         private static async Task TestStreaming()
         {
             // Replace these values with valid ones
-            string apiQuoteToken = "dGFzdHksYXBpLCwxNzMyMDIwMzkzLDE3MzE5MzM5OTMsVWNhMzJiYzg2LTIyOTgtNDlhYS1iYmY0LThjNDYxMTMwNjdlOQ.pqVr1mdg-HjNcWVtuVt6y9aB3V-t849JyLmh20VrO6w";
+            string apiQuoteToken = "dGFzdHksYXBpLCwxNzMyMTA3MzcyLDE3MzIwMjA5NzIsVWNhMzJiYzg2LTIyOTgtNDlhYS1iYmY0LThjNDYxMTMwNjdlOQ.SyBAnxdcC3Xgpk99rUzH77barEzh81-0gkTqjXF0x8k";
             string webSocketUrl = "wss://tasty-openapi-ws.dxfeed.com/realtime";
 
             IStreamService streamService = new StreamingService(webSocketUrl, apiQuoteToken);
@@ -138,15 +305,12 @@ namespace TangoBot
             // Invoke StreamHistoricData method
             //var objs = streamService.StreamHistoricData("SPY", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
 
-            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
+            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
 
-            return;
-
-            var streamer = new StreamingService(webSocketUrl, apiQuoteToken);
-
-            Console.WriteLine("[Info] Starting streaming service...");
-            await streamer.StartStreamingAsync();
         }
+
+        #region Tests
+
         private static async Task TestGetAccountLiveOrdersAsync(string accountNumber, OrderComponent orderComponent)
         {
             Console.WriteLine("\nFetching live orders...\n");
@@ -568,6 +732,7 @@ namespace TangoBot
                 Console.WriteLine($"Error canceling order: {ex.Message}");
             }
         }
-
+        
+        #endregion
     }
 }

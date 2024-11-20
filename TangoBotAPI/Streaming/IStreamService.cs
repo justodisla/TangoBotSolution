@@ -37,7 +37,7 @@ namespace TangoBotAPI.Streaming
         /// The frequency of the streaming is determined by the QuoteDataHistory object.
         /// </summary>
         /// <param name=""></param>
-        void StremLiveMarketData(QuoteDataHistory quoteDataHistory);
+        void StreamLiveMarketData(QuoteDataHistory quoteDataHistory);
 
         /// <summary>
         /// Closes the WebSocket connection.

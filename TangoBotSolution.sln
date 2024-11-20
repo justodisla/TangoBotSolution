@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotTests", "TangoBotTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotStreaming", "TangoBotStreaming\TangoBotStreaming.csproj", "{BAD736FF-EB3B-4C93-81B2-E0266D34EA4A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{10257662-AB88-40C5-8B13-21E9C83E2745}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Strategies", "Strategies", "{10257662-AB88-40C5-8B13-21E9C83E2745}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotAPI", "TangoBotAPI\TangoBotAPI.csproj", "{BE20C3A4-5421-499D-8F93-C030F8C7D795}"
 EndProject
