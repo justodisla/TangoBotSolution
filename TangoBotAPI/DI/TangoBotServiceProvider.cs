@@ -6,21 +6,42 @@ namespace TangoBotAPI.DI
     public static class TangoBotServiceProvider
     {
         private static IServiceProvider? _serviceProvider;
+        private static bool initialize;
+        private static ServiceCollection? services;
 
-        public static void Initialize(Action<IServiceCollection> configureServices)
+        public static void Initialize()
         {
-            var services = new ServiceCollection();
-            configureServices(services);
+             services = new ServiceCollection();
+            _serviceProvider = services.BuildServiceProvider();
+
+            initialize = true;
+        }
+
+        public static void AddService<T>(T service) where T : class
+        {
+            if (!initialize)
+            {
+                Initialize();
+            }
+            services?.AddSingleton(service);
             _serviceProvider = services.BuildServiceProvider();
         }
 
         public static T? GetService<T>()
         {
+            if(!initialize)
+            {
+                Initialize();
+            }
             return _serviceProvider.GetService<T>();
         }
 
         public static T? GetRequiredService<T>()
         {
+            if (!initialize)
+            {
+                Initialize();
+            }
             return _serviceProvider.GetRequiredService<T>();
         }
     }

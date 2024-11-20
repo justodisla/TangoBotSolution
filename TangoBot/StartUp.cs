@@ -11,19 +11,12 @@ namespace TangoBot
     {
         internal static void InitializeDI()
         {
-            TangoBotServiceProvider.Initialize(services =>
-            {
-                // Register HttpClient
-                //services.AddHttpClient();
 
-                services.AddSingleton<HttpClient>();
+            TangoBotServiceProvider.AddService<HttpClient>(new HttpClient());
 
-                // Register TokenProvider
-                services.AddSingleton<TokenProvider>();
+            TangoBotServiceProvider.AddService<ITokenProvider>(new TokenProvider());
 
-                // Register AccountComponent
-                services.AddTransient<AccountComponent>();
-            });
+            TangoBotServiceProvider.AddService<AccountComponent>(new AccountComponent());
 
             // Resolve the AccountComponent to use it
             var accountComponent = TangoBotServiceProvider.GetService<AccountComponent>();

@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
 using static HttpClientLib.TastyTradeApiClient;
 
@@ -30,9 +31,9 @@ namespace HttpClientLib.TokenManagement
         /// Initializes a new instance of the <see cref="TokenProvider"/> class.
         /// </summary>
         /// <param name="httpClient">The HttpClient used for API calls.</param>
-        public TokenProvider(HttpClient httpClient)
+        public TokenProvider()
         {
-            _httpClient = httpClient;
+            _httpClient = TangoBotServiceProvider.GetService<HttpClient>();
             _tokenParser = new TokenParser();
             _tokenFileHandler = new TokenFileHandler();
         }
