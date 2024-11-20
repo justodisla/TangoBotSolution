@@ -8,7 +8,7 @@ using TangoBotAPI.Streaming;
 
 namespace TangoBotStreaming.Services
 {
-    public class StreamingService : IStreamService
+    public class StreamingService : IStreamService<QuoteDataHistory>
     {
         private readonly string _webSocketUrl;
         private readonly string _apiQuoteToken;
@@ -89,6 +89,8 @@ namespace TangoBotStreaming.Services
         {
             throw new NotImplementedException();
         }
+        
+        #region Auxilliary methods
 
         private async Task SendMessageAsync(ClientWebSocket client, string message)
         {
@@ -159,8 +161,6 @@ namespace TangoBotStreaming.Services
             // Return true if both conditions are met
             return hasFromTimeDataPoint && hasToTimeDataPoint;
         }
-
-
 
         private void ProcessMessage(string message, DateTime fromTime, DateTime toTime, QuoteDataHistory quoteDataHistory)
         {
@@ -236,5 +236,7 @@ namespace TangoBotStreaming.Services
             }
             return 0.0;
         }
+
+        #endregion
     }
 }

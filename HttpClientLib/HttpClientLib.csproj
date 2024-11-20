@@ -22,4 +22,8 @@
     <Folder Include="InstrumentApi\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TangoBotAPI\TangoBotAPI.csproj" />
+  </ItemGroup>
+
 </Project>

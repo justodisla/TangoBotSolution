@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TangoBotAPI.Streaming
 {
-    public interface IStreamService
+    public interface IStreamService<T>
     {
         /// <summary>
         /// Stream historic data for a given symbol into the QuoteDataHistory object.
@@ -19,7 +19,7 @@ namespace TangoBotAPI.Streaming
         /// <returns></returns>
         //QuoteDataHistory StreamHistoricData(string symbol, DateTime fromTime, DateTime toTime, Timeframe timeframe = Timeframe.Daily, int interval = 1);
 
-        public  Task<QuoteDataHistory> StreamHistoricDataAsync(string symbol, DateTime fromTime, DateTime toTime, Timeframe timeframe = Timeframe.Daily, int interval = 1);
+        public  Task<T> StreamHistoricDataAsync(string symbol, DateTime fromTime, DateTime toTime, Timeframe timeframe = Timeframe.Daily, int interval = 1);
 
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace TangoBotAPI.Streaming
         /// For instance if QuoteDataHistory has data up to 5 days ago, this method can be used to patch the data for the last 5 days up to present
         /// </summary>
         /// <param name="quoteDataHistory"></param>
-        void PatchHistoricData(QuoteDataHistory quoteDataHistory);
+        void PatchHistoricData(T quoteDataHistory);
 
 
 
@@ -37,7 +37,7 @@ namespace TangoBotAPI.Streaming
         /// The frequency of the streaming is determined by the QuoteDataHistory object.
         /// </summary>
         /// <param name=""></param>
-        void StreamLiveMarketData(QuoteDataHistory quoteDataHistory);
+        void StreamLiveMarketData(T quoteDataHistory);
 
         /// <summary>
         /// Closes the WebSocket connection.

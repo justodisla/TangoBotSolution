@@ -9,16 +9,21 @@ using HttpClientLib.CustomerApi;
 using TangoBotStreaming.Services;
 using TangoBotAPI.Streaming;
 
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
+using TangoBot.HttpClientLib;
+
 namespace TangoBot
 {
     class Program
     {
         static async Task Main(string[] args)
         {
+            StartUp.InitializeDI();
 
-            MainManu();
+            //MainManu();
 
-            TestStreaming().Wait();
+            //TestStreaming().Wait();
 
             return;
 
@@ -129,6 +134,8 @@ namespace TangoBot
             await TestCancelOrderByIdAsync(orderComponent, "5WU34986", 155672);
 
         }
+
+        
 
         private static async void MainManu()
         {
@@ -300,12 +307,12 @@ namespace TangoBot
             string apiQuoteToken = "dGFzdHksYXBpLCwxNzMyMTA3MzcyLDE3MzIwMjA5NzIsVWNhMzJiYzg2LTIyOTgtNDlhYS1iYmY0LThjNDYxMTMwNjdlOQ.SyBAnxdcC3Xgpk99rUzH77barEzh81-0gkTqjXF0x8k";
             string webSocketUrl = "wss://tasty-openapi-ws.dxfeed.com/realtime";
 
-            IStreamService streamService = new StreamingService(webSocketUrl, apiQuoteToken);
+            //IStreamService streamService = new StreamingService(webSocketUrl, apiQuoteToken);
 
             // Invoke StreamHistoricData method
             //var objs = streamService.StreamHistoricData("SPY", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
 
-            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
+            //var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
 
         }
 

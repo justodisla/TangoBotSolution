@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBotAPI.TokenManagement;
 using static HttpClientLib.TastyTradeApiClient;
 
 namespace HttpClientLib.TokenManagement
@@ -11,7 +12,7 @@ namespace HttpClientLib.TokenManagement
     /// <summary>
     /// Provides a valid session token by handling authentication and validation.
     /// </summary>
-    public class TokenProvider
+    public class TokenProvider : ITokenProvider
     {
 
         // Endpoint URLs and credentials for Tastytrade API
@@ -140,7 +141,7 @@ namespace HttpClientLib.TokenManagement
 
                 if (response.IsSuccessStatusCode)
                 {
-                    
+
                     Console.WriteLine("[Debug] Authentication response received from Tastytrade.");
                     Console.WriteLine($"[Debug] Response body: {responseBody}");
 

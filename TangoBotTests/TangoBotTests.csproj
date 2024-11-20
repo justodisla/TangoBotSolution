@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
+    <ProjectReference Include="..\TangoBotAPI\TangoBotAPI.csproj" />
   </ItemGroup>
 
 </Project>

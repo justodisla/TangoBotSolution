@@ -2,29 +2,34 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using TangoBotAPI.DI;
 
-namespace HttpClientLib
+namespace TangoBot.HttpClientLib
 {
     public abstract class BaseApiComponent
     {
-        protected readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         private readonly TokenProvider _tokenProvider;
 
         protected BaseApiComponent()
         {
-            _httpClient = new HttpClient();
-            _tokenProvider = new TokenProvider(_httpClient);
         }
 
-        #region Obsolete
+        protected BaseApiComponent(HttpClient httpClient, TokenProvider tokenProvider)
+        {
+            _httpClient = httpClient;
+            _tokenProvider = tokenProvider;
+
+            TangoBotServiceProvider.GetService<HttpClient>();
+
+        }
+
         /// <summary>
         /// Sends an authorized GET request to the specified URL.
         /// </summary>
-        [Obsolete("SendGetRequestAsync is deprecated. Use SendRequestAsync instead.")]
-
-        protected async Task<HttpResponseMessage?> SendGetRequestAsync(string url)
+        protected async Task<HttpResponseMessage> SendGetRequestAsync(string url)
         {
-            string? token = await _tokenProvider.GetValidTokenAsync();
+            string token = await _tokenProvider.GetValidTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
                 Console.WriteLine("[Error] Failed to obtain a valid token for API request.");
@@ -61,100 +66,8 @@ namespace HttpClientLib
             }
         }
 
-        /// <summary>
-        /// Sends an authorized POST request to the specified URL with the provided content.
-        /// </summary>
-        [Obsolete("SendPostRequestAsync is deprecated. Use SendRequestAsync instead.")]
-        protected async Task<HttpResponseMessage?> SendPostRequestAsync(string url, HttpContent content)
-        {
-            string? token = await _tokenProvider.GetValidTokenAsync();
-            if (string.IsNullOrEmpty(token))
-            {
-                Console.WriteLine("[Error] Failed to obtain a valid token for API request.");
-                return null;
-            }
 
-            try
-            {
-                Console.WriteLine($"[Info] Sending POST request to {url}");
 
-                var request = new HttpRequestMessage(HttpMethod.Post, url)
-                {
-                    Content = content
-                };
-                request.Headers.Add("Authorization", token);
-
-                var response = await _httpClient.SendAsync(request);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    Console.WriteLine("[Warning] Unauthorized request. Retrying with new token.");
-                    token = await _tokenProvider.GetValidTokenAsync();
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        request = new HttpRequestMessage(HttpMethod.Post, url)
-                        {
-                            Content = content
-                        };
-                        request.Headers.Add("Authorization", token);
-                        response = await _httpClient.SendAsync(request);
-                    }
-                }
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Error] Exception in API request: {ex.Message}");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Sends an authorized DELETE request to the specified URL.
-        /// </summary>
-        [Obsolete("SendDeleteRequestAsync is deprecated. Use SendRequestAsync instead.")]
-        protected async Task<HttpResponseMessage?> SendDeleteRequestAsync(string url)
-        {
-            string? token = await _tokenProvider.GetValidTokenAsync();
-            if (string.IsNullOrEmpty(token))
-            {
-                Console.WriteLine("[Error] Failed to obtain a valid token for API request.");
-                return null;
-            }
-
-            try
-            {
-                Console.WriteLine($"[Info] Sending DELETE request to {url}");
-
-                var request = new HttpRequestMessage(HttpMethod.Delete, url);
-                request.Headers.Add("Authorization", token);
-
-                var response = await _httpClient.SendAsync(request);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    Console.WriteLine("[Warning] Unauthorized request. Retrying with new token.");
-                    token = await _tokenProvider.GetValidTokenAsync();
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        request = new HttpRequestMessage(HttpMethod.Delete, url);
-                        request.Headers.Add("Authorization", token);
-                        response = await _httpClient.SendAsync(request);
-                    }
-                }
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Error] Exception in API request: {ex.Message}");
-                throw;
-            }
-        }
-
-        #endregion
-       
         /// <summary>
         /// Sends an authorized request to the specified URL with the provided content and HTTP method.
         /// </summary>
@@ -197,6 +110,7 @@ namespace HttpClientLib
             }
         }
 
+
         private static HttpRequestMessage ResolveToken(string url, HttpMethod method, HttpContent? content, string? token)
         {
             Console.WriteLine($"[Info] Sending {method} request to {url}");
@@ -208,5 +122,7 @@ namespace HttpClientLib
             request.Headers.Add("Authorization", token);
             return request;
         }
+
+
     }
 }
