@@ -3,5 +3,7 @@
     public interface ITokenProvider
     {
         Task<string?> GetValidTokenAsync();
+
+        Task<string> GetValidStreamingToken();
     }
 }

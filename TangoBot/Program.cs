@@ -12,6 +12,8 @@ using TangoBotAPI.Streaming;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using TangoBot.HttpClientLib;
+using TangoBotAPI.DI;
+using TangoBotAPI.TokenManagement;
 
 namespace TangoBot
 {
@@ -31,7 +33,7 @@ namespace TangoBot
             using var httpClient = new HttpClient();
 
             // Create a TokenProvider instance (assuming you have a suitable constructor)
-            var tokenProvider = new TokenProvider(httpClient);
+            var tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>();
 
             // Create AccountComponent instance
             var accountComponent = new AccountComponent();
@@ -83,7 +85,7 @@ namespace TangoBot
             await TestGetActiveInstrumentsAsync(instrumentComponent);
 
             // Create OrderComponent instance
-            var orderComponent = new OrderComponent( "https://api.cert.tastyworks.com");
+            var orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
             await TestGetAccountOrdersAsync(accountNumber, orderComponent);
             await TestGetAccountLiveOrdersAsync(accountNumber, orderComponent);
             await TestGetOrderByIdAsync(accountNumber, 155008, orderComponent);
@@ -197,16 +199,18 @@ namespace TangoBot
 
                 var choice = Console.ReadLine();
 
+                OrderComponent? orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
                 switch (choice)
                 {
                     case "1":
                         await TestStreaming();
                         break;
                     case "2":
-                        await TestGetAccountLiveOrdersAsync("accountNumber", new OrderComponent("baseUrl"));
+                        await TestGetAccountLiveOrdersAsync("accountNumber", orderComponent);
                         break;
                     case "3":
-                        await TestGetAccountOrdersAsync("accountNumber", new OrderComponent("baseUrl"));
+                        await TestGetAccountOrdersAsync("accountNumber",
+                                                        orderComponent: orderComponent);
                         break;
                     case "4":
                         await TestGetActiveInstrumentsAsync(new InstrumentComponent());
@@ -233,16 +237,16 @@ namespace TangoBot
                         TestGetAccountBalanceAsync(new AccountComponent(), "accountNumber");
                         break;
                     case "12":
-                        await TestGetOrderByIdAsync("accountNumber", 123, new OrderComponent("baseUrl"));
+                        await TestGetOrderByIdAsync("accountNumber", 123, orderComponent);
                         break;
                     case "13":
-                        await TestPostEquityDryRunOrderAsync(new OrderComponent("baseUrl"), "accountNumber", new OrderRequest());
+                        await TestPostEquityDryRunOrderAsync(orderComponent, "accountNumber", new OrderRequest());
                         break;
                     case "14":
-                        await TestPostEquityOrderAsync(new OrderComponent("baseUrl"), "accountNumber", new OrderRequest());
+                        await TestPostEquityOrderAsync(orderComponent, "accountNumber", new OrderRequest());
                         break;
                     case "15":
-                        await TestCancelOrderByIdAsync(new OrderComponent("baseUrl"), "accountNumber", 123);
+                        await TestCancelOrderByIdAsync(orderComponent, "accountNumber", 123);
                         break;
                     case "16":
                         return;

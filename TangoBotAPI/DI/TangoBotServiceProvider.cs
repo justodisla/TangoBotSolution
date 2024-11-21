@@ -17,7 +17,7 @@ namespace TangoBotAPI.DI
             initialize = true;
         }
 
-        public static void AddService<T>(T service) where T : class
+        public static void AddSingletonService<T>(T service) where T : class
         {
             if (!initialize)
             {

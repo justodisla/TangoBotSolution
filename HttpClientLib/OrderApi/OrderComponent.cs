@@ -6,6 +6,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
+using TangoBotAPI.Configuration;
+using TangoBotAPI.DI;
 
 namespace HttpClientLib.OrderApi
 {
@@ -13,10 +15,13 @@ namespace HttpClientLib.OrderApi
     {
         private readonly string _baseUrl;
 
-        public OrderComponent(string baseUrl)
+        public OrderComponent()
             : base()
         {
-            _baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
+            _baseUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+                .GetConfigurationValue("OrderApiBaseUrl");
+
+            //_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
         }
 
         public async Task<Order[]?> GetAccountOrdersAsync(string accountNumber)

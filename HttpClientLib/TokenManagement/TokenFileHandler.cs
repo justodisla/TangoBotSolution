@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-
 namespace HttpClientLib.TokenManagement
 {
+    [Obsolete("This class is obsolete, using file to persist token was changed to config")]
+
     /// <summary>
     /// Handles the storage and retrieval of the session token from a file.
     /// </summary>

@@ -1,0 +1,61 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace TangoBotAPI.Configuration
+{
+    public class ConfigurationProvider : IConfigurationProvider
+    {
+        private readonly string _filePath;
+        private IDictionary<string, string> _configurations;
+
+        public ConfigurationProvider()
+        {
+            _filePath = "TBConfig/config.json";
+            _configurations = new Dictionary<string, string>();
+
+            LoadConfiguration();
+
+        }
+
+        public string? GetConfigurationValue(string key)
+        {
+            return _configurations.TryGetValue(key, out var value) ? value : null;
+        }
+
+        public IDictionary<string, string> GetAllConfigurationValues()
+        {
+            return new Dictionary<string, string>(_configurations);
+        }
+
+        public void SetConfigurationValue(string key, string value)
+        {
+            if (_configurations.TryGetValue(key, out var existingValue) && existingValue == value)
+            {
+                return;
+            }
+            _configurations[key] = value;
+            SaveConfigurationAsync().Wait();
+        }
+
+        public async Task SaveConfigurationAsync()
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(_filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(_filePath));
+            }
+            var json = JsonSerializer.Serialize(_configurations, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(_filePath, json);
+        }
+
+        private void LoadConfiguration()
+        {
+            if (File.Exists(_filePath))
+            {
+                var json = File.ReadAllText(_filePath);
+                _configurations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
+            }
+        }
+    }
+}

@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using TangoBotAPI.Configuration;
+using TangoBotAPI.DI;
 using TangoBotAPI.Streaming;
 
 namespace TangoBotStreaming.Services
@@ -15,7 +17,9 @@ namespace TangoBotStreaming.Services
 
         public StreamingService(string webSocketUrl, string apiQuoteToken)
         {
-            _webSocketUrl = webSocketUrl;
+            _webSocketUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+                .GetConfigurationValue(webSocketUrl);
+
             _apiQuoteToken = apiQuoteToken;
         }
 

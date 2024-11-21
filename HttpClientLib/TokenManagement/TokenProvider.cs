@@ -1,12 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using TangoBotAPI.Configuration;
 using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
+using TangoBotAPI.Toolkit;
 using static HttpClientLib.TastyTradeApiClient;
+
 
 namespace HttpClientLib.TokenManagement
 {
@@ -16,6 +21,11 @@ namespace HttpClientLib.TokenManagement
     public class TokenProvider : ITokenProvider
     {
 
+        private const string API_QUOTE_TOKEN = "api_quote_token";
+        private const string SESSION_TOKEN = "api_session_token";
+
+
+
         // Endpoint URLs and credentials for Tastytrade API
         private const string LoginUrl = "https://api.cert.tastyworks.com/sessions"; // Sandbox login endpoint
         private const string TestApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; // Test endpoint to validate token
@@ -24,8 +34,9 @@ namespace HttpClientLib.TokenManagement
 
         private readonly HttpClient _httpClient;
         private readonly TokenParser _tokenParser;
-        private readonly TokenFileHandler _tokenFileHandler;
+        //private readonly TokenFileHandler _tokenFileHandler;
         private string? _sessionToken;
+        private string? _streamingTokenEndpoint;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenProvider"/> class.
@@ -35,7 +46,9 @@ namespace HttpClientLib.TokenManagement
         {
             _httpClient = TangoBotServiceProvider.GetService<HttpClient>();
             _tokenParser = new TokenParser();
-            _tokenFileHandler = new TokenFileHandler();
+            //_tokenFileHandler = new TokenFileHandler();
+
+            _streamingTokenEndpoint = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue("apiQuoteTokenEndpoint");
         }
 
         /// <summary>
@@ -45,7 +58,8 @@ namespace HttpClientLib.TokenManagement
         public async Task<string?> GetValidTokenAsync()
         {
             // Attempt to load the token from file
-            _sessionToken = await _tokenFileHandler.LoadTokenFromFileAsync();
+            //_sessionToken = await _tokenFileHandler.LoadTokenFromFileAsync();
+            _sessionToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(SESSION_TOKEN);
 
             // Validate the loaded token
             if (!string.IsNullOrEmpty(_sessionToken) && await IsTokenValidAsync())
@@ -59,7 +73,8 @@ namespace HttpClientLib.TokenManagement
             // Authenticate to get a new token
             if (await AuthenticateAsync())
             {
-                await _tokenFileHandler.SaveTokenToFileAsync(_sessionToken);
+                //await _tokenFileHandler.SaveTokenToFileAsync(_sessionToken);
+                TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(SESSION_TOKEN, _sessionToken);
                 return _sessionToken;
             }
 
@@ -173,6 +188,84 @@ namespace HttpClientLib.TokenManagement
 
             return false;
         }
+
+        #region Streaming token
+
+        public async Task<string> GetValidStreamingToken()
+        {
+            string sessionToken = await GetValidTokenAsync();
+
+            // Load token from persistence
+            string streamingToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(API_QUOTE_TOKEN);
+
+            if (string.IsNullOrEmpty(streamingToken))
+            {
+                // Get streaming token
+                streamingToken = await GetStreamingTokenAsync(sessionToken);
+                TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(API_QUOTE_TOKEN, streamingToken);
+            }
+
+            return streamingToken;
+
+        }
+
+        private async Task<string?> GetStreamingTokenAsync(string? sessionToken)
+        {
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                throw new ArgumentNullException(nameof(sessionToken), "Session token cannot be null or empty.");
+            }
+
+            try
+            {
+                string sburl = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.SANDBOX_URL);
+
+                var cUrl = sburl + _streamingTokenEndpoint;
+
+                var request = new HttpRequestMessage(HttpMethod.Get, cUrl);
+                request.Headers.Add("Authorization", sessionToken);
+
+                var response = await _httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var responseJson = JsonSerializer.Deserialize<StreamingTokenResponse>(responseBody);
+
+                if (responseJson?.Data?.Token != null)
+                {
+                    string token = responseJson.Data.Token;
+                    return token;
+                }
+                else
+                {
+                    Console.WriteLine("[Error] Streaming token is missing in the response.");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Exception during streaming token retrieval: {ex.Message}");
+                return null;
+            }
+        }
+
+        private class StreamingTokenResponse
+        {
+            [JsonPropertyName("data")]
+            public StreamingTokenData? Data { get; set; }
+            public string? Context { get; set; }
+        }
+
+        private class StreamingTokenData
+        {
+            [JsonPropertyName("token")]
+
+            public string? Token { get; set; }
+            public string? DxlinkUrl { get; set; }
+            public string? Level { get; set; }
+        }
+
+        #endregion
 
         private class SessionData
         {
