@@ -43,6 +43,7 @@ namespace TangoBotAPI.Streaming
         /// Closes the WebSocket connection.
         /// </summary>
         void CloseWsConnection();
+        Task<bool> IsStreamingAuthTokenValid();
     }
 
     public enum Timeframe

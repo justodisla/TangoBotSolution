@@ -9,14 +9,22 @@ namespace TangoBotAPI.Configuration
     {
         private readonly string _filePath;
         private IDictionary<string, string> _configurations;
+        private bool IsInitialized;
 
         public ConfigurationProvider()
         {
+            if(IsInitialized)
+            {
+                return;
+            }
             _filePath = "TBConfig/config.json";
             _configurations = new Dictionary<string, string>();
 
+            //ResetConfigurationAsync().Wait();
+
             LoadConfiguration();
 
+            IsInitialized = true;
         }
 
         public string? GetConfigurationValue(string key)
@@ -56,6 +64,12 @@ namespace TangoBotAPI.Configuration
                 var json = File.ReadAllText(_filePath);
                 _configurations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
             }
+        }
+
+        public async Task ResetConfigurationAsync()
+        {
+            _configurations.Clear();
+            await SaveConfigurationAsync();
         }
     }
 }

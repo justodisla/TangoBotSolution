@@ -10,7 +10,7 @@ namespace TangoBotAPI.Streaming
     /// QuoteDataHistory is a class that holds the historic and live market data for a given symbol.
     /// along with the timeframe and interval of the data, the symbol and the time range of the data.
     /// </summary>
-    public class QuoteDataHistory
+    public class QuoteDataHistory 
     {
         public readonly List<DataPoint> DataPoints = new();
 

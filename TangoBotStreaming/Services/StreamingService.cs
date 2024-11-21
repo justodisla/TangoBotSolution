@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.WebSockets;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using TangoBotAPI.Configuration;
 using TangoBotAPI.DI;
 using TangoBotAPI.Streaming;
+using TangoBotAPI.Toolkit;
 
 namespace TangoBotStreaming.Services
 {
@@ -15,12 +17,17 @@ namespace TangoBotStreaming.Services
         private readonly string _webSocketUrl;
         private readonly string _apiQuoteToken;
 
-        public StreamingService(string webSocketUrl, string apiQuoteToken)
+        public StreamingService()
         {
-            _webSocketUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
-                .GetConfigurationValue(webSocketUrl);
+            //_webSocketUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+            //    .GetConfigurationValue(webSocketUrl);
 
-            _apiQuoteToken = apiQuoteToken;
+            _webSocketUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+                .GetConfigurationValue(Constants.DX_LINK_WS_URL);
+
+            //_apiQuoteToken = apiQuoteToken;
+            _apiQuoteToken = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+                .GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN);
         }
 
         public async Task<QuoteDataHistory> StreamHistoricDataAsync(string symbol, DateTime fromTime, DateTime toTime, Timeframe timeframe = Timeframe.Daily, int interval = 1)
@@ -239,6 +246,29 @@ namespace TangoBotStreaming.Services
                 Console.WriteLine($"[Error] Exception while processing message: {ex.Message}");
             }
             return 0.0;
+        }
+
+        public async Task< bool> IsStreamingAuthTokenValid()
+        {
+
+            using var client = new ClientWebSocket();
+
+            Console.WriteLine("[Info] Connecting to WebSocket...");
+            await client.ConnectAsync(new Uri(_webSocketUrl), CancellationToken.None);
+
+            Console.WriteLine("[Info] Connected. Sending SETUP...");
+            await SendMessageAsync(client, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":60,\"acceptKeepaliveTimeout\":60}");
+
+            Console.WriteLine("[Info] Authorizing...");
+            await SendMessageAsync(client, $"{{\"type\":\"AUTH\",\"channel\":0,\"token\":\"{_apiQuoteToken}\"}}");
+
+            string iMessage = $"{{\"type\":\"AUTH\",\"channel\":0,\"token\":\"{_apiQuoteToken}\"}}";
+            var buffer = Encoding.UTF8.GetBytes(iMessage);
+            var eso = client.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+            
+            Console.WriteLine($"[Sent] {iMessage}");
+
+            return true;
         }
 
         #endregion

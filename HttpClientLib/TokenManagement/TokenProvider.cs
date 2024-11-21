@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TangoBotAPI.Configuration;
 using TangoBotAPI.DI;
+using TangoBotAPI.Streaming;
 using TangoBotAPI.TokenManagement;
 using TangoBotAPI.Toolkit;
 
@@ -31,8 +33,10 @@ namespace HttpClientLib.TokenManagement
         public TokenProvider()
         {
             _httpClient = TangoBotServiceProvider.GetService<HttpClient>();
+            
             _tokenParser = new TokenParser();
-            _streamingTokenEndpoint = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue("apiQuoteTokenEndpoint");
+            _streamingTokenEndpoint = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.ACTIVE_API_URL) + 
+                TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN_ENDPOINT);
 
              }
 
@@ -181,6 +185,9 @@ namespace HttpClientLib.TokenManagement
             {
                 streamingToken = await GetStreamingTokenAsync(sessionToken);
                 TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(Constants.STREAMING_AUTH_TOKEN, streamingToken);
+
+                IsStreamingTokenValid(streamingToken);
+
             }
 
             return streamingToken;
@@ -193,8 +200,17 @@ namespace HttpClientLib.TokenManagement
         /// <returns>True if the streaming token is valid; otherwise, false.</returns>
         private bool IsStreamingTokenValid(string streamingToken)
         {
-            return true;
+            var ss = TangoBotServiceProvider.GetService<IStreamService<QuoteDataHistory>>();
+
+            
+
+           // bool isValid = ss.IsStreamingAuthTokenValid().Result;
+
+            return false;
+            
         }
+        
+
 
         /// <summary>
         /// Retrieves a new streaming token asynchronously.
@@ -209,17 +225,15 @@ namespace HttpClientLib.TokenManagement
             }
 
             try
-            {
-                string apiUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.ACTIVE_API_URL);
-                var streamingAuthTokenEndpoint = apiUrl + _streamingTokenEndpoint;
-
-                var request = new HttpRequestMessage(HttpMethod.Get, streamingAuthTokenEndpoint);
+            {   
+                var request = new HttpRequestMessage(HttpMethod.Get, _streamingTokenEndpoint);
                 request.Headers.Add("Authorization", sessionToken);
 
                 var response = await _httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-
                 var responseBody = await response.Content.ReadAsStringAsync();
+
+                response.EnsureSuccessStatusCode();
+                
                 var responseJson = JsonSerializer.Deserialize<StreamingTokenResponse>(responseBody);
 
                 if (responseJson?.Data?.Token != null)

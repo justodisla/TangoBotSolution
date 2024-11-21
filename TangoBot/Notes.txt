@@ -1,4 +1,4 @@
-﻿//Sandbox pass: TTTangoBotSandBoxPass
+﻿//Sandbox pass: HyperBerserker?3000
 //Sandbox user: tangobotsandboxuser
 
 https://developer.tastytrade.com/
