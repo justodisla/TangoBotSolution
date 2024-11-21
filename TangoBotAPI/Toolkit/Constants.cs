@@ -5,8 +5,45 @@
         // API Base URLs
         public const string PRODUCTION_URL = "production_url";
         public const string SANDBOX_URL = "sandbox_url";
-        //public const string CUSTOMERS_ENDPOINT = SANDBOX_URL + "/customers/me";
-        //public const string ACCOUNTS_ENDPOINT = SANDBOX_URL + "/accounts";
+
+        // Production Related Constants
+        public const string PRODUCTION_ACCOUNT_NUMBER = "PRODUCTION_ACCOUNT_NUMBER";
+        public const string PRODUCTION_CUSTOMER_ID = "PRODUCTION_CUSTOMER_ID";
+        public const string PRODUCTION_CUSTOMER_FIRST_NAME = "PRODUCTION_CUSTOMER_FIRST_NAME";
+        public const string PRODUCTION_CUSTOMER_LAST_NAME = "PRODUCTION_CUSTOMER_LAST_NAME";
+        public const string PRODUCTION_CUSTOMER_EMAIL = "PRODUCTION_CUSTOMER_EMAIL";
+        public const string PRODUCTION_CUSTOMER_MOBILE = "PRODUCTION_CUSTOMER_MOBILE";
+        public const string PRODUCTION_PASSWORD = "PRODUCTION_PASSWORD";
+        public const string PRODUCTION_USER = "PRODUCTION_USER";
+        public const string PRODUCTION_RUN_MODE = "PRODUCTION_RUN_MODE";
+
+        // Sandbox Related Constants
+        public const string SANDBOX_ACCOUNT_NUMBER = "SANDBOX_ACCOUNT_NUMBER";
+        public const string SANDBOX_CUSTOMER_ID = "SANDBOX_CUSTOMER_ID";
+        public const string SANDBOX_CUSTOMER_FIRST_NAME = "SANDBOX_CUSTOMER_FIRST_NAME";
+        public const string SANDBOX_CUSTOMER_LAST_NAME = "SANDBOX_CUSTOMER_LAST_NAME";
+        public const string SANDBOX_CUSTOMER_EMAIL = "SANDBOX_CUSTOMER_EMAIL";
+        public const string SANDBOX_CUSTOMER_MOBILE = "SANDBOX_CUSTOMER_MOBILE";
+        public const string SANDBOX_PASSWORD = "SANDBOX_PASSWORD";
+        public const string SAND_BOX_USER = "SAND_BOX_USER";
+        public const string SAND_BOX_RUN_MODE = "SAND_BOX_RUN_MODE";
+
+        // Common Constants
+        public const string RUN_MODE = "RUN_MODE";
+        public const string DX_LINK_WS_URL = "DX_LINK_WS_URL";
+        public const string ACTIVE_USER = "ACTIVE_USER";
+        public const string ACTIVE_PASSWORD = "ACTIVE_PASSWORD";
+        public const string ACTIVE_ACCOUNT_NUMBER = "ACTIVE_ACCOUNT_NUMBER";
+        public const string ACTIVE_CUSTOMER_ID = "ACTIVE_CUSTOMER_ID";
+        public const string ACTIVE_CUSTOMER_FIRST_NAME = "ACTIVE_CUSTOMER_FIRST_NAME";
+        public const string ACTIVE_CUSTOMER_LAST_NAME = "ACTIVE_CUSTOMER_LAST_NAME";
+        public const string ACTIVE_CUSTOMER_EMAIL = "ACTIVE_CUSTOMER_EMAIL";
+        public const string ACTIVE_CUSTOMER_MOBILE = "ACTIVE_CUSTOMER_MOBILE";
+        public const string ACTIVE_API_URL = "ACTIVE_API_URL";
+        public const string STREAMING_AUTH_TOKEN_ENDPOINT = "STREAMING_AUTH_TOKEN_ENDPOINT";
+        public const string MAX_RETRY_ATTEMPTS = "MAX_RETRY_ATTEMPTS";
+        public const string TOKEN_EXPIRATION_HOURS = "TOKEN_EXPIRATION_HOURS";
+        public const string JSON_CONTENT_TYPE = "JSON_CONTENT_TYPE";
 
         // Mock/Default Data for Testing
         public const string DEFAULT_ACCOUNT_NUMBER = "5WU34986";
@@ -16,37 +53,9 @@
         public const string DEFAULT_CUSTOMER_EMAIL = "jdisla@gmail.com";
         public const string DEFAULT_CUSTOMER_MOBILE = "1-809-757-0665";
 
-        // Mock/Default Data for Account Testing
-        public const string DEFAULT_INVESTMENT_OBJECTIVE = "SPECULATION";
-        public const string DEFAULT_ACCOUNT_TYPE_NAME = "Individual";
-        public const bool DEFAULT_DAY_TRADER_STATUS = false;
+        // Token Management
+        public const string VALID_AUTH_TOKEN = "VALID_AUTH_TOKEN";
+        public const string STREAMING_AUTH_TOKEN = "STREAMING_AUTH_TOKEN";
 
-        // Other Constants
-        public const int MAX_RETRY_ATTEMPTS = 3;
-        public const int TOKEN_EXPIRATION_HOURS = 24;
-        public const string JSON_CONTENT_TYPE = "application/json";
-
-        // API Routes
-        /*
-        public static string GetCustomerAccountDetailsUrl(string accountNumber)
-        {
-            return $"{ACCOUNTS_ENDPOINT}/{accountNumber}";
-        }
-
-        public static string GetCustomerAccountBalanceUrl(string accountNumber)
-        {
-            return $"{ACCOUNTS_ENDPOINT}/{accountNumber}/balances";
-        }
-
-        public static string GetBalanceSnapshotsUrl(string accountNumber)
-        {
-            return $"{ACCOUNTS_ENDPOINT}/{accountNumber}/balance-snapshots";
-        }
-
-        public static string GetPositionsUrl(string accountNumber)
-        {
-            return $"{ACCOUNTS_ENDPOINT}/{accountNumber}/positions";
-        }
-        */
     }
 }

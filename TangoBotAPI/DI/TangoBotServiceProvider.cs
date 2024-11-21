@@ -6,12 +6,17 @@ namespace TangoBotAPI.DI
     public static class TangoBotServiceProvider
     {
         private static IServiceProvider? _serviceProvider;
-        private static bool initialize;
+        private static bool initialize = false;
         private static ServiceCollection? services;
 
         public static void Initialize()
         {
-             services = new ServiceCollection();
+            if (initialize)
+            {
+                return;
+            }
+
+                services = new ServiceCollection();
             _serviceProvider = services.BuildServiceProvider();
 
             initialize = true;

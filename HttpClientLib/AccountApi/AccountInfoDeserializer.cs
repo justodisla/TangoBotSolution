@@ -1,4 +1,4 @@
-using HttpClientLib.CustomerApi;
+using HttpClientLib.AccountApi;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;

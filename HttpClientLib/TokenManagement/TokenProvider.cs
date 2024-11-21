@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Net.Http;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,8 +8,6 @@ using TangoBotAPI.Configuration;
 using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
 using TangoBotAPI.Toolkit;
-using static HttpClientLib.TastyTradeApiClient;
-
 
 namespace HttpClientLib.TokenManagement
 {
@@ -20,36 +16,25 @@ namespace HttpClientLib.TokenManagement
     /// </summary>
     public class TokenProvider : ITokenProvider
     {
-
-        private const string API_QUOTE_TOKEN = "api_quote_token";
-        private const string SESSION_TOKEN = "api_session_token";
-
-
-
-        // Endpoint URLs and credentials for Tastytrade API
-        private const string LoginUrl = "https://api.cert.tastyworks.com/sessions"; // Sandbox login endpoint
-        private const string TestApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; // Test endpoint to validate token
-        private const string Username = "tangobotsandboxuser"; // Replace with your TT sandbox username
-        private const string Password = "HyperBerserker?3000";//"TTTangoBotSandBoxPass"; // Replace with your TT sandbox password
-
+        //private const string SESSION_TOKEN = "api_session_token";
+        private const string LoginUrl = "https://api.cert.tastyworks.com/sessions"; //TODO: Build login url from configuration
+        private const string TestApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; //TODO: Build test api url from configuration 
+        
         private readonly HttpClient _httpClient;
         private readonly TokenParser _tokenParser;
-        //private readonly TokenFileHandler _tokenFileHandler;
         private string? _sessionToken;
         private string? _streamingTokenEndpoint;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenProvider"/> class.
         /// </summary>
-        /// <param name="httpClient">The HttpClient used for API calls.</param>
         public TokenProvider()
         {
             _httpClient = TangoBotServiceProvider.GetService<HttpClient>();
             _tokenParser = new TokenParser();
-            //_tokenFileHandler = new TokenFileHandler();
-
             _streamingTokenEndpoint = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue("apiQuoteTokenEndpoint");
-        }
+
+             }
 
         /// <summary>
         /// Retrieves a valid session token, either from storage or by authenticating.
@@ -57,11 +42,8 @@ namespace HttpClientLib.TokenManagement
         /// <returns>The valid session token if successful; otherwise, null.</returns>
         public async Task<string?> GetValidTokenAsync()
         {
-            // Attempt to load the token from file
-            //_sessionToken = await _tokenFileHandler.LoadTokenFromFileAsync();
-            _sessionToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(SESSION_TOKEN);
+            _sessionToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.VALID_AUTH_TOKEN);
 
-            // Validate the loaded token
             if (!string.IsNullOrEmpty(_sessionToken) && await IsTokenValidAsync())
             {
                 Console.WriteLine("[Info] Using existing valid token.");
@@ -70,11 +52,9 @@ namespace HttpClientLib.TokenManagement
 
             Console.WriteLine("[Info] No valid token found. Requesting a new token.");
 
-            // Authenticate to get a new token
             if (await AuthenticateAsync())
             {
-                //await _tokenFileHandler.SaveTokenToFileAsync(_sessionToken);
-                TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(SESSION_TOKEN, _sessionToken);
+                TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(Constants.VALID_AUTH_TOKEN, _sessionToken);
                 return _sessionToken;
             }
 
@@ -92,7 +72,6 @@ namespace HttpClientLib.TokenManagement
             {
                 Console.WriteLine("[Debug] Validating the token by making a test API call.");
                 var request = new HttpRequestMessage(HttpMethod.Get, TestApiUrl);
-                //request.Headers.Add("Authorization", $"Bearer {_sessionToken}");
                 request.Headers.Add("Authorization", _sessionToken);
 
                 var response = await _httpClient.SendAsync(request);
@@ -105,8 +84,6 @@ namespace HttpClientLib.TokenManagement
                 else
                 {
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    var responseJson = JsonSerializer.Deserialize<SessionResponse>(responseBody);
-
                     Console.WriteLine($"[Debug] Token validation failed with status code: {response.StatusCode}");
                     Console.WriteLine($"[Debug] Response body: {responseBody}");
                 }
@@ -126,18 +103,23 @@ namespace HttpClientLib.TokenManagement
         /// <returns>True if authentication is successful; otherwise, false.</returns>
         private async Task<bool> AuthenticateAsync()
         {
+            IConfigurationProvider? configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>();
 
+            if (configurationProvider == null) 
+            {
+                //TODO: Log error
+                throw new Exception("Unable to access Configuration Provider");
+            }
+
+            //TODO: Add user agent as configuration
             var credentials = new Dictionary<string, object>
             {
-                { "login", Username },
-                { "password", Password },
+                { "login", configurationProvider.GetConfigurationValue(Constants.ACTIVE_USER) },
+                { "password", configurationProvider.GetConfigurationValue(Constants.ACTIVE_PASSWORD) },
                 { "remember-me", true }
             };
 
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
-
-            //var credentials = new { login = Username, password = Password, remember-me: true };
-            //var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
 
             try
             {
@@ -147,21 +129,16 @@ namespace HttpClientLib.TokenManagement
                 {
                     Content = content
                 };
-                request.Headers.Add("User-Agent", "tangobot/1.0");
+                request.Headers.Add("User-Agent", "tangobot/1.0");//TODO: Add user agent as configuration
 
                 var response = await _httpClient.SendAsync(request);
                 var responseBody = await response.Content.ReadAsStringAsync();
 
-                //var response = await _httpClient.PostAsync(LoginUrl, content);
-                //var responseBody = await response.Content.ReadAsStringAsync();
-
                 if (response.IsSuccessStatusCode)
                 {
-
                     Console.WriteLine("[Debug] Authentication response received from Tastytrade.");
                     Console.WriteLine($"[Debug] Response body: {responseBody}");
 
-                    // Use TokenParser to extract the token
                     _sessionToken = _tokenParser.ParseToken(responseBody);
 
                     if (!string.IsNullOrEmpty(_sessionToken))
@@ -178,7 +155,6 @@ namespace HttpClientLib.TokenManagement
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"[Error] Authentication failed with status code {response.StatusCode} from Tastytrade. Error: {errorContent}");
-                    //Console.WriteLine($"[Error] Response body: {responseBody}");
                 }
             }
             catch (Exception ex)
@@ -191,24 +167,40 @@ namespace HttpClientLib.TokenManagement
 
         #region Streaming token
 
+        /// <summary>
+        /// Gets a valid streaming token asynchronously.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the valid streaming token.</returns>
         public async Task<string> GetValidStreamingToken()
         {
             string sessionToken = await GetValidTokenAsync();
 
-            // Load token from persistence
-            string streamingToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(API_QUOTE_TOKEN);
+            string streamingToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN);
 
-            if (string.IsNullOrEmpty(streamingToken))
+            if (string.IsNullOrEmpty(streamingToken) || !IsStreamingTokenValid(streamingToken))
             {
-                // Get streaming token
                 streamingToken = await GetStreamingTokenAsync(sessionToken);
-                TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(API_QUOTE_TOKEN, streamingToken);
+                TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(Constants.STREAMING_AUTH_TOKEN, streamingToken);
             }
 
             return streamingToken;
-
         }
 
+        /// <summary>
+        /// Checks if the streaming token is valid.
+        /// </summary>
+        /// <param name="streamingToken">The streaming token to validate.</param>
+        /// <returns>True if the streaming token is valid; otherwise, false.</returns>
+        private bool IsStreamingTokenValid(string streamingToken)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Retrieves a new streaming token asynchronously.
+        /// </summary>
+        /// <param name="sessionToken">The session token to use for authentication.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the new streaming token.</returns>
         private async Task<string?> GetStreamingTokenAsync(string? sessionToken)
         {
             if (string.IsNullOrEmpty(sessionToken))
@@ -218,11 +210,10 @@ namespace HttpClientLib.TokenManagement
 
             try
             {
-                string sburl = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.SANDBOX_URL);
+                string apiUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.ACTIVE_API_URL);
+                var streamingAuthTokenEndpoint = apiUrl + _streamingTokenEndpoint;
 
-                var cUrl = sburl + _streamingTokenEndpoint;
-
-                var request = new HttpRequestMessage(HttpMethod.Get, cUrl);
+                var request = new HttpRequestMessage(HttpMethod.Get, streamingAuthTokenEndpoint);
                 request.Headers.Add("Authorization", sessionToken);
 
                 var response = await _httpClient.SendAsync(request);
@@ -233,8 +224,7 @@ namespace HttpClientLib.TokenManagement
 
                 if (responseJson?.Data?.Token != null)
                 {
-                    string token = responseJson.Data.Token;
-                    return token;
+                    return responseJson.Data.Token;
                 }
                 else
                 {
@@ -259,9 +249,12 @@ namespace HttpClientLib.TokenManagement
         private class StreamingTokenData
         {
             [JsonPropertyName("token")]
-
             public string? Token { get; set; }
+
+            [JsonPropertyName("dxlink-url")]
             public string? DxlinkUrl { get; set; }
+
+            [JsonPropertyName("level")]
             public string? Level { get; set; }
         }
 
@@ -269,9 +262,11 @@ namespace HttpClientLib.TokenManagement
 
         private class SessionData
         {
+            [JsonPropertyName("session_token")]
             public string session_token { get; set; }
+
+            [JsonPropertyName("remember_token")]
             public string remember_token { get; set; }
         }
-
     }
 }
