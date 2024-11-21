@@ -181,7 +181,9 @@ namespace HttpClientLib.TokenManagement
 
             string streamingToken = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN);
 
-            if (string.IsNullOrEmpty(streamingToken) || !IsStreamingTokenValid(streamingToken))
+            //bool sta = await IsStreamingTokenValid(streamingToken);
+
+            if (string.IsNullOrEmpty(streamingToken) || !await IsStreamingTokenValid(streamingToken))
             {
                 streamingToken = await GetStreamingTokenAsync(sessionToken);
                 TangoBotServiceProvider.GetService<IConfigurationProvider>().SetConfigurationValue(Constants.STREAMING_AUTH_TOKEN, streamingToken);
@@ -198,19 +200,17 @@ namespace HttpClientLib.TokenManagement
         /// </summary>
         /// <param name="streamingToken">The streaming token to validate.</param>
         /// <returns>True if the streaming token is valid; otherwise, false.</returns>
-        private bool IsStreamingTokenValid(string streamingToken)
+        private async Task<bool> IsStreamingTokenValid(string streamingToken)
         {
-            var ss = TangoBotServiceProvider.GetService<IStreamService<QuoteDataHistory>>();
+            var streamingService = TangoBotServiceProvider.GetService<IStreamService<QuoteDataHistory>>();
 
-            
+            if (streamingService == null)
+            {
+                throw new Exception("Streaming service is not available.");
+            }
 
-           // bool isValid = ss.IsStreamingAuthTokenValid().Result;
-
-            return false;
-            
+            return await streamingService.IsStreamingAuthTokenValid(streamingToken);
         }
-        
-
 
         /// <summary>
         /// Retrieves a new streaming token asynchronously.
