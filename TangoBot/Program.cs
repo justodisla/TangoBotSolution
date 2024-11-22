@@ -314,8 +314,10 @@ namespace TangoBot
 
             var streamService = TangoBotServiceProvider.GetService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>();
 
-            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddDays(-15), DateTime.Now.Date, Timeframe.Daily, 1);
+            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-30), DateTime.Now.Date, Timeframe.Daily, 1);
 
+
+            Thread.Sleep(5000);
 
             //var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
 

@@ -54,7 +54,15 @@ namespace TangoBotStreaming.Services
             try
             {
                 Console.WriteLine("[Info] Connecting to WebSocket...");
-                await _clientWebSocket.ConnectAsync(new Uri(_webSocketUrl), CancellationToken.None);
+                if (_clientWebSocket.State != WebSocketState.Open)
+                {
+                    await _clientWebSocket.ConnectAsync(new Uri(_webSocketUrl), CancellationToken.None);
+                    Console.WriteLine("[Info] Connected.");
+                }
+                else
+                {
+                    Console.WriteLine("[Info] WebSocket connection is already open.");
+                }
 
                 Console.WriteLine("[Info] Connected. Sending SETUP...");
                 await SendMessageAsync(_clientWebSocket, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":60,\"acceptKeepaliveTimeout\":60}");
