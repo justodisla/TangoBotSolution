@@ -85,7 +85,7 @@ namespace HttpClientLib.Tests.AccountApi
         public async Task GetBalanceSnapshotAsync_ReturnsNull_WhenResponseIsUnsuccessful()
         {
             // Arrange
-            var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+            var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER) + "X";
 
             // Act
             var result = await _accountComponent.GetBalanceSnapshotAsync(accountNumber);

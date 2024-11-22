@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
 using TangoBotAPI.Configuration;
 using TangoBotAPI.DI;
+using TangoBotAPI.Toolkit;
 
 namespace HttpClientLib.OrderApi
 {
@@ -19,7 +20,7 @@ namespace HttpClientLib.OrderApi
             : base()
         {
             _baseUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
-                .GetConfigurationValue("OrderApiBaseUrl");
+                .GetConfigurationValue(Constants.ACTIVE_API_URL);
 
             //_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
         }
