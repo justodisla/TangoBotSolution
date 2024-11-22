@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace HttpClientLib.AccountApi
+namespace HttpClientLib.AccountApi.Models
 {
     public class Account
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace HttpClientLib.OrderApi
+namespace HttpClientLib.OrderApi.Models
 {
     public class Order
     {

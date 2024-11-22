@@ -14,6 +14,7 @@ using System.Net.Http;
 using TangoBot.HttpClientLib;
 using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
+using HttpClientLib.OrderApi.Models;
 
 namespace TangoBot
 {
