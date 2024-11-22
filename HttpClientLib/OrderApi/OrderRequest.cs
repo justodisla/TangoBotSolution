@@ -9,7 +9,7 @@ namespace HttpClientLib.OrderApi
         public string OrderType { get; set; }
 
         [JsonPropertyName("price")]
-        public double Price { get; set; }
+        public double? Price { get; set; }
 
         [JsonPropertyName("price-effect")]
         public string PriceEffect { get; set; }

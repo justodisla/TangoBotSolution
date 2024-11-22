@@ -32,33 +32,30 @@ namespace HttpClientLib.Tests.OrderApi
                 .GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
         }
 
-        [Fact(Skip ="Test later")]
+        [Fact]
         public async Task GetAccountOrdersAsync_ReturnsOrders_WhenResponseIsSuccessful()
         {
             // Arrange
-            var accountNumber = "123456";
-            var responseContent = "[{\"orderId\": 1, \"status\": \"filled\"}]";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseContent)
-            };
+            var accountNumber = _accountNumber;
+            //var responseContent = "[{\"orderId\": 1, \"status\": \"filled\"}]";
+
 
             // Act
             var result = await _orderComponent.GetAccountOrdersAsync(accountNumber);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Single(result);
+            //Assert.Single(result);
             //Assert.Equal(1, result[0].OrderId);
-            Assert.Equal("filled", result[0].Status);
+            //Assert.Equal("filled", result[0].Status);
         }
 
-        [Fact(Skip = "Test later")]
+        [Fact]
         public async Task GetAccountOrdersAsync_ReturnsNull_WhenResponseIsUnsuccessful()
         {
             // Arrange
-            var accountNumber = "123456";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            var accountNumber = _accountNumber + "3";
+
 
             // Act
             var result = await _orderComponent.GetAccountOrdersAsync(accountNumber);
@@ -67,7 +64,7 @@ namespace HttpClientLib.Tests.OrderApi
             Assert.Null(result);
         }
 
-        [Fact(Skip = "Test later")]
+        [Fact]
         public async Task GetOrderByIdAsync_ReturnsOrder_WhenResponseIsSuccessful()
         {
             // Arrange
@@ -96,27 +93,26 @@ namespace HttpClientLib.Tests.OrderApi
                 }.ToList()
             };
 
+            var postOrderDryRun = await _orderComponent.PostEquityOrder(accountNumber, orderRequest);
 
             // Act & Assert
             var postOrderResult = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
 
             var orderId = postOrderResult.Data.Order.Id;
 
-            await Assert.ThrowsAsync<HttpRequestException>(() => _orderComponent.GetOrderByIdAsync(accountNumber, orderId));
+            var orderReport = await _orderComponent.GetOrderByIdAsync(accountNumber, orderId);
 
+            Assert.Equal(orderId, orderReport.Id);
+
+            //Let's cancel the order
             var cancelResult = await _orderComponent.CancelOrderByIdAsync(accountNumber, orderId);
 
-            Assert.Equal("Cancelled", cancelResult.Status);
+            Assert.Equal("Cancel Requested", cancelResult.Status);
 
+            // Attempt to retrieve the cancelled order
+            var cancelledOrder = await _orderComponent.GetOrderByIdAsync(accountNumber, orderId);
 
-
-            // Act
-            var result = await _orderComponent.GetOrderByIdAsync(accountNumber, orderId);
-
-            // Assert
-            Assert.NotNull(result);
-           // Assert.Equal(1, result.OrderId);
-            Assert.Equal("filled", result.Status);
+            Assert.Equal("Cancelled", cancelledOrder.Status);
         }
 
         [Fact]
@@ -126,38 +122,11 @@ namespace HttpClientLib.Tests.OrderApi
             var accountNumber = _accountNumber;
             var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
 
-            var orderRequest = new OrderRequest
-            {
-                OrderType = "Limit",
-                Price = 100.0,
-                TimeInForce = "Day",
-                PriceEffect = "Debit",
-                Legs = new[]
-                {
-                    new LegRequest
-                    {
-                        Symbol = "AAPL",
-                        InstrumentType = "Equity",
-                        Action = "Buy to Open",
-                        Quantity = 1
-                    }
-                }.ToList()
-            };
-
-
             // Act & Assert
-            var postOrderResult = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
-
-            var orderId = postOrderResult.Data.Order.Id;
-
-            await Assert.ThrowsAsync<HttpRequestException>(() => _orderComponent.GetOrderByIdAsync(accountNumber, orderId));
-
-            var cancelResult = await _orderComponent.CancelOrderByIdAsync(accountNumber, orderId);
-
-            Assert.Equal("Cancelled", cancelResult.Status);
+            await Assert.ThrowsAsync<HttpRequestException>(async () => await _orderComponent.GetOrderByIdAsync(accountNumber, 123456));
         }
 
-            [Fact]
+        [Fact]
         public async Task PostEquityOrderDryRun_ReturnsOrderPostReport_WhenResponseIsSuccessful()
         {
             // Arrange
@@ -199,7 +168,7 @@ namespace HttpClientLib.Tests.OrderApi
             var accountNumber = _accountNumber;
             //var orderRequest = new OrderRequest { TimeInForce };
             var responseContent = "{\"orderId\": 1, \"status\": \"filled\"}";
-           
+
             var orderRequest = new OrderRequest
             {
                 OrderType = "Limit",
@@ -227,7 +196,7 @@ namespace HttpClientLib.Tests.OrderApi
             //Assert.Equal("filled", result.Status);
         }
 
-        [Fact(Skip = "Test later")]
+        [Fact]
         public async Task PostEquityOrder_ThrowsException_WhenResponseIsUnsuccessful()
         {
             // Arrange
@@ -278,7 +247,7 @@ namespace HttpClientLib.Tests.OrderApi
             // Assert
             Assert.NotNull(result);
             //Assert.Equal(1, result.OrderId);
-            Assert.Equal("Cancelled", result.Status);
+            Assert.Equal("Cancel Requested", result.Status);
         }
 
         [Fact]

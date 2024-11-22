@@ -1,4 +1,5 @@
 using HttpClientLib.AccountApi;
+using HttpClientLib.OrderApi;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,12 @@ namespace HttpClientLib.Tests.AccountApi
         {
 
             StartUp.InitializeDI();
+
+            var activeAccount = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+            var sandboxAccountNumber = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.SANDBOX_ACCOUNT_NUMBER);
+
+            if (activeAccount != sandboxAccountNumber)
+                throw new Exception("Wrong account number used");
 
             //_httpMessageHandlerMock = new Mock<HttpMessageHandler>();
             //_httpClient = TangoBotServiceProvider.GetService<HttpClient>();
@@ -98,6 +105,7 @@ namespace HttpClientLib.Tests.AccountApi
         public async Task GetAccountPositionsAsync_ReturnsAccountPositions_WhenResponseIsSuccessful()
         {
             // Arrange
+            var _orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
             var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
             var responseContent = "[{\"position\": 1000.0}]";
             var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -105,12 +113,35 @@ namespace HttpClientLib.Tests.AccountApi
                 Content = new StringContent(responseContent)
             };
 
-            //_httpMessageHandlerMock
-            //    .Setup(m => m.Send(It.IsAny<HttpRequestMessage>()))
-            //    .Returns(responseMessage);
+            var orderRequest = new OrderRequest
+            {
+                OrderType = "Market",
+                TimeInForce = "Day",
+                PriceEffect = "Debit",
+                Legs = new[]
+                 {
+                    new LegRequest
+                    {
+                        Symbol = "SPY",
+                        InstrumentType = "Equity",
+                        Action = "Buy to Open",
+                        Quantity = 1
+                    }
+                }.ToList()
+            };
+
+            // Act
+            var newDryRunOrder = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
+
+            //var newOrder = await _orderComponent.PostEquityOrder(accountNumber, orderRequest);
+
+            //Thread.Sleep(5000);
 
             // Act
             var result = await _accountComponent.GetAccountPositionsAsync(accountNumber);
+
+
+            //_orderComponent.CancelOrderByIdAsync(accountNumber, newOrder.Data.Order.Id);
 
             // Assert
             Assert.NotNull(result);

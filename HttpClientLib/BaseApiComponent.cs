@@ -63,8 +63,6 @@ namespace TangoBot.HttpClientLib
             }
         }
 
-
-
         /// <summary>
         /// Sends an authorized request to the specified URL with the provided content and HTTP method.
         /// </summary>
@@ -77,35 +75,63 @@ namespace TangoBot.HttpClientLib
                 return null;
             }
 
-            try
+            int maxRetries = 3;
+            int delay = 2000; // 2 seconds
+
+            for (int i = 0; i < maxRetries; i++)
             {
-                HttpRequestMessage request = ResolveToken(url, method, content, token);
-
-                var response = await _httpClient.SendAsync(request);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                try
                 {
-                    Console.WriteLine("[Warning] Unauthorized request. Retrying with new token.");
-                    token = await _tokenProvider.GetValidTokenAsync();
-                    if (!string.IsNullOrEmpty(token))
+                    HttpRequestMessage request = ResolveToken(url, method, content, token);
+
+                    Console.WriteLine("[Info] Sending request...");
+                    var response = await _httpClient.SendAsync(request);
+                    Console.WriteLine("[Info] Request sent. Awaiting response...");
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
-                        request = new HttpRequestMessage(method, url)
+                        Console.WriteLine("[Warning] Unauthorized request. Retrying with new token.");
+                        token = await _tokenProvider.GetValidTokenAsync();
+                        if (!string.IsNullOrEmpty(token))
                         {
-                            Content = content
-                        };
-                        request.Headers.Add("Authorization", token);
-                        response = await _httpClient.SendAsync(request);
+                            request = new HttpRequestMessage(method, url)
+                            {
+                                Content = content
+                            };
+                            request.Headers.Add("Authorization", token);
+                            response = await _httpClient.SendAsync(request);
+                        }
+                    }
+
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[Info] Response received. Status code: {response.StatusCode}, Content: {responseContent}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("[Info] Successful response.");
+                        return response;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Warning] Unsuccessful response. Status code: {response.StatusCode}, Content: {responseContent}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Exception in API request: {ex.Message}");
+                    if (i == maxRetries - 1)
+                    {
+                        throw;
                     }
                 }
 
-                return response;
+                Console.WriteLine($"[Info] Waiting for {delay}ms before retrying...");
+                await Task.Delay(delay);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Error] Exception in API request: {ex.Message}");
-                throw;
-            }
+
+            return null;
         }
+
 
 
         private static HttpRequestMessage ResolveToken(string url, HttpMethod method, HttpContent? content, string? token)
