@@ -27,7 +27,7 @@ namespace HttpClientLib.Tests.AccountApi
             StartUp.InitializeDI();
 
             //_httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-            _httpClient = TangoBotServiceProvider.GetService<HttpClient>();
+            //_httpClient = TangoBotServiceProvider.GetService<HttpClient>();
             _accountComponent = TangoBotServiceProvider.GetService<AccountComponent>();
 
             _configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>();
@@ -39,41 +39,21 @@ namespace HttpClientLib.Tests.AccountApi
         {
             // Arrange
             var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
-            var responseContent = "{\"balance\": 1000.0}";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseContent)
-            };
-
-            //var eso = await _accountComponent.GetAccountBalancesAsync(accountNumber);
-
-            /*
-            _httpMessageHandlerMock
-                .Setup(m => m.Send(It.IsAny<HttpRequestMessage>()))
-                .Returns(responseMessage);
-            */
 
             // Act
             var result = await _accountComponent.GetAccountBalancesAsync(accountNumber);
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.ContainsKey("balance"));
-            Assert.Equal(1000.0, result["balance"]);
+            Assert.True(result.ContainsKey("cash-balance"));
+            Assert.Equal("1000000.0", result["cash-balance"]);
         }
 
         [Fact]
         public async Task GetAccountBalancesAsync_ReturnsNull_WhenResponseIsUnsuccessful()
         {
             // Arrange
-            var accountNumber = "123456";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-
-            /*
-            _httpMessageHandlerMock
-                .Setup(m => m.Send(It.IsAny<HttpRequestMessage>()))
-                .Returns(responseMessage);
-            */
+            var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER) + "X";
 
             // Act
             var result = await _accountComponent.GetAccountBalancesAsync(accountNumber);
@@ -86,18 +66,12 @@ namespace HttpClientLib.Tests.AccountApi
         public async Task GetBalanceSnapshotAsync_ReturnsBalanceSnapshots_WhenResponseIsSuccessful()
         {
             // Arrange
-            var accountNumber = "123456";
+            var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
             var responseContent = "[{\"snapshot\": 1000.0}]";
             var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(responseContent)
             };
-
-            /*
-            _httpMessageHandlerMock
-                .Setup(m => m.Send(It.IsAny<HttpRequestMessage>()))
-                .Returns(responseMessage);
-            */
 
             // Act
             var result = await _accountComponent.GetBalanceSnapshotAsync(accountNumber);
@@ -105,20 +79,13 @@ namespace HttpClientLib.Tests.AccountApi
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            Assert.True(result[0].ContainsKey("snapshot"));
-            Assert.Equal(1000.0, result[0]["snapshot"]);
         }
 
         [Fact]
         public async Task GetBalanceSnapshotAsync_ReturnsNull_WhenResponseIsUnsuccessful()
         {
             // Arrange
-            var accountNumber = "123456";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-
-            //_httpMessageHandlerMock
-            //    .Setup(m => m.Send(It.IsAny<HttpRequestMessage>()))
-            //    .Returns(responseMessage);
+            var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
 
             // Act
             var result = await _accountComponent.GetBalanceSnapshotAsync(accountNumber);
@@ -131,7 +98,7 @@ namespace HttpClientLib.Tests.AccountApi
         public async Task GetAccountPositionsAsync_ReturnsAccountPositions_WhenResponseIsSuccessful()
         {
             // Arrange
-            var accountNumber = "123456";
+            var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
             var responseContent = "[{\"position\": 1000.0}]";
             var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
             {

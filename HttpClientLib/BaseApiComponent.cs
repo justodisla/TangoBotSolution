@@ -3,22 +3,19 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TangoBotAPI.DI;
+using TangoBotAPI.TokenManagement;
 
 namespace TangoBot.HttpClientLib
 {
     public abstract class BaseApiComponent
     {
         private readonly HttpClient _httpClient;
-        private readonly TokenProvider _tokenProvider;
+        private readonly ITokenProvider _tokenProvider;
 
         protected BaseApiComponent()
         {
-        }
-
-        protected BaseApiComponent(HttpClient httpClient, TokenProvider tokenProvider)
-        {
-            _httpClient = httpClient;
-            _tokenProvider = tokenProvider;
+            _httpClient = TangoBotServiceProvider.GetService<HttpClient>(); ;
+            _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>(); ;
 
             TangoBotServiceProvider.GetService<HttpClient>();
 
