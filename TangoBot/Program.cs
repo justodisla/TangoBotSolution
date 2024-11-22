@@ -24,9 +24,9 @@ namespace TangoBot
         {
             StartUp.InitializeDI();
 
-            //MainManu();
+            MainManu();
 
-            //TestStreaming().Wait();
+            TestStreaming().Wait();
 
             return;
 
@@ -309,13 +309,13 @@ namespace TangoBot
         private static async Task TestStreaming()
         {
             // Replace these values with valid ones
-            string apiQuoteToken = "dGFzdHksYXBpLCwxNzMyMTA3MzcyLDE3MzIwMjA5NzIsVWNhMzJiYzg2LTIyOTgtNDlhYS1iYmY0LThjNDYxMTMwNjdlOQ.SyBAnxdcC3Xgpk99rUzH77barEzh81-0gkTqjXF0x8k";
+            string apiQuoteToken = await TangoBotServiceProvider.GetService<ITokenProvider>().GetValidStreamingToken();
             string webSocketUrl = "wss://tasty-openapi-ws.dxfeed.com/realtime";
 
-            //IStreamService streamService = new StreamingService(webSocketUrl, apiQuoteToken);
+            var streamService = TangoBotServiceProvider.GetService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>();
 
-            // Invoke StreamHistoricData method
-            //var objs = streamService.StreamHistoricData("SPY", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
+            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddDays(-15), DateTime.Now.Date, Timeframe.Daily, 1);
+
 
             //var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
 
