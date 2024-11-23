@@ -15,6 +15,10 @@ using TangoBot.HttpClientLib;
 using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
 using HttpClientLib.OrderApi.Models;
+using System.Net;
+using Nancy.Json;
+using System.Text.Json;
+using TangoBotAPI.Configuration;
 
 namespace TangoBot
 {
@@ -23,6 +27,8 @@ namespace TangoBot
         static async Task Main(string[] args)
         {
             StartUp.InitializeDI();
+
+            RandomTests();
 
             MainManu();
 
@@ -138,7 +144,10 @@ namespace TangoBot
 
         }
 
-        
+        private static void RandomTests()
+        {
+            
+        }
 
         private static async void MainManu()
         {

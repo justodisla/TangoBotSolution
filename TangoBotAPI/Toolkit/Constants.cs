@@ -57,5 +57,6 @@
         public const string VALID_AUTH_TOKEN = "VALID_AUTH_TOKEN";
         public const string STREAMING_AUTH_TOKEN = "STREAMING_AUTH_TOKEN";
 
+        public const string ALPHA_VANTAGE_API_KEY = "ALPHA_VANTAGE_API_KEY";
     }
 }

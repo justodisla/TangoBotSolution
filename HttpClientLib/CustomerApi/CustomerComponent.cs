@@ -1,5 +1,4 @@
-﻿using HttpClientLib;
-using HttpClientLib.AccountApi.Models;
+﻿using HttpClientLib.AccountApi.Models;
 using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;

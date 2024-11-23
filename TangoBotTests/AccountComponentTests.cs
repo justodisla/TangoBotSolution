@@ -1,5 +1,7 @@
+using HttpClientLib;
 using HttpClientLib.AccountApi;
 using HttpClientLib.OrderApi;
+using HttpClientLib.OrderApi.Models;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,32 +14,31 @@ using TangoBotAPI.DI;
 using TangoBotAPI.Toolkit;
 using Xunit;
 
-namespace HttpClientLib.Tests.AccountApi
+namespace TangoBotTests
 {
     public class AccountComponentTests
     {
-        private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
-        private readonly HttpClient _httpClient;
         private readonly AccountComponent _accountComponent;
         private readonly IConfigurationProvider _configurationProvider;
-
 
         public AccountComponentTests()
         {
 
+
             StartUp.InitializeDI();
 
-            var activeAccount = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
-            var sandboxAccountNumber = TangoBotServiceProvider.GetService<IConfigurationProvider>().GetConfigurationValue(Constants.SANDBOX_ACCOUNT_NUMBER);
+            _configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
+
+
+            var activeAccount = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+            var sandboxAccountNumber = _configurationProvider.GetConfigurationValue(Constants.SANDBOX_ACCOUNT_NUMBER);
 
             if (activeAccount != sandboxAccountNumber)
                 throw new Exception("Wrong account number used");
 
             //_httpMessageHandlerMock = new Mock<HttpMessageHandler>();
             //_httpClient = TangoBotServiceProvider.GetService<HttpClient>();
-            _accountComponent = TangoBotServiceProvider.GetService<AccountComponent>();
-
-            _configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>();
+            _accountComponent = TangoBotServiceProvider.GetService<AccountComponent>() ?? throw new Exception("AccountComponent is null");
 
         }
 
@@ -74,12 +75,7 @@ namespace HttpClientLib.Tests.AccountApi
         {
             // Arrange
             var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
-            var responseContent = "[{\"snapshot\": 1000.0}]";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseContent)
-            };
-
+            
             // Act
             var result = await _accountComponent.GetBalanceSnapshotAsync(accountNumber);
 
@@ -105,17 +101,23 @@ namespace HttpClientLib.Tests.AccountApi
         public async Task GetAccountPositionsAsync_ReturnsAccountPositions_WhenResponseIsSuccessful()
         {
             // Arrange
-            var _orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
+            var _orderComponent = TangoBotServiceProvider.GetService<OrderComponent>() ?? throw new Exception("OrderComponent null");
             var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
-            var responseContent = "[{\"position\": 1000.0}]";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+
+            //var msc = TangoBotServiceProvider.GetService<MarketStatusChecker>();
+            //bool isMarketOpened = await msc.IsMarketOpenAsync();
+
+            MarketStatusChecker? marketStatusChecker = TangoBotServiceProvider.GetService<MarketStatusChecker>() ?? throw new Exception("Unable to load MarketStatusChecker");
+            if (!await marketStatusChecker.IsMarketOpenAsync())
             {
-                Content = new StringContent(responseContent)
-            };
+                Assert.True(true);
+                return;
+            }
 
             var orderRequest = new OrderRequest
             {
                 OrderType = "Market",
+                Price = null,
                 TimeInForce = "Day",
                 PriceEffect = "Debit",
                 Legs = new[]
@@ -130,8 +132,9 @@ namespace HttpClientLib.Tests.AccountApi
                 }.ToList()
             };
 
+
             // Act
-            var newDryRunOrder = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
+            var newDryRunOrder = await _orderComponent.PostEquityOrder(accountNumber, orderRequest);
 
             //var newOrder = await _orderComponent.PostEquityOrder(accountNumber, orderRequest);
 

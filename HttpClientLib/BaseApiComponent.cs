@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
 
-namespace TangoBot.HttpClientLib
+namespace HttpClientLib
 {
     public abstract class BaseApiComponent
     {
@@ -14,10 +14,8 @@ namespace TangoBot.HttpClientLib
 
         protected BaseApiComponent()
         {
-            _httpClient = TangoBotServiceProvider.GetService<HttpClient>(); ;
-            _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>(); ;
-
-            TangoBotServiceProvider.GetService<HttpClient>();
+            _httpClient = TangoBotServiceProvider.GetService<HttpClient>() ?? throw new Exception("HttpClient is null");
+            _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
 
         }
 
@@ -26,11 +24,11 @@ namespace TangoBot.HttpClientLib
         /// </summary>
         protected async Task<HttpResponseMessage> SendGetRequestAsync(string url)
         {
-            string token = await _tokenProvider.GetValidTokenAsync();
+            string? token = await _tokenProvider.GetValidTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
                 Console.WriteLine("[Error] Failed to obtain a valid token for API request.");
-                return null;
+                return new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
             }
 
             try
@@ -87,6 +85,14 @@ namespace TangoBot.HttpClientLib
                     Console.WriteLine("[Info] Sending request...");
                     var response = await _httpClient.SendAsync(request);
                     Console.WriteLine("[Info] Request sent. Awaiting response...");
+
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        Console.WriteLine($"[Warning] Unsuccessful response. Status code: {response.StatusCode}");
+                        var _diagnoseComponent = new DiagnoseComponent();
+                        await DiagnoseComponent.DiagnoseAsync(response);
+
+                    }
 
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {

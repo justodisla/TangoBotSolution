@@ -5,11 +5,11 @@ using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
 using Xunit;
 
-namespace HttpClientLib.Tests.TokenManagement
+namespace TangoBotTests
 {
     public class TokenProviderTests
     {
-        private readonly TokenProvider _tokenProvider;
+        private readonly TokenProvider? _tokenProvider;
 
         public TokenProviderTests()
         {
@@ -20,6 +20,12 @@ namespace HttpClientLib.Tests.TokenManagement
         [Fact]
         public async Task GetValidTokenAsync_ReturnsToken_WhenTokenIsValid()
         {
+            if (_tokenProvider == null)
+            {
+                Assert.True(false, "TokenProvider is null");
+                return;
+            }
+
             // Act
             var token = await _tokenProvider.GetValidTokenAsync();
 
@@ -30,6 +36,11 @@ namespace HttpClientLib.Tests.TokenManagement
         [Fact]
         public async Task GetStreamingTokenAsync_ReturnsStreamingToken_WhenSessionTokenIsValid()
         {
+            if (_tokenProvider == null)
+            {
+                Assert.True(false, "TokenProvider is null");
+                return;
+            }
             // Act
             var result = await _tokenProvider.GetValidStreamingToken();
 

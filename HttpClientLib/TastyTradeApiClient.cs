@@ -43,8 +43,8 @@ namespace HttpClientLib
                 var responseJson = JsonSerializer.Deserialize<SessionResponse>(responseBody);
 
                 // Retrieve the session and remember tokens
-                _sessionToken = responseJson?.data?.session_token;
-                _rememberToken = responseJson?.data?.remember_token;
+                _sessionToken = responseJson?.Data?.Session_token;
+                _rememberToken = responseJson?.Data?.Remember_token;
 
                 if (!string.IsNullOrEmpty(_sessionToken))
                 {
@@ -69,14 +69,18 @@ namespace HttpClientLib
 
         public class SessionResponse
         {
-            public SessionData data { get; set; }
+            [System.Text.Json.Serialization.JsonPropertyName("data")]
+            public SessionData? Data { get; set; }
         }
 
         public class SessionData
         {
-            public string session_token { get; set; }
-            public string remember_token { get; set; }
-            public string session_expiration { get; set; }
+            [System.Text.Json.Serialization.JsonPropertyName("session_token")]
+            public string? Session_token { get; set; }
+            [System.Text.Json.Serialization.JsonPropertyName("remember_token")]
+            public string? Remember_token { get; set; }
+            [System.Text.Json.Serialization.JsonPropertyName("session_expiration")]
+            public string? Session_expiration { get; set; }
         }
     }
 }

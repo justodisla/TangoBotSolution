@@ -1,5 +1,4 @@
-﻿using HttpClientLib;
-using HttpClientLib.TokenManagement;
+﻿using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;

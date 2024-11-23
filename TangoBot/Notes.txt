@@ -1,4 +1,7 @@
 ﻿//Sandbox pass: HyperBerserker?3000
 //Sandbox user: tangobotsandboxuser
 
-https://developer.tastytrade.com/
+https://developer.TastyTrade.com/
+
+Alpha Vantage API Key:
+A5069SA46CZPGTHQ

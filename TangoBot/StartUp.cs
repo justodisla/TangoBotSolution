@@ -1,4 +1,5 @@
-﻿using HttpClientLib.AccountApi;
+﻿using HttpClientLib;
+using HttpClientLib.AccountApi;
 using HttpClientLib.CustomerApi;
 using HttpClientLib.InstrumentApi;
 using HttpClientLib.OrderApi;
@@ -47,6 +48,7 @@ namespace TangoBot
             TangoBotServiceProvider.AddSingletonService<CustomerComponent>(new CustomerComponent());
             TangoBotServiceProvider.AddSingletonService<OrderComponent>(new OrderComponent());
             TangoBotServiceProvider.AddSingletonService<InstrumentComponent>(new InstrumentComponent());
+            TangoBotServiceProvider.AddSingletonService<MarketStatusChecker>(new MarketStatusChecker());
             //TangoBotServiceProvider.AddSingletonService<IStreamService<?>>(new StreamingService());
 
             TangoBotServiceProvider.AddSingletonService<IStreamService<QuoteDataHistory>>(new StreamingService());
@@ -129,6 +131,9 @@ namespace TangoBot
             configurationProvider.SetConfigurationValue(Constants.MAX_RETRY_ATTEMPTS, "3");
             configurationProvider.SetConfigurationValue(Constants.TOKEN_EXPIRATION_HOURS, "24");
             configurationProvider.SetConfigurationValue(Constants.JSON_CONTENT_TYPE, "application/json");
+
+
+            configurationProvider.SetConfigurationValue(Constants.ALPHA_VANTAGE_API_KEY, "A5069SA46CZPGTHQ");
             #endregion
         }
     }
