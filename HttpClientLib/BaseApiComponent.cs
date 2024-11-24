@@ -1,24 +1,27 @@
 ﻿using HttpClientLib.TokenManagement;
 using System;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using TangoBotAPI.DI;
 using TangoBotAPI.TokenManagement;
 
 namespace HttpClientLib
 {
-    public abstract class BaseApiComponent
+    public abstract class BaseApiComponent : IObservable<HttpResponseEvent>
     {
         private readonly HttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;
+        private readonly ObserverManager<HttpResponseEvent> _observerManager;
 
         protected BaseApiComponent()
         {
             _httpClient = TangoBotServiceProvider.GetService<HttpClient>() ?? throw new Exception("HttpClient is null");
             _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
-
+            _observerManager = new ObserverManager<HttpResponseEvent>();
         }
 
+        [Obsolete("This method is deprecated, use SendRequestAsync instead.")]
         /// <summary>
         /// Sends an authorized GET request to the specified URL.
         /// </summary>
@@ -38,6 +41,7 @@ namespace HttpClientLib
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("Authorization", token);
 
+                //Perform the request
                 var response = await _httpClient.SendAsync(request);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -66,6 +70,10 @@ namespace HttpClientLib
         /// </summary>
         protected async Task<HttpResponseMessage?> SendRequestAsync(string url, HttpMethod method, HttpContent? content = null)
         {
+            HttpResponseEvent? httpResponseEvent;
+            HttpRequestMessage? request = null;
+            HttpResponseMessage? response = null;
+
             string? token = await _tokenProvider.GetValidTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
@@ -80,21 +88,21 @@ namespace HttpClientLib
             {
                 try
                 {
-                    HttpRequestMessage request = ResolveToken(url, method, content, token);
+                    request = ResolveRequest(url, method, content, token);
 
                     Console.WriteLine("[Info] Sending request...");
-                    var response = await _httpClient.SendAsync(request);
+                    response = await _httpClient.SendAsync(request);
                     Console.WriteLine("[Info] Request sent. Awaiting response...");
 
-                    //string responseContent2 = await response.Content.ReadAsStringAsync();
-
+                    //Capture the response into the HttpResponseEvent
+                    httpResponseEvent = new HttpResponseEvent(request, response, null);
+                    _observerManager.Notify(httpResponseEvent);
 
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         Console.WriteLine($"[Warning] Unsuccessful response. Status code: {response.StatusCode}");
                         var _diagnoseComponent = new DiagnoseComponent();
                         await DiagnoseComponent.DiagnoseAsync(response);
-
                     }
 
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -127,6 +135,9 @@ namespace HttpClientLib
                 }
                 catch (Exception ex)
                 {
+                    httpResponseEvent = new HttpResponseEvent(request, response, ex);
+                    _observerManager.Notify(httpResponseEvent);
+
                     Console.WriteLine($"[Error] Exception in API request: {ex.Message}");
                     if (i == maxRetries - 1)
                     {
@@ -141,9 +152,7 @@ namespace HttpClientLib
             return null;
         }
 
-
-
-        private static HttpRequestMessage ResolveToken(string url, HttpMethod method, HttpContent? content, string? token)
+        private static HttpRequestMessage ResolveRequest(string url, HttpMethod method, HttpContent? content, string? token)
         {
             Console.WriteLine($"[Info] Sending {method} request to {url}");
 
@@ -155,6 +164,9 @@ namespace HttpClientLib
             return request;
         }
 
-
+        public IDisposable Subscribe(IObserver<HttpResponseEvent> observer)
+        {
+            return _observerManager.Subscribe(observer);
+        }
     }
 }

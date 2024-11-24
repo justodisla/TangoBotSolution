@@ -318,13 +318,11 @@ namespace TangoBot
         private static async Task TestStreaming()
         {
             // Replace these values with valid ones
-            string apiQuoteToken = await TangoBotServiceProvider.GetService<ITokenProvider>().GetValidStreamingToken();
-            string webSocketUrl = "wss://tasty-openapi-ws.dxfeed.com/realtime";
+            var streamService = TangoBotServiceProvider.GetSingletonService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>(typeof(StreamingService).Name);
 
-            var streamService = TangoBotServiceProvider.GetService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>();
+            var hc = streamService.GetHashCode();
 
-            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-30), DateTime.Now.Date, Timeframe.Daily, 1);
-
+            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-1), DateTime.Now.Date, Timeframe.Daily, 1);
 
             Thread.Sleep(5000);
 

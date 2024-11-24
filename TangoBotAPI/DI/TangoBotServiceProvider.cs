@@ -32,12 +32,12 @@ namespace TangoBotAPI.DI
         }
 
         /// <summary>
-        /// Adds a singleton service to the service collection.
+        /// Adds a service to the service collection.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
-        /// <param name="service">The service instance.</param>
+        /// <param name="implementationFactory">The factory to create the service instance.</param>
         /// <param name="name">An optional name for the service to support multiple implementations.</param>
-        public static void AddSingletonService<T>(T service, string name = "") where T : class
+        public static void AddService<T>(Func<IServiceProvider, T> implementationFactory, string name = "") where T : class
         {
             if (!initialize)
             {
@@ -49,17 +49,17 @@ namespace TangoBotAPI.DI
                 namedServices[name] = typeof(T);
             }
 
-            (services ?? throw new Exception("Services is null")).AddSingleton(service);
+            (services ?? throw new Exception("Services is null")).AddSingleton(implementationFactory);
             _wrappedServiceProvider = services?.BuildServiceProvider();
         }
 
         /// <summary>
-        /// Gets a service from the service provider.
+        /// Gets a singleton service from the service provider.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
         /// <param name="name">An optional name for the service to support multiple implementations.</param>
         /// <returns>The service instance, or null if not found.</returns>
-        public static T? GetService<T>(string name = "")
+        public static T? GetSingletonService<T>(string name = "")
         {
             if (!initialize)
             {
@@ -80,12 +80,12 @@ namespace TangoBotAPI.DI
         }
 
         /// <summary>
-        /// Gets a required service from the service provider.
+        /// Gets a transient service from the service provider.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
         /// <param name="name">An optional name for the service to support multiple implementations.</param>
-        /// <returns>The service instance.</returns>
-        public static T? GetRequiredService<T>(string name = "")
+        /// <returns>The service instance, or null if not found.</returns>
+        public static T? GetTransientService<T>(string name = "")
         {
             if (!initialize)
             {
@@ -102,9 +102,18 @@ namespace TangoBotAPI.DI
                 return (T?)_wrappedServiceProvider.GetRequiredService(serviceType);
             }
 
-#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             return _wrappedServiceProvider.GetRequiredService<T>();
-#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+        }
+
+        /// <summary>
+        /// Gets a service from the service provider.
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        /// <param name="name">An optional name for the service to support multiple implementations.</param>
+        /// <returns>The service instance, or null if not found.</returns>
+        public static T? GetService<T>(string name = "")
+        {
+            return GetSingletonService<T>(name);
         }
     }
 }

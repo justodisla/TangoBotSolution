@@ -28,7 +28,7 @@ namespace TangoBotTests
 
             _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
             _httpClient = new HttpClient(_httpMessageHandlerMock.Object);
-            _orderComponent = new OrderComponent();
+            _orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
             _accountNumber = TangoBotServiceProvider.GetService<IConfigurationProvider>()
                 .GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
             _createdOrderIds = new List<int>();

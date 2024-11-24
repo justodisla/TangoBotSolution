@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,11 +13,22 @@ namespace DatabaseLib
         private readonly DatabaseManager _databaseManager;
         private readonly string _dataDirectory;
         private readonly string _databaseFilePath;
+        private string _tableName = "";
 
-        public SQLitePersistence(string dbPath = "")
+        public string TableName
+        {
+            get => _tableName;
+            set
+            {
+                _tableName = value;
+                EnsureTableExists();
+            }
+        }
+
+        public SQLitePersistence()
         {
             _dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-            _databaseFilePath = string.IsNullOrEmpty(dbPath) ? Path.Combine(_dataDirectory, "database.db") : dbPath;
+            _databaseFilePath = Path.Combine(_dataDirectory, "database.db");
 
             // Ensure the directory exists
             if (!Directory.Exists(_dataDirectory))
@@ -26,10 +38,16 @@ namespace DatabaseLib
 
             _databaseManager = new DatabaseManager(_databaseFilePath);
             _databaseManager.InitializeDatabase();
+            EnsureTableExists();
         }
 
         public async Task<IEntity> CreateAsync(IEntity entity)
         {
+            if(string.IsNullOrEmpty(TableName))
+            {
+                throw new Exception("Table name is not set");
+            }
+
             entity.BeforeSave();
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
@@ -43,8 +61,8 @@ namespace DatabaseLib
             }
 
             var command = connection.CreateCommand();
-            command.CommandText = @"
-                    INSERT INTO Entities (Id, Data)
+            command.CommandText = $@"
+                    INSERT INTO {TableName} (Id, Data)
                     VALUES (@id, @data);
                 ";
             command.Parameters.AddWithValue("@id", entity.Id.ToString());
@@ -58,13 +76,18 @@ namespace DatabaseLib
 
         public async Task<IEntity> ReadAsync(Guid id)
         {
+            if (string.IsNullOrEmpty(TableName))
+            {
+                throw new Exception("Table name is not set");
+            }
+
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();
-            command.CommandText = @"
+            command.CommandText = $@"
                     SELECT Data
-                    FROM Entities
+                    FROM {TableName}
                     WHERE Id = @id;
                 ";
             command.Parameters.AddWithValue("@id", id.ToString());
@@ -75,13 +98,18 @@ namespace DatabaseLib
 
         public async Task<IEnumerable<IEntity>> ReadAllAsync()
         {
+            if (string.IsNullOrEmpty(TableName))
+            {
+                throw new Exception("Table name is not set");
+            }
+
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();
-            command.CommandText = @"
+            command.CommandText = $@"
                     SELECT Data
-                    FROM Entities;
+                    FROM {TableName};
                 ";
 
             var entities = new List<IEntity>();
@@ -96,14 +124,19 @@ namespace DatabaseLib
 
         public async Task<IEntity> UpdateAsync(IEntity entity)
         {
+            if (string.IsNullOrEmpty(TableName))
+            {
+                throw new Exception("Table name is not set");
+            }
+
             entity.BeforeSave();
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();
-            command.CommandText = @"
-                    UPDATE Entities
+            command.CommandText = $@"
+                    UPDATE {TableName}
                     SET Data = @data
                     WHERE Id = @id;
                 ";
@@ -118,18 +151,44 @@ namespace DatabaseLib
 
         public async Task<bool> DeleteAsync(Guid id)
         {
+            if (string.IsNullOrEmpty(TableName))
+            {
+                throw new Exception("Table name is not set");
+            }
+
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();
-            command.CommandText = @"
-                    DELETE FROM Entities
+            command.CommandText = $@"
+                    DELETE FROM {TableName}
                     WHERE Id = @id;
                 ";
             command.Parameters.AddWithValue("@id", id.ToString());
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             return rowsAffected > 0;
+        }
+
+        private void EnsureTableExists()
+        {
+            if (string.IsNullOrWhiteSpace(TableName))
+            {
+                return;
+            }
+
+            using var connection = new SqliteConnection(_databaseManager.ConnectionString);
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = $@"
+                CREATE TABLE IF NOT EXISTS {TableName} (
+                    Id TEXT PRIMARY KEY,
+                    Data TEXT NOT NULL
+                );
+            ";
+
+            command.ExecuteNonQuery();
         }
 
         private string SerializeEntity(IEntity entity)

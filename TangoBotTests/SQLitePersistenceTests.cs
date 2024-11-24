@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TangoBotAPI.Persistence;
 using DatabaseLib;
 using Xunit;
+using TangoBotAPI.DI;
 
 namespace DatabaseLib.Tests
 {
@@ -19,6 +20,9 @@ namespace DatabaseLib.Tests
             // Specify the directory and database file name for testing
             _dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestData");
             _databaseFilePath = Path.Combine(_dataDirectory, "test_database.db");
+
+            TangoBotServiceProvider.AddService<IPersistence>(provider => new SQLitePersistence(), typeof(SQLitePersistence).Name);
+            _persistence = TangoBotServiceProvider.GetSingletonService<IPersistence>(typeof(SQLitePersistence).Name) as SQLitePersistence ?? throw new System.Exception("Service not found");
 
             try
             {
@@ -37,7 +41,9 @@ namespace DatabaseLib.Tests
             }
 
             // Create an instance of SQLitePersistence with the test database file path
-            _persistence = new SQLitePersistence(_databaseFilePath);
+            //_persistence = new SQLitePersistence();
+        
+            _persistence.TableName = typeof(User).Name;
         }
 
         [Fact]
@@ -47,7 +53,7 @@ namespace DatabaseLib.Tests
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
 
             // Act
-            var createdEntity = await _persistence.CreateAsync(user);
+            var createdEntity = await _persistence.CreateAsync(user); 
 
             // Assert
             Assert.NotNull(createdEntity);
@@ -145,7 +151,7 @@ namespace DatabaseLib.Tests
             // Cleanup the test database file after all tests
             if (File.Exists(_databaseFilePath))
             {
-                //File.Delete(_databaseFilePath);
+                File.Delete(_databaseFilePath);
             }
         }
     }

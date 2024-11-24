@@ -14,9 +14,9 @@ namespace TangoBotAPI.Tests
 
         public InMemoryPersistenceTests()
         {
-            TangoBotServiceProvider.AddSingletonService<IPersistence>(new InMemoryPersistence(), "imp");
+            TangoBotServiceProvider.AddService<IPersistence>(provider => new InMemoryPersistence(), typeof(InMemoryPersistence).Name);
 
-            _persistence = TangoBotServiceProvider.GetService<IPersistence>("imp") as InMemoryPersistence ?? throw new System.Exception("Service not found");
+            _persistence = TangoBotServiceProvider.GetTransientService<IPersistence>(typeof(InMemoryPersistence).Name) as InMemoryPersistence ?? throw new System.Exception("Service not found");
             //_persistence = new InMemoryPersistence();
         }
 

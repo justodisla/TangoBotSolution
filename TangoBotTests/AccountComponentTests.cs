@@ -1,5 +1,7 @@
 using HttpClientLib;
 using HttpClientLib.AccountApi;
+using HttpClientLib.CustomerApi;
+using HttpClientLib.InstrumentApi;
 using HttpClientLib.OrderApi;
 using HttpClientLib.OrderApi.Models;
 using Moq;

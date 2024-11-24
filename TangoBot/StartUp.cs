@@ -1,13 +1,16 @@
 ﻿using HttpClientLib;
 using HttpClientLib.AccountApi;
+using HttpClientLib.AccountApi.Observer;
 using HttpClientLib.CustomerApi;
 using HttpClientLib.InstrumentApi;
 using HttpClientLib.OrderApi;
+using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
 using TangoBotAPI.Configuration;
 using TangoBotAPI.Streaming;
 using TangoBotAPI.TokenManagement;
 using TangoBotAPI.Toolkit;
+using TangoBotStreaming.Observables;
 using TangoBotStreaming.Services;
 using TangoBotServiceProvider = TangoBotAPI.DI.TangoBotServiceProvider;
 
@@ -28,7 +31,7 @@ namespace TangoBot
                 return;
             }
 
-            TangoBotServiceProvider.AddSingletonService<IConfigurationProvider>(new ConfigurationProvider());
+            TangoBotServiceProvider.AddService<IConfigurationProvider>(provider => new ConfigurationProvider());
 
             SetupConfigurations();
 
@@ -42,16 +45,27 @@ namespace TangoBot
         /// </summary>
         private static void SetupServices()
         {
-            TangoBotServiceProvider.AddSingletonService<HttpClient>(new HttpClient());
-            TangoBotServiceProvider.AddSingletonService<ITokenProvider>(new TokenProvider());
-            TangoBotServiceProvider.AddSingletonService<AccountComponent>(new AccountComponent());
-            TangoBotServiceProvider.AddSingletonService<CustomerComponent>(new CustomerComponent());
-            TangoBotServiceProvider.AddSingletonService<OrderComponent>(new OrderComponent());
-            TangoBotServiceProvider.AddSingletonService<InstrumentComponent>(new InstrumentComponent());
-            TangoBotServiceProvider.AddSingletonService<MarketStatusChecker>(new MarketStatusChecker());
+            TangoBotServiceProvider.AddService<HttpClient>(provider => new HttpClient());
+            TangoBotServiceProvider.AddService<ITokenProvider>(provider => new TokenProvider());
+            TangoBotServiceProvider.AddService<AccountComponent>(provider => new AccountComponent());
+            TangoBotServiceProvider.AddService<CustomerComponent>(provider => new CustomerComponent());
+            TangoBotServiceProvider.AddService<OrderComponent>(provider => new OrderComponent());
+            TangoBotServiceProvider.AddService<InstrumentComponent>(provider => new InstrumentComponent());
+            TangoBotServiceProvider.AddService<MarketStatusChecker>(provider => new MarketStatusChecker());
             //TangoBotServiceProvider.AddSingletonService<IStreamService<?>>(new StreamingService());
 
-            TangoBotServiceProvider.AddSingletonService<IStreamService<QuoteDataHistory>>(new StreamingService());
+            //Configure streaming service
+            TangoBotServiceProvider.AddService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>(provider => new StreamingService(), typeof(StreamingService).Name);
+            var _streamingService = TangoBotServiceProvider.GetSingletonService<IStreamService<QuoteDataHistory>>(typeof(StreamingService).Name);
+            ((IObservable<CandleEvent>)_streamingService).Subscribe(new HistoryDataStreamObserver());
+            var hc = _streamingService.GetHashCode();
+
+            //Subscribe to the HttpResponseEvent
+            ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<AccountComponent>()).Subscribe(new OrderObserver());
+            ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<AccountComponent>()).Subscribe(new AccountObserver());
+            ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<CustomerComponent>()).Subscribe(new OrderObserver());
+            ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<OrderComponent>()).Subscribe(new OrderObserver());
+            ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<InstrumentComponent>()).Subscribe(new OrderObserver());
         }
 
         /// <summary>
