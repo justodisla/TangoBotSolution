@@ -55,9 +55,9 @@ namespace TangoBot
             //TangoBotServiceProvider.AddSingletonService<IStreamService<?>>(new StreamingService());
 
             //Configure streaming service
-            TangoBotServiceProvider.AddService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>(provider => new StreamingService(), typeof(StreamingService).Name);
-            var _streamingService = TangoBotServiceProvider.GetSingletonService<IStreamService<QuoteDataHistory>>(typeof(StreamingService).Name);
-            ((IObservable<CandleEvent>)_streamingService).Subscribe(new HistoryDataStreamObserver());
+            TangoBotServiceProvider.AddService<TangoBotAPI.Streaming.IStreamingService>(provider => new StreamingService(), typeof(StreamingService).Name);
+            var _streamingService = TangoBotServiceProvider.GetSingletonService<IStreamingService>(typeof(StreamingService).Name);
+            ((IObservable<HistoricDataReceivedEvent>)_streamingService).Subscribe(new HistoryDataStreamObserver());
             var hc = _streamingService.GetHashCode();
 
             //Subscribe to the HttpResponseEvent

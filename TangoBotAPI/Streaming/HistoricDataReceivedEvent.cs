@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace TangoBotAPI.Streaming
 {
-    public class CandleEvent
+    public class HistoricDataReceivedEvent
     {
-        public CandleEvent(string v)
+        public HistoricDataReceivedEvent(string v)
         {
             V = v;
         }

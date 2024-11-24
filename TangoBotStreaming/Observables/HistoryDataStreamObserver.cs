@@ -8,7 +8,7 @@ using TangoBotAPI.Streaming;
 
 namespace TangoBotStreaming.Observables
 {
-    public class HistoryDataStreamObserver : IObserver<CandleEvent>
+    public class HistoryDataStreamObserver : IObserver<HistoricDataReceivedEvent>
     {
 
         public void OnCompleted()
@@ -21,10 +21,10 @@ namespace TangoBotStreaming.Observables
             throw new NotImplementedException();
         }
 
-        public void OnNext(CandleEvent value)
+        public void OnNext(HistoricDataReceivedEvent value)
         {
             Console.WriteLine("\n\n------------\n\n");
-            Console.WriteLine("HistoryDataStreamObserver: " + value);
+            Console.WriteLine("HistoryDataStreamObserver: " + value.V);
             Console.WriteLine("\n\n------------\n\n");
         }
     }

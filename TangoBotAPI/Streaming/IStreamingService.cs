@@ -7,7 +7,7 @@ namespace TangoBotAPI.Streaming
     /// Interface for streaming services that handle market data.
     /// </summary>
     /// <typeparam name="T">The type of data to be streamed.</typeparam>
-    public interface IStreamService<T>
+    public interface IStreamingService
     {
         /// <summary>
         /// Streams historic data for a given symbol into the specified data object.
@@ -18,7 +18,7 @@ namespace TangoBotAPI.Streaming
         /// <param name="timeframe">The timeframe for the data stream. Default is daily.</param>
         /// <param name="interval">The interval for the data stream. Default is 1.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the streamed data.</returns>
-        Task<T> StreamHistoricDataAsync(string symbol, DateTime fromTime, DateTime toTime, Timeframe timeframe = Timeframe.Daily, int interval = 1);
+        void StreamHistoricDataAsync(string symbol, DateTime fromTime, DateTime toTime, Timeframe timeframe = Timeframe.Daily, int interval = 1);
 
         /// <summary>
         /// Patches the historic data into the specified data object.
@@ -26,14 +26,14 @@ namespace TangoBotAPI.Streaming
         /// For instance, if the data object has data up to 5 days ago, this method can be used to patch the data for the last 5 days up to the present.
         /// </summary>
         /// <param name="quoteDataHistory">The data object to patch.</param>
-        void PatchHistoricData(T quoteDataHistory);
+        void PatchHistoricData<T>(T quoteDataHistory);
 
         /// <summary>
         /// Streams live market data into the specified data object.
         /// The frequency of the streaming is determined by the data object.
         /// </summary>
         /// <param name="quoteDataHistory">The data object to stream live market data into.</param>
-        void StreamLiveMarketData(T quoteDataHistory);
+        void StreamLiveMarketData<T>(T quoteDataHistory);
 
         /// <summary>
         /// Closes the WebSocket connection.

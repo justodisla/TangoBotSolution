@@ -195,7 +195,7 @@ namespace HttpClientLib.TokenManagement
         /// <returns>True if the streaming token is valid; otherwise, false.</returns>
         private static async Task<bool> IsStreamingTokenValid(string streamingToken)
         {
-            var streamingService = TangoBotServiceProvider.GetService<IStreamService<QuoteDataHistory>>();
+            var streamingService = TangoBotServiceProvider.GetService<IStreamingService>();
 
             return streamingService == null
                 ? throw new Exception("Streaming service is not available.")

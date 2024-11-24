@@ -318,11 +318,11 @@ namespace TangoBot
         private static async Task TestStreaming()
         {
             // Replace these values with valid ones
-            var streamService = TangoBotServiceProvider.GetSingletonService<TangoBotAPI.Streaming.IStreamService<QuoteDataHistory>>(typeof(StreamingService).Name);
+            var streamService = TangoBotServiceProvider.GetSingletonService<TangoBotAPI.Streaming.IStreamingService>(typeof(StreamingService).Name);
 
             var hc = streamService.GetHashCode();
 
-            var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-1), DateTime.Now.Date, Timeframe.Daily, 1);
+            streamService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
 
             Thread.Sleep(5000);
 

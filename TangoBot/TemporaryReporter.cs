@@ -7,7 +7,7 @@ using TangoBotAPI.Streaming;
 
 namespace TangoBot
 {
-    public class TemporaryReporter : IObserver<CandleEvent>
+    public class TemporaryReporter : IObserver<HistoricDataReceivedEvent>
     {
         public void OnCompleted()
         {
@@ -19,7 +19,7 @@ namespace TangoBot
             Console.WriteLine("There was an error");
         }
 
-        public void OnNext(CandleEvent value)
+        public void OnNext(HistoricDataReceivedEvent value)
         {
             Console.WriteLine("\n\n_____________________________\nTANGOBOT TANGOBOT\n___________________________________________\n\n");
         }
