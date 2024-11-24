@@ -23,7 +23,7 @@ namespace TangoBot
         public static void InitializeDI()
         {
 
-            if(IsInitialized)
+            if (IsInitialized)
             {
                 return;
             }
@@ -59,12 +59,7 @@ namespace TangoBot
         /// </summary>
         private static void SetupConfigurations()
         {
-            IConfigurationProvider? configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>();
-
-            if (configurationProvider == null)
-            {
-                throw new Exception("Unable to access Configuration Provider");
-            }
+            IConfigurationProvider? configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>() ?? throw new Exception("Unable to access Configuration Provider");
 
             #region Environment configuration
 
@@ -78,6 +73,7 @@ namespace TangoBot
             configurationProvider.SetConfigurationValue(Constants.PRODUCTION_CUSTOMER_LAST_NAME, "Disla");
             configurationProvider.SetConfigurationValue(Constants.PRODUCTION_CUSTOMER_EMAIL, "jdisla@gmail.com");
             configurationProvider.SetConfigurationValue(Constants.PRODUCTION_CUSTOMER_MOBILE, "1-809-757-0665");
+            configurationProvider.SetConfigurationValue(Constants.PRODUCTION_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL, "wss://streamer.tastyworks.com");
             #endregion
 
             #region Sandbox Configuration
@@ -90,6 +86,7 @@ namespace TangoBot
             configurationProvider.SetConfigurationValue(Constants.SANDBOX_CUSTOMER_LAST_NAME, "Box");
             configurationProvider.SetConfigurationValue(Constants.SANDBOX_CUSTOMER_EMAIL, "jdisla@gmail.com");
             configurationProvider.SetConfigurationValue(Constants.SANDBOX_CUSTOMER_MOBILE, "1-809-757-0665");
+            configurationProvider.SetConfigurationValue(Constants.SANDBOX_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL, "wss://streamer.cert.tastyworks.com");
             #endregion
 
             #region Switching environments
@@ -107,6 +104,7 @@ namespace TangoBot
                     configurationProvider.SetConfigurationValue(Constants.ACTIVE_CUSTOMER_EMAIL, configurationProvider.GetConfigurationValue(Constants.SANDBOX_CUSTOMER_EMAIL));
                     configurationProvider.SetConfigurationValue(Constants.ACTIVE_CUSTOMER_MOBILE, configurationProvider.GetConfigurationValue(Constants.SANDBOX_CUSTOMER_MOBILE));
                     configurationProvider.SetConfigurationValue(Constants.ACTIVE_API_URL, configurationProvider.GetConfigurationValue(Constants.SANDBOX_URL));
+                    configurationProvider.SetConfigurationValue(Constants.ACTIVE_STREAMING_ACCOUNT_WEBSOCKET_URL, configurationProvider.GetConfigurationValue(Constants.SANDBOX_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL));
                     break;
 
                 case Constants.PRODUCTION_RUN_MODE:
@@ -119,6 +117,7 @@ namespace TangoBot
                     configurationProvider.SetConfigurationValue(Constants.ACTIVE_CUSTOMER_EMAIL, configurationProvider.GetConfigurationValue(Constants.PRODUCTION_CUSTOMER_EMAIL));
                     configurationProvider.SetConfigurationValue(Constants.ACTIVE_CUSTOMER_MOBILE, configurationProvider.GetConfigurationValue(Constants.PRODUCTION_CUSTOMER_MOBILE));
                     configurationProvider.SetConfigurationValue(Constants.ACTIVE_API_URL, configurationProvider.GetConfigurationValue(Constants.PRODUCTION_URL));
+                    configurationProvider.SetConfigurationValue(Constants.ACTIVE_STREAMING_ACCOUNT_WEBSOCKET_URL, configurationProvider.GetConfigurationValue(Constants.PRODUCTION_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL));
                     break;
             }
             #endregion
@@ -132,9 +131,10 @@ namespace TangoBot
             configurationProvider.SetConfigurationValue(Constants.TOKEN_EXPIRATION_HOURS, "24");
             configurationProvider.SetConfigurationValue(Constants.JSON_CONTENT_TYPE, "application/json");
 
-
             configurationProvider.SetConfigurationValue(Constants.ALPHA_VANTAGE_API_KEY, "A5069SA46CZPGTHQ");
             #endregion
+
+
         }
     }
 }

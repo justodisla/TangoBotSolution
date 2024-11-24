@@ -86,6 +86,9 @@ namespace HttpClientLib
                     var response = await _httpClient.SendAsync(request);
                     Console.WriteLine("[Info] Request sent. Awaiting response...");
 
+                    //string responseContent2 = await response.Content.ReadAsStringAsync();
+
+
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         Console.WriteLine($"[Warning] Unsuccessful response. Status code: {response.StatusCode}");

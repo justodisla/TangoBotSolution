@@ -3,8 +3,8 @@
     public static class Constants
     {
         // API Base URLs
-        public const string PRODUCTION_URL = "production_url";
-        public const string SANDBOX_URL = "sandbox_url";
+        public const string PRODUCTION_URL = "PRODUCTION_URL";
+        public const string SANDBOX_URL = "SANDBOX_URL";
 
         // Production Related Constants
         public const string PRODUCTION_ACCOUNT_NUMBER = "PRODUCTION_ACCOUNT_NUMBER";
@@ -58,5 +58,10 @@
         public const string STREAMING_AUTH_TOKEN = "STREAMING_AUTH_TOKEN";
 
         public const string ALPHA_VANTAGE_API_KEY = "ALPHA_VANTAGE_API_KEY";
+
+
+        public const string SANDBOX_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL = "SANDBOX_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL";
+        public const string PRODUCTION_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL = "PRODUCTION_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL";
+        public const string ACTIVE_STREAMING_ACCOUNT_WEBSOCKET_URL = "ACTIVE_STREAMING_ACCOUNT_WEBSOCKET_URL";
     }
 }

@@ -5,3 +5,16 @@ https://developer.TastyTrade.com/
 
 Alpha Vantage API Key:
 A5069SA46CZPGTHQ
+
+production streaming url.
+wss://streamer.tastyworks.com
+
+Hosts
+Sandbox : wss://streamer.cert.tastyworks.com
+
+Production: wss://streamer.tastyworks.com
+
+SANDBOX_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL
+PRODUCTION_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL
+
+ACTIVE_STREAMING_ACCOUNT_DATA_WEBSOCKET_URL

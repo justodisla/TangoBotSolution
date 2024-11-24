@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HttpClientLib.TokenManagement
 {
@@ -47,11 +48,13 @@ namespace HttpClientLib.TokenManagement
         /// </summary>
         private class SessionResponse
         {
+            [JsonPropertyName("data")]
             public SessionData? Data { get; set; }
         }
 
         private class SessionData
         {
+            [JsonPropertyName("session_token")]
             public string? Session_token { get; set; }
         }
     }

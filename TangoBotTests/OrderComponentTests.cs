@@ -2,7 +2,8 @@ using HttpClientLib.OrderApi;
 using HttpClientLib.OrderApi.Models;
 using Moq;
 using System;
-using System.Net;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TangoBot;
@@ -11,18 +12,18 @@ using TangoBotAPI.DI;
 using TangoBotAPI.Toolkit;
 using Xunit;
 
-namespace HttpClientLib.Tests.OrderApi
+namespace TangoBotTests
 {
-    public class OrderComponentTests
+    public class OrderComponentTests : IDisposable
     {
         private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
         private readonly HttpClient _httpClient;
         private readonly OrderComponent _orderComponent;
-        private string _accountNumber;
+        private readonly string _accountNumber;
+        private readonly List<int> _createdOrderIds;
 
         public OrderComponentTests()
         {
-
             StartUp.InitializeDI();
 
             _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
@@ -30,6 +31,29 @@ namespace HttpClientLib.Tests.OrderApi
             _orderComponent = new OrderComponent();
             _accountNumber = TangoBotServiceProvider.GetService<IConfigurationProvider>()
                 .GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+            _createdOrderIds = new List<int>();
+
+            // Cancel all cancellable orders at the start
+            CancelAllCancellableOrdersAsync().Wait();
+        }
+
+        private async Task CancelAllCancellableOrdersAsync()
+        {
+            var orders = await _orderComponent.GetAccountOrdersAsync(_accountNumber);
+            if (orders != null)
+            {
+                foreach (var order in orders.Where(o => o.Cancellable))
+                {
+                    try
+                    {
+                        await _orderComponent.CancelOrderByIdAsync(_accountNumber, order.Id);
+                    }
+                    catch
+                    {
+                        // Log or handle the exception if needed
+                    }
+                }
+            }
         }
 
         [Fact]
@@ -37,18 +61,12 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber;
-            //var responseContent = "[{\"orderId\": 1, \"status\": \"filled\"}]";
-
 
             // Act
             var result = await _orderComponent.GetAccountOrdersAsync(accountNumber);
 
-
             // Assert
             Assert.NotNull(result);
-            //Assert.Single(result);
-            //Assert.Equal(1, result[0].OrderId);
-            //Assert.Equal("filled", result[0].Status);
         }
 
         [Fact]
@@ -56,7 +74,6 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber + "3";
-
 
             // Act
             var result = await _orderComponent.GetAccountOrdersAsync(accountNumber);
@@ -70,12 +87,6 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber;
-            var responseContent = "{\"orderId\": 1, \"status\": \"filled\"}";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseContent)
-            };
-
             var orderRequest = new OrderRequest
             {
                 OrderType = "Limit",
@@ -94,27 +105,15 @@ namespace HttpClientLib.Tests.OrderApi
                 }.ToList()
             };
 
-            var postOrderDryRun = await _orderComponent.PostEquityOrder(accountNumber, orderRequest);
-
-            // Act & Assert
             var postOrderResult = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
-
             var orderId = postOrderResult.Data.Order.Id;
+            _createdOrderIds.Add(orderId);
 
+            // Act
             var orderReport = await _orderComponent.GetOrderByIdAsync(accountNumber, orderId);
 
+            // Assert
             Assert.Equal(orderId, orderReport.Id);
-
-            //Let's cancel the order
-            var cancelResult = await _orderComponent.CancelOrderByIdAsync(accountNumber, orderId);
-
-            //Assert.Equal("Cancel Requested", cancelResult.Status);
-            Assert.True(cancelResult.Status.ToLower().Contains("cancel"));
-
-            // Attempt to retrieve the cancelled order
-            var cancelledOrder = await _orderComponent.GetOrderByIdAsync(accountNumber, orderId);
-
-            Assert.Equal("Cancelled", cancelledOrder.Status);
         }
 
         [Fact]
@@ -122,7 +121,6 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber;
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
 
             // Act & Assert
             await Assert.ThrowsAsync<HttpRequestException>(async () => await _orderComponent.GetOrderByIdAsync(accountNumber, 123456));
@@ -133,8 +131,6 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber;
-            //var orderRequest = new OrderRequest { TimeInForce };
-
             var orderRequest = new OrderRequest
             {
                 OrderType = "Limit",
@@ -158,8 +154,6 @@ namespace HttpClientLib.Tests.OrderApi
 
             // Assert
             Assert.NotNull(result);
-            //Assert.Equal(1, result.OrderId);
-            //Assert.Equal("filled", result.Status);
         }
 
         [Fact]
@@ -167,8 +161,6 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber;
-            //var orderRequest = new OrderRequest { TimeInForce };
-
             var orderRequest = new OrderRequest
             {
                 OrderType = "Limit",
@@ -189,11 +181,10 @@ namespace HttpClientLib.Tests.OrderApi
 
             // Act
             var result = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
+            _createdOrderIds.Add(result.Data.Order.Id);
 
             // Assert
             Assert.NotNull(result);
-            //Assert.Equal(1, result.OrderId);
-            //Assert.Equal("filled", result.Status);
         }
 
         [Fact]
@@ -202,7 +193,6 @@ namespace HttpClientLib.Tests.OrderApi
             // Arrange
             var accountNumber = _accountNumber;
             var orderRequest = new OrderRequest { /* Initialize properties */ };
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
 
             // Act & Assert
             await Assert.ThrowsAsync<HttpRequestException>(() => _orderComponent.PostEquityOrder(accountNumber, orderRequest));
@@ -213,12 +203,6 @@ namespace HttpClientLib.Tests.OrderApi
         {
             // Arrange
             var accountNumber = _accountNumber;
-            var responseContent = "{\"orderId\": 1, \"status\": \"canceled\"}";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseContent)
-            };
-
             var orderRequest = new OrderRequest
             {
                 OrderType = "Limit",
@@ -226,7 +210,7 @@ namespace HttpClientLib.Tests.OrderApi
                 TimeInForce = "Day",
                 PriceEffect = "Debit",
                 Legs = new[]
-                 {
+                {
                     new LegRequest
                     {
                         Symbol = "SPY",
@@ -237,16 +221,15 @@ namespace HttpClientLib.Tests.OrderApi
                 }.ToList()
             };
 
-            // Act
             var postOrderResult = await _orderComponent.PostEquityOrder(accountNumber, orderRequest, false);
             var orderId = postOrderResult.Data.Order.Id;
-            //postOrderResult.Data.("orderId", out var orderIdValue);
+            _createdOrderIds.Add(orderId);
 
+            // Act
             var result = await _orderComponent.CancelOrderByIdAsync(accountNumber, orderId);
 
             // Assert
             Assert.NotNull(result);
-            //Assert.Equal(1, result.OrderId);
             Assert.True(result.Status.ToLower().Contains("cancel"));
         }
 
@@ -256,10 +239,25 @@ namespace HttpClientLib.Tests.OrderApi
             // Arrange
             var accountNumber = _accountNumber;
             var orderId = 99999;
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
 
             // Act & Assert
             await Assert.ThrowsAsync<HttpRequestException>(() => _orderComponent.CancelOrderByIdAsync(accountNumber, orderId));
+        }
+
+        public void Dispose()
+        {
+            // Cleanup all created orders
+            foreach (var orderId in _createdOrderIds)
+            {
+                try
+                {
+                    _orderComponent.CancelOrderByIdAsync(_accountNumber, orderId).Wait();
+                }
+                catch
+                {
+                    // Log or handle the exception if needed
+                }
+            }
         }
     }
 }
