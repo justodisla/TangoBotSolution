@@ -45,6 +45,10 @@ namespace TangoBotStreaming.Services
             Timeframe timeframe = Timeframe.Daily,
             int interval = 1)
         {
+
+            //Define that the toDate is the previous day
+            toTime = toTime.AddDays(-1);
+
             var _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>()
                 ?? throw new Exception("TokenProvider is null");
 
@@ -126,7 +130,7 @@ namespace TangoBotStreaming.Services
 
             while (client.State == WebSocketState.Open)
             {
-
+                //Gather the message chunks
                 WebSocketReceiveResult result;
                 do
                 {
@@ -147,16 +151,11 @@ namespace TangoBotStreaming.Services
                 var message = messageBuilder.ToString();
                 messageBuilder.Clear();
 
-                var wsresponse = new WsResponse(message);
+                //Cast the message to a WsResponse object
+                var wsresponse = new WsResponse(message) ?? throw new Exception("Unable to create WsResponse instance");
 
-                //Skip if data is null
-                if (wsresponse.Data != null)
-                {
-                    continue;
-                }
-
-                //Check if the message is a feed data message
-                if (wsresponse.Type != "FEED_DATA")
+                //Skip if the message is not a feed data message
+                if (wsresponse.Data != null || wsresponse.Type != "FEED_DATA")
                 {
                     continue;
                 }
@@ -165,46 +164,29 @@ namespace TangoBotStreaming.Services
                 foreach (WsResponse.DataItem item in wsresponse.Data)
                 {
                     //Check if Candle event is after the toDate
-                    var timeInUnixMs = wsresponse.Data[0].Time;
-                    var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMs).UtcDateTime;
+                    var timeInUnixMss = wsresponse.Data[0].Time;
+                    var timeOfEvent = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMss).UtcDateTime;
+
+                    //if timeOfEvent ouside of the range defined by fromDate and toDate, skip
+                    if (timeOfEvent.Date < fromTime || timeOfEvent.Date > toTime)
+                    {
+                        continue;
+                    }
 
                     var eventTimex = DateTimeOffset.FromUnixTimeMilliseconds(item.Time).UtcDateTime;
                     Console.WriteLine($"[Received Date] {eventTimex.ToString()}");
                 }
 
+                continue;
 
-
-                if (wsresponse.Data[0].EventType != "Candle")
-                {
-                    //continue;
-                }
-
-                
-
-                //Check that in data, time is not the current day
-                //Check that in data, eventType is Candle
-                // Check that in data, time is not the current day
                 var currentDate = DateTime.UtcNow.Date;
                 var timeInUnixMs = wsresponse.Data[0].Time;
-
 
                 var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMs).UtcDateTime;
                 if (eventTime.Date == currentDate)
                 {
                     continue;
                 }
-                else
-                {
-                    //Console.WriteLine($"[Received] {eventTime.ToString()}");
-                }
-
-                
-
-                
-
-
-                //if(message.Length < 1000)
-                //Console.WriteLine($"[Received] {message[..50]}");
 
                 if (count++ > 20)
                 {
