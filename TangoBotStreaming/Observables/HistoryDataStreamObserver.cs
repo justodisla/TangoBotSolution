@@ -10,7 +10,13 @@ namespace TangoBotStreaming.Observables
     public class HistoryDataStreamObserver : IObserver<HistoricDataReceivedEvent>
     {
         private readonly HashSet<DateTime> _receivedDates = new();
+        private readonly QuoteDataHistory _quoteDataHistory;
         private bool _isHistoricalDataComplete = false;
+
+        public HistoryDataStreamObserver()
+        {
+            _quoteDataHistory = new QuoteDataHistory();
+        }
 
         public void OnCompleted()
         {
@@ -45,15 +51,39 @@ namespace TangoBotStreaming.Observables
                     {
                         if (data.GetProperty("eventType").GetString() == "Candle")
                         {
+                            //Turn data into a QuoteDataHistory.DataPoint object
+                            try
+                            {
+                                var quoteDataHistoryDataPoint = new QuoteDataHistory.DataPoint(
+                                                        data.GetProperty("open").GetDecimal(),
+                                                        data.GetProperty("high").GetDecimal(),
+                                                        data.GetProperty("low").GetDecimal(),
+                                                        data.GetProperty("close").GetDecimal(),
+                                                        DateTimeOffset.FromUnixTimeMilliseconds(data.GetProperty("time").GetInt64()).UtcDateTime,
+                                                        data.GetProperty("volume").GetDouble(),
+                                                        data.GetProperty("vwap").GetDouble(),
+                                                        data.GetProperty("bidVolume").GetDouble(),
+                                                        data.GetProperty("askVolume").GetDouble(),
+                                                        data.GetProperty("impVolatility").GetDouble()
+                                                    );
+
+                                _quoteDataHistory.AppendData(quoteDataHistoryDataPoint);
+
+                                Console.WriteLine($"[Info] date: {quoteDataHistoryDataPoint.Time} counter:{counter} Received historical data for \n{data.ToString()}\n");
+
+                            }
+                            catch (Exception ex)
+                            {
+
+                                throw;
+                            }
+
+
+
                             var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(data.GetProperty("time").GetInt64()).UtcDateTime;
 
                             Console.WriteLine($"[Info] date: {eventTime} counter:{counter} Received historical data for \n{data.ToString()}\n");
                             counter++;
-
-                            if (counter > 10)
-                            {
-                                break;
-                            }
 
                             // Check if the event time is already in the received dates
                             if (_receivedDates.Contains(eventTime))
@@ -72,6 +102,7 @@ namespace TangoBotStreaming.Observables
                         }
                     }
                 }
+            
             }
         }
 

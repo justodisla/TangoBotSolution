@@ -16,6 +16,8 @@ namespace TangoBotAPI.Streaming
 
         public void AppendData(DataPoint dataPoint)
         {
+            Console.WriteLine($"QuoteDataHistory: Appending data point: {dataPoint.ToString()}\n\n");
+
             if (DataPoints.Any())
             {
                 dataPoint.ForwardIndex = DataPoints.Last().ForwardIndex + 1;
@@ -55,6 +57,11 @@ namespace TangoBotAPI.Streaming
             public double AskVolume { get; set; }
             public double ImpVolatility { get; set; }
             internal double ForwardIndex { get; set; }
+
+            public override string ToString()
+            {
+                return $"Open: {Open}, High: {High}, Low: {Low}, Close: {Close}, Time: {Time}, Volume: {Volume}, Vwap: {Vwap}, BidVolume: {BidVolume}, AskVolume: {AskVolume}, ImpVolatility: {ImpVolatility}";
+            }
         }
     }
 
