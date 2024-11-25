@@ -2,30 +2,79 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using TangoBotAPI.Streaming;
 
 namespace TangoBotStreaming.Observables
 {
     public class HistoryDataStreamObserver : IObserver<HistoricDataReceivedEvent>
     {
+        private readonly HashSet<DateTime> _receivedDates = new();
+        private bool _isHistoricalDataComplete = false;
 
         public void OnCompleted()
         {
-            throw new NotImplementedException();
+            // Handle the completion of the data stream
+            Console.WriteLine("HistoryDataStreamObserver: Data stream completed.");
         }
 
         public void OnError(Exception error)
         {
-            throw new NotImplementedException();
+            // Handle any errors that occur during the data stream
+            Console.WriteLine($"HistoryDataStreamObserver: An error occurred: {error.Message}");
         }
 
         public void OnNext(HistoricDataReceivedEvent value)
         {
-            Console.WriteLine("\n\n------------\n\n");
-            Console.WriteLine("HistoryDataStreamObserver: " + value.V);
-            Console.WriteLine("\n\n------------\n\n");
+            if (value != null && !string.IsNullOrEmpty(value.ReceivedData))
+            {
+                //Console.WriteLine("\n\n------------\n\n");
+                //Console.WriteLine("HistoryDataStreamObserver: " + value.ReceivedData);
+                //Console.WriteLine("\n\n------------\n\n");
+
+                // Process the received data
+                var jsonDocument = JsonDocument.Parse(value.ReceivedData);
+                var root = jsonDocument.RootElement;
+
+                int counter = 0;
+
+                if (root.GetProperty("type").GetString() == "FEED_DATA")
+                {
+                    var dataArray = root.GetProperty("data").EnumerateArray();
+                    foreach (var data in dataArray)
+                    {
+                        if (data.GetProperty("eventType").GetString() == "Candle")
+                        {
+                            var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(data.GetProperty("time").GetInt64()).UtcDateTime;
+
+                            Console.WriteLine($"[Info] date: {eventTime} counter:{counter} Received historical data for \n{data.ToString()}\n");
+                            counter++;
+
+                            if (counter > 10)
+                            {
+                                break;
+                            }
+
+                            // Check if the event time is already in the received dates
+                            if (_receivedDates.Contains(eventTime))
+                            {
+                                _isHistoricalDataComplete = true;
+                                Console.WriteLine("[Info] Historical data is complete. Closing connection.");
+                                // Close the WebSocket connection
+                                // Note: You need to have a reference to the WebSocket client to close it here
+                                // _websocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "Historical data received", CancellationToken.None);
+                                break;
+                            }
+                            else
+                            {
+                                _receivedDates.Add(eventTime);
+                            }
+                        }
+                    }
+                }
+            }
         }
+
+        public bool IsHistoricalDataComplete => _isHistoricalDataComplete;
     }
 }

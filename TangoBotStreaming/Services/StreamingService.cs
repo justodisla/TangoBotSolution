@@ -83,7 +83,7 @@ namespace TangoBotStreaming.Services
                 #region Prepare connection
 
                 Console.WriteLine("[Info] Connected. Sending SETUP...");
-                await StreamingUtils.SendMessageAsync(_websocketClient, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":30,\"acceptKeepaliveTimeout\":30}");
+                await StreamingUtils.SendMessageAsync(_websocketClient, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":120,\"acceptKeepaliveTimeout\":120}");
 
                 Console.WriteLine("[Info] Authorizing...");
                 await StreamingUtils.SendMessageAsync(_websocketClient, $"{{\"type\":\"AUTH\",\"channel\":0,\"token\":\"{_apiQuoteToken}\"}}");

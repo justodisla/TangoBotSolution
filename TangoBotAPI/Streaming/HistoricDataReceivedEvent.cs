@@ -8,11 +8,11 @@ namespace TangoBotAPI.Streaming
 {
     public class HistoricDataReceivedEvent
     {
-        public HistoricDataReceivedEvent(string v)
+        public HistoricDataReceivedEvent(string receivedData)
         {
-            V = v;
+            ReceivedData = receivedData;
         }
 
-        public string V { get; }
+        public string ReceivedData { get; }
     }
 }
