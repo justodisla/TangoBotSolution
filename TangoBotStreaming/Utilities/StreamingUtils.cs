@@ -19,7 +19,7 @@ namespace TangoBotStreaming.Utilities
         {
             var buffer = Encoding.UTF8.GetBytes(message);
             await client.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-            Console.WriteLine($"[Sent] {message}");
+            //Console.WriteLine($"[Sent] {message}");
         }
     }
 }

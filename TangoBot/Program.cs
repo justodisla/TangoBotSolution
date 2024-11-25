@@ -34,6 +34,12 @@ namespace TangoBot
 
             TestStreaming().Wait();
 
+            //add code to keep the console open waiting for input
+            //Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+
+
+
             return;
 
             // Create HttpClient instance
@@ -322,13 +328,15 @@ namespace TangoBot
 
             var hc = streamService.GetHashCode();
 
-            streamService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddDays(-1), DateTime.Now.Date, Timeframe.Daily, 1);
+            streamService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
 
             Thread.Sleep(5000);
 
             //var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
 
         }
+
+
 
         #region Tests
 

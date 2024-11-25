@@ -87,7 +87,7 @@ namespace TangoBotStreaming.Services
                 #region Prepare connection
 
                 //Console.WriteLine("[Info] Connected. Sending SETUP...");
-                await StreamingUtils.SendMessageAsync(_websocketClient, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":120,\"acceptKeepaliveTimeout\":120}");
+                await StreamingUtils.SendMessageAsync(_websocketClient, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":60,\"acceptKeepaliveTimeout\":60}");
 
                 //Console.WriteLine("[Info] Authorizing...");
                 await StreamingUtils.SendMessageAsync(_websocketClient, $"{{\"type\":\"AUTH\",\"channel\":0,\"token\":\"{_apiQuoteToken}\"}}");
@@ -112,6 +112,66 @@ namespace TangoBotStreaming.Services
 
         }
 
+        private async Task ReceiveMessagesAsync(ClientWebSocket client, DateTime fromTime, DateTime toTime)
+        {
+
+            Console.WriteLine("\n\n\n[Info] Receiving messages...");
+
+            var buffer = new byte[1024 * 4];
+            var messageBuilder = new StringBuilder();
+
+            while (client.State == WebSocketState.Open)
+            {
+                WebSocketReceiveResult result;
+                messageBuilder.Clear();
+                do
+                {
+                    //Receives a message part and adds it to messageBuilder
+
+                    result = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                        return;
+                    }
+
+                    var messagePart = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    messageBuilder.Append(messagePart);
+
+                    //Console.WriteLine($"\n\n\n[Received] Message part of length: {messagePart.Length} \n{messagePart[..50]}\n[Received] Message part of length: {messagePart.Length}");
+
+                } while (!result.EndOfMessage);//A message is complete when the EndOfMessage is true
+
+                //Extracting the events from the message
+
+                //Reject any message of all type but FEED_DATA
+
+                //In the data array filter events of type Candle
+
+                //Verify if within the date range
+
+                //The message must be analized to find if it is a candle event
+
+
+
+                Console.WriteLine($"\n[Received] Message of length: {messageBuilder.ToString().Length} \n{messageBuilder.ToString()}\n[Received] Message of length: {messageBuilder.ToString().Length}\n\n");
+
+                //Send a hartbeat to the websocket
+                await StreamingUtils.SendMessageAsync(client, "{\"type\":\"KEEPALIVE\",\"channel\":0}");
+                
+                Thread.Sleep(100);
+
+            }
+
+            var message = messageBuilder.ToString();
+
+            Console.WriteLine($"\n\n\n[Received] {message}");
+
+            return;
+
+        }
+
         int count = 0;
 
         /// <summary>
@@ -121,7 +181,7 @@ namespace TangoBotStreaming.Services
         /// <param name="fromTime">The start time for the data stream.</param>
         /// <param name="toTime">The end time for the data stream.</param>
         /// <param name="quoteDataHistory">The data object to store the received data.</param>
-        private async Task ReceiveMessagesAsync(ClientWebSocket client, DateTime fromTime, DateTime toTime)
+        private async Task ReceiveMessagesAsyncx(ClientWebSocket client, DateTime fromTime, DateTime toTime)
         {
             Console.WriteLine("\n\n\n[Info] Receiving messages...");
 
@@ -155,26 +215,42 @@ namespace TangoBotStreaming.Services
                 var wsresponse = new WsResponse(message) ?? throw new Exception("Unable to create WsResponse instance");
 
                 //Skip if the message is not a feed data message
-                if (wsresponse.Data != null || wsresponse.Type != "FEED_DATA")
+                if (wsresponse.Data == null || wsresponse.Type != "FEED_DATA")
                 {
                     continue;
                 }
 
+                if (count++ > 5)
+                    continue;
+
                 //Process what came in data
                 foreach (WsResponse.DataItem item in wsresponse.Data)
                 {
-                    //Check if Candle event is after the toDate
-                    var timeInUnixMss = wsresponse.Data[0].Time;
-                    var timeOfEvent = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMss).UtcDateTime;
-
-                    //if timeOfEvent ouside of the range defined by fromDate and toDate, skip
-                    if (timeOfEvent.Date < fromTime || timeOfEvent.Date > toTime)
+                    try
                     {
-                        continue;
-                    }
+                        //Check if Candle event is after the toDate
+                        var timeInUnixMss = wsresponse.Data[0].Time;
+                        var timeOfEvent = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMss).UtcDateTime;
 
-                    var eventTimex = DateTimeOffset.FromUnixTimeMilliseconds(item.Time).UtcDateTime;
-                    Console.WriteLine($"[Received Date] {eventTimex.ToString()}");
+                        //if timeOfEvent ouside of the range defined by fromDate and toDate, skip
+                        bool isTimeOfEventInRange = timeOfEvent.Date <= fromTime && timeOfEvent.Date >= toTime;
+
+                        if (isTimeOfEventInRange)
+                        {
+                            //Console.WriteLine($"[Info] Skipping event outside of the range: {timeOfEvent.ToString()}");
+                            continue;
+                        }
+
+                        Console.WriteLine($"[Info] Data in range: {timeOfEvent.ToString()}");
+
+                        // var eventTimex = DateTimeOffset.FromUnixTimeMilliseconds(item.Time).UtcDateTime;
+                        //Console.WriteLine($"[Received Date] {eventTimex.ToString()}");
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
                 }
 
                 continue;
@@ -211,6 +287,8 @@ namespace TangoBotStreaming.Services
             //Notify the observers that the data stream is completed
 
         }
+
+
 
         /// <inheritdoc />
         public void PatchHistoricData<T>(T quoteDataHistory)
