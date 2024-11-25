@@ -19,7 +19,7 @@ namespace TangoBotStreaming.Services
     public class StreamingService : IStreamingService, IObservable<HistoricDataReceivedEvent>
     {
         private readonly string _webSocketUrl;
-        private  string? _apiQuoteToken;
+        private string? _apiQuoteToken;
         private ClientWebSocket _websocketClient;
 
         private readonly ObserverManager<HistoricDataReceivedEvent> _observerManager;
@@ -45,7 +45,7 @@ namespace TangoBotStreaming.Services
             Timeframe timeframe = Timeframe.Daily,
             int interval = 1)
         {
-            var _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() 
+            var _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>()
                 ?? throw new Exception("TokenProvider is null");
 
             _apiQuoteToken = _tokenProvider.GetValidStreamingToken().Result;
@@ -61,51 +61,54 @@ namespace TangoBotStreaming.Services
                 Timeframe.Weekly => "1w",
                 Timeframe.Monthly => "1m",
                 Timeframe.Year => "1y",
-                _ => throw new ArgumentOutOfRangeException(nameof(timeframe), 
+                _ => throw new ArgumentOutOfRangeException(nameof(timeframe),
                 $"Unsupported timeframe: {timeframe}")
             };
 
             try
             {
                 #region Connect
-                Console.WriteLine("[Info] Connecting to WebSocket...");
+                //Console.WriteLine("[Info] Connecting to WebSocket...");
                 if (_websocketClient.State != WebSocketState.Open)
                 {
                     await _websocketClient.ConnectAsync(new Uri(_webSocketUrl), CancellationToken.None);
-                    Console.WriteLine("[Info] Connected.");
+                    //Console.WriteLine("[Info] Connected.");
                 }
                 else
                 {
-                    Console.WriteLine("[Info] WebSocket connection is already open.");
+                    //Console.WriteLine("[Info] WebSocket connection is already open.");
                 }
                 #endregion
 
                 #region Prepare connection
 
-                Console.WriteLine("[Info] Connected. Sending SETUP...");
+                //Console.WriteLine("[Info] Connected. Sending SETUP...");
                 await StreamingUtils.SendMessageAsync(_websocketClient, "{\"type\":\"SETUP\",\"channel\":0,\"version\":\"0.1-DXF-JS/0.3.0\",\"keepaliveTimeout\":120,\"acceptKeepaliveTimeout\":120}");
 
-                Console.WriteLine("[Info] Authorizing...");
+                //Console.WriteLine("[Info] Authorizing...");
                 await StreamingUtils.SendMessageAsync(_websocketClient, $"{{\"type\":\"AUTH\",\"channel\":0,\"token\":\"{_apiQuoteToken}\"}}");
 
-                Console.WriteLine("[Info] Opening channel for market data...");
+                //Console.WriteLine("[Info] Opening channel for market data...");
                 await StreamingUtils.SendMessageAsync(_websocketClient, "{\"type\":\"CHANNEL_REQUEST\",\"channel\":1,\"service\":\"FEED\",\"parameters\":{\"contract\":\"AUTO\"}}");
 
-                Console.WriteLine($"[Info] Subscribing to {symbol} candles...");
+                //Console.WriteLine($"[Info] Subscribing to {symbol} candles...");
 
                 long fromUnixTime = ((DateTimeOffset)fromTime).ToUnixTimeSeconds();
                 await StreamingUtils.SendMessageAsync(_websocketClient, $"{{\"type\":\"FEED_SUBSCRIPTION\",\"channel\":1,\"reset\":true,\"add\":[{{\"type\":\"Candle\",\"symbol\":\"{symbol}{{={candleType}}}\",\"fromTime\":{fromUnixTime}}}]}}");
 
                 #endregion
 
-                Console.WriteLine("[Info] Waiting for market data...");
+                //Console.WriteLine("[Info] Waiting for market data...");
                 await ReceiveMessagesAsync(_websocketClient, fromTime, toTime);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"[Error] {ex.Message}");
+                throw;
             }
+
         }
+
+        int count = 0;
 
         /// <summary>
         /// Receives messages asynchronously from the WebSocket connection.
@@ -116,11 +119,14 @@ namespace TangoBotStreaming.Services
         /// <param name="quoteDataHistory">The data object to store the received data.</param>
         private async Task ReceiveMessagesAsync(ClientWebSocket client, DateTime fromTime, DateTime toTime)
         {
+            Console.WriteLine("\n\n\n[Info] Receiving messages...");
+
             var buffer = new byte[1024 * 4];
             var messageBuilder = new StringBuilder();
 
             while (client.State == WebSocketState.Open)
             {
+
                 WebSocketReceiveResult result;
                 do
                 {
@@ -141,6 +147,75 @@ namespace TangoBotStreaming.Services
                 var message = messageBuilder.ToString();
                 messageBuilder.Clear();
 
+                var wsresponse = new WsResponse(message);
+
+                //Skip if data is null
+                if (wsresponse.Data != null)
+                {
+                    continue;
+                }
+
+                //Check if the message is a feed data message
+                if (wsresponse.Type != "FEED_DATA")
+                {
+                    continue;
+                }
+
+                //Process what came in data
+                foreach (WsResponse.DataItem item in wsresponse.Data)
+                {
+                    //Check if Candle event is after the toDate
+                    var timeInUnixMs = wsresponse.Data[0].Time;
+                    var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMs).UtcDateTime;
+
+                    var eventTimex = DateTimeOffset.FromUnixTimeMilliseconds(item.Time).UtcDateTime;
+                    Console.WriteLine($"[Received Date] {eventTimex.ToString()}");
+                }
+
+
+
+                if (wsresponse.Data[0].EventType != "Candle")
+                {
+                    //continue;
+                }
+
+                
+
+                //Check that in data, time is not the current day
+                //Check that in data, eventType is Candle
+                // Check that in data, time is not the current day
+                var currentDate = DateTime.UtcNow.Date;
+                var timeInUnixMs = wsresponse.Data[0].Time;
+
+
+                var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMs).UtcDateTime;
+                if (eventTime.Date == currentDate)
+                {
+                    continue;
+                }
+                else
+                {
+                    //Console.WriteLine($"[Received] {eventTime.ToString()}");
+                }
+
+                
+
+                
+
+
+                //if(message.Length < 1000)
+                //Console.WriteLine($"[Received] {message[..50]}");
+
+                if (count++ > 20)
+                {
+                    foreach (var observer in _observers)
+                    {
+                        observer.OnCompleted();
+                    }
+                    CloseWsConnection();
+                    break;
+                }
+
                 //Delegate the message processing to the observers
                 var _historicDataReceivedEvent = new HistoricDataReceivedEvent(message);
                 _observerManager.Notify(_historicDataReceivedEvent);
@@ -148,8 +223,11 @@ namespace TangoBotStreaming.Services
                 //TODO: Detect when the historic data is fully received
                 //TODO: Implement the logic to stop the streaming when the data is fully received
                 //TODO: Implement the logic to close the WebSocket connection when the data is fully received
-                
+
             }
+
+            //Notify the observers that the data stream is completed
+
         }
 
         /// <inheritdoc />
@@ -347,8 +425,15 @@ namespace TangoBotStreaming.Services
         }
 
         #region Observable
+
+        private readonly List<IObserver<HistoricDataReceivedEvent>> _observers = new List<IObserver<HistoricDataReceivedEvent>>();
+
         public IDisposable Subscribe(IObserver<HistoricDataReceivedEvent> observer)
         {
+            if ((!_observers.Contains(observer)))
+            {
+                _observers.Add(observer);
+            }
             return _observerManager.Subscribe(observer);
         }
 

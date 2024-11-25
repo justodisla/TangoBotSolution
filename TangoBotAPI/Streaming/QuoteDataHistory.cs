@@ -16,7 +16,7 @@ namespace TangoBotAPI.Streaming
 
         public void AppendData(DataPoint dataPoint)
         {
-            Console.WriteLine($"QuoteDataHistory: Appending data point: {dataPoint.ToString()}\n\n");
+            //Console.WriteLine($"QuoteDataHistory: Appending data point: {dataPoint.ToString()}\n\n");
 
             if (DataPoints.Any())
             {
