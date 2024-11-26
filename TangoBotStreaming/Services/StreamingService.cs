@@ -172,8 +172,8 @@ namespace TangoBotStreaming.Services
                             Console.WriteLine($"[Received Date] {timeOfEvent.ToString()}\n");
 
                             //Notify the observers
-                            //var _historicDataReceivedEvent = new HistoricDataReceivedEvent(messageBuilder.ToString());
-
+                            var _historicDataReceivedEvent = new HistoricDataReceivedEvent(messageBuilder.ToString());
+                            _observerManager.Notify(_historicDataReceivedEvent);
                         }
                         else
                         {
@@ -206,27 +206,23 @@ namespace TangoBotStreaming.Services
                     Console.WriteLine("[Info] Data fully received.");
                     break;
                 }
-                //Verify if within the date range
-
-                //The message must be analized to find if it is a candle event
-
-
-
-                //Console.WriteLine($"\n[Received] Message of length: {messageBuilder.ToString().Length} \n{messageBuilder.ToString()}\n[Received] Message of length: {messageBuilder.ToString().Length}\n\n");
-
+                
                 //Send a hartbeat to the websocket
                 await StreamingUtils.SendMessageAsync(client, "{\"type\":\"KEEPALIVE\",\"channel\":0}");
-                
+
                 Thread.Sleep(1000);
 
             }
 
-            //var message = messageBuilder.ToString();
+            //Close the WebSocket connection
+            CloseWsConnection();
 
-            //Console.WriteLine($"\n\n\n[Received] {message}");
-
-            return;
-
+            //Notify the observers that the data stream is completed
+            foreach (var observer in _observers)
+            {
+                observer.OnCompleted();
+            }
+            
         }
 
         int count = 0;
