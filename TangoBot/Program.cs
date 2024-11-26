@@ -328,7 +328,7 @@ namespace TangoBot
 
             var hc = streamService.GetHashCode();
 
-            streamService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddDays(-5), DateTime.Now.Date, Timeframe.Daily, 1);
+            streamService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddYears(-2), DateTime.Now.Date, Timeframe.Daily, 1);
 
             Thread.Sleep(5000);
 
