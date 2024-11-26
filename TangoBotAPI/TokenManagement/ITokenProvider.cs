@@ -1,9 +1,11 @@
-﻿namespace TangoBotAPI.TokenManagement
+﻿using TangoBotAPI.DI;
+
+namespace TangoBotAPI.TokenManagement
 {
     /// <summary>
     /// Interface for providing tokens.
     /// </summary>
-    public interface ITokenProvider
+    public interface ITokenProvider : ITTService
     {
         /// <summary>
         /// Gets a valid token asynchronously.

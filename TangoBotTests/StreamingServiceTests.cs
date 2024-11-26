@@ -27,7 +27,7 @@ namespace TangoBotStreaming.Tests
 
             StartUp.InitializeDI();
 
-            _streamingService = TangoBotServiceProvider.GetSingletonService<IStreamingService>();
+            _streamingService = TangoBotServiceProviderExp.GetSingletonService<IStreamingService>();
 
         }
 

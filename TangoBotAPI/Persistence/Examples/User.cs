@@ -28,5 +28,20 @@ namespace TangoBotAPI.Persistence.Examples
             // Custom action after saving User entity
             Console.WriteLine("Performing actions after saving the user.");
         }
+
+        public override string GetEntityName()
+        {
+            return "User";
+        }
+
+        public override string GetDescription()
+        {
+            return "System users table";
+        }
+
+        public override string GetTableName()
+        {
+            return "Users";
+        }
     }
 }

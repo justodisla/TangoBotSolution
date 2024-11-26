@@ -1,4 +1,5 @@
 using HttpClientLib.OrderApi.Models;
+using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using TangoBotAPI.Toolkit;
 
 namespace HttpClientLib.OrderApi
 {
-    public class OrderComponent : BaseApiComponent
+    public class OrderComponent : BaseApiComponent, IOrderComponent<Order>
     {
         private readonly string _baseUrl;
 
@@ -23,6 +24,9 @@ namespace HttpClientLib.OrderApi
                 .GetConfigurationValue(Constants.ACTIVE_API_URL);
 
             //_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
+            
+            Subscribe(new OrderObserver());
+
         }
 
         public async Task<Order[]?> GetAccountOrdersAsync(string accountNumber)

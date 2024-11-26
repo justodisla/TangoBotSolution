@@ -10,6 +10,7 @@ using TangoBotAPI.DI;
 using TangoBotAPI.Streaming;
 using TangoBotAPI.TokenManagement;
 using TangoBotAPI.Toolkit;
+using TangoBotStreaming.Observables;
 using TangoBotStreaming.Utilities;
 
 namespace TangoBotStreaming.Services
@@ -32,10 +33,12 @@ namespace TangoBotStreaming.Services
         {
             _observerManager = new ObserverManager<HistoricDataReceivedEvent>();
 
-            _webSocketUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+            _webSocketUrl = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>()
                 .GetConfigurationValue(Constants.DX_LINK_WS_URL);
 
             _websocketClient = new ClientWebSocket();
+
+            this.Subscribe(new HistoryDataStreamObserver());
         }
 
         /// <inheritdoc />

@@ -8,7 +8,7 @@ using TangoBotAPI.TokenManagement;
 
 namespace HttpClientLib
 {
-    public abstract class BaseApiComponent : IObservable<HttpResponseEvent>
+    public abstract class BaseApiComponent : IObservable<HttpResponseEvent>, ITTService
     {
         private readonly HttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;
@@ -16,8 +16,8 @@ namespace HttpClientLib
 
         protected BaseApiComponent()
         {
-            _httpClient = TangoBotServiceProvider.GetService<HttpClient>() ?? throw new Exception("HttpClient is null");
-            _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            _httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
+            _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
             _observerManager = new ObserverManager<HttpResponseEvent>();
         }
 

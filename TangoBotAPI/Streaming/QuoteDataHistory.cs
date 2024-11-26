@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TangoBotAPI.Persistence;
 
 namespace TangoBotAPI.Streaming
 {
@@ -30,7 +31,7 @@ namespace TangoBotAPI.Streaming
             DataPoints.Add(dataPoint);
         }
 
-        public class DataPoint
+        public class DataPoint : AbstractEntity
         {
             public DataPoint(decimal open, decimal high, decimal low, decimal close, DateTime time, double volume, double vwap, double bidVolume, double askVolume, double impVolatility)
             {
@@ -56,11 +57,42 @@ namespace TangoBotAPI.Streaming
             public double BidVolume { get; set; }
             public double AskVolume { get; set; }
             public double ImpVolatility { get; set; }
+            public Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             internal double ForwardIndex { get; set; }
+
+            public void AfterSave()
+            {
+                //throw new NotImplementedException();
+            }
+
+            public void BeforeSave()
+            {
+                //throw new NotImplementedException();
+            }
+
+            public override string GetDescription()
+            {
+                return "";
+            }
+
+            public override string GetEntityName()
+            {
+               return "DataPoint";
+            }
+
+            public override string GetTableName()
+            {
+                return "DataPoints";
+            }
 
             public override string ToString()
             {
                 return $"Open: {Open}, High: {High}, Low: {Low}, Close: {Close}, Time: {Time}, Volume: {Volume}, Vwap: {Vwap}, BidVolume: {BidVolume}, AskVolume: {AskVolume}, ImpVolatility: {ImpVolatility}";
+            }
+
+            public bool Validate()
+            {
+                return true;
             }
         }
     }

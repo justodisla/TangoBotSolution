@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace TangoBotAPI.DI
 {
+    [Obsolete("This class is obsolete, use TangoBotServiceProviderExp instead")]
     /// <summary>
     /// Provides a service provider for dependency injection, allowing registration and resolution of services.
     /// Supports named services to register multiple implementations of the same interface.
@@ -30,7 +31,7 @@ namespace TangoBotAPI.DI
 
             initialize = true;
         }
-
+        [Obsolete("This method is obsolete, use AddService<T> instead")]
         /// <summary>
         /// Adds a service to the service collection.
         /// </summary>
@@ -52,7 +53,7 @@ namespace TangoBotAPI.DI
             (services ?? throw new Exception("Services is null")).AddSingleton(implementationFactory);
             _wrappedServiceProvider = services?.BuildServiceProvider();
         }
-
+        [Obsolete("This method is obsolete, use AddService<T> instead")]
         /// <summary>
         /// Gets a singleton service from the service provider.
         /// </summary>

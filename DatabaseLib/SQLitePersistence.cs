@@ -13,17 +13,6 @@ namespace DatabaseLib
         private readonly DatabaseManager _databaseManager;
         private readonly string _dataDirectory;
         private readonly string _databaseFilePath;
-        private string _tableName = "";
-
-        public string TableName
-        {
-            get => _tableName;
-            set
-            {
-                _tableName = value;
-                EnsureTableExists();
-            }
-        }
 
         public SQLitePersistence()
         {
@@ -38,15 +27,12 @@ namespace DatabaseLib
 
             _databaseManager = new DatabaseManager(_databaseFilePath);
             _databaseManager.InitializeDatabase();
-            EnsureTableExists();
         }
 
         public async Task<IEntity> CreateAsync(IEntity entity)
         {
-            if(string.IsNullOrEmpty(TableName))
-            {
-                throw new Exception("Table name is not set");
-            }
+            var tableName = entity.GetTableName();
+            EnsureTableExists(tableName);
 
             entity.BeforeSave();
 
@@ -54,7 +40,7 @@ namespace DatabaseLib
             await connection.OpenAsync();
 
             // Check if the entity already exists
-            var existingEntity = await ReadAsync(entity.Id);
+            var existingEntity = await ReadAsync(entity.Id, tableName);
             if (existingEntity != null)
             {
                 throw new SqliteException("UNIQUE constraint failed: Entities.Id", 19);
@@ -62,7 +48,7 @@ namespace DatabaseLib
 
             var command = connection.CreateCommand();
             command.CommandText = $@"
-                    INSERT INTO {TableName} (Id, Data)
+                    INSERT INTO {tableName} (Id, Data)
                     VALUES (@id, @data);
                 ";
             command.Parameters.AddWithValue("@id", entity.Id.ToString());
@@ -76,10 +62,12 @@ namespace DatabaseLib
 
         public async Task<IEntity> ReadAsync(Guid id)
         {
-            if (string.IsNullOrEmpty(TableName))
-            {
-                throw new Exception("Table name is not set");
-            }
+            throw new NotImplementedException("Use the overload with tableName parameter.");
+        }
+
+        public async Task<IEntity> ReadAsync(Guid id, string tableName)
+        {
+            EnsureTableExists(tableName);
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
@@ -87,7 +75,7 @@ namespace DatabaseLib
             var command = connection.CreateCommand();
             command.CommandText = $@"
                     SELECT Data
-                    FROM {TableName}
+                    FROM {tableName}
                     WHERE Id = @id;
                 ";
             command.Parameters.AddWithValue("@id", id.ToString());
@@ -98,10 +86,12 @@ namespace DatabaseLib
 
         public async Task<IEnumerable<IEntity>> ReadAllAsync()
         {
-            if (string.IsNullOrEmpty(TableName))
-            {
-                throw new Exception("Table name is not set");
-            }
+            throw new NotImplementedException("Use the overload with tableName parameter.");
+        }
+
+        public async Task<IEnumerable<IEntity>> ReadAllAsync(string tableName)
+        {
+            EnsureTableExists(tableName);
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
@@ -109,7 +99,7 @@ namespace DatabaseLib
             var command = connection.CreateCommand();
             command.CommandText = $@"
                     SELECT Data
-                    FROM {TableName};
+                    FROM {tableName};
                 ";
 
             var entities = new List<IEntity>();
@@ -124,10 +114,8 @@ namespace DatabaseLib
 
         public async Task<IEntity> UpdateAsync(IEntity entity)
         {
-            if (string.IsNullOrEmpty(TableName))
-            {
-                throw new Exception("Table name is not set");
-            }
+            var tableName = entity.GetTableName();
+            EnsureTableExists(tableName);
 
             entity.BeforeSave();
 
@@ -136,7 +124,7 @@ namespace DatabaseLib
 
             var command = connection.CreateCommand();
             command.CommandText = $@"
-                    UPDATE {TableName}
+                    UPDATE {tableName}
                     SET Data = @data
                     WHERE Id = @id;
                 ";
@@ -151,17 +139,19 @@ namespace DatabaseLib
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            if (string.IsNullOrEmpty(TableName))
-            {
-                throw new Exception("Table name is not set");
-            }
+            throw new NotImplementedException("Use the overload with tableName parameter.");
+        }
+
+        public async Task<bool> DeleteAsync(Guid id, string tableName)
+        {
+            EnsureTableExists(tableName);
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();
             command.CommandText = $@"
-                    DELETE FROM {TableName}
+                    DELETE FROM {tableName}
                     WHERE Id = @id;
                 ";
             command.Parameters.AddWithValue("@id", id.ToString());
@@ -170,11 +160,47 @@ namespace DatabaseLib
             return rowsAffected > 0;
         }
 
-        private void EnsureTableExists()
+        public async Task<bool> RemoveTableAsync(string tableName)
         {
-            if (string.IsNullOrWhiteSpace(TableName))
+            using var connection = new SqliteConnection(_databaseManager.ConnectionString);
+            await connection.OpenAsync();
+
+            var command = connection.CreateCommand();
+            command.CommandText = $@"
+                    DROP TABLE IF EXISTS {tableName};
+                ";
+
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
+        }
+
+        public async Task<IEnumerable<string>> ListTablesAsync()
+        {
+            using var connection = new SqliteConnection(_databaseManager.ConnectionString);
+            await connection.OpenAsync();
+
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                    SELECT name
+                    FROM sqlite_master
+                    WHERE type = 'table';
+                ";
+
+            var tables = new List<string>();
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                return;
+                tables.Add(reader.GetString(0));
+            }
+
+            return tables;
+        }
+
+        private void EnsureTableExists(string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                throw new Exception("Table name is not set");
             }
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
@@ -182,7 +208,7 @@ namespace DatabaseLib
 
             var command = connection.CreateCommand();
             command.CommandText = $@"
-                CREATE TABLE IF NOT EXISTS {TableName} (
+                CREATE TABLE IF NOT EXISTS {tableName} (
                     Id TEXT PRIMARY KEY,
                     Data TEXT NOT NULL
                 );

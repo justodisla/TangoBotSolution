@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TangoBotAPI.DI;
 
 namespace TangoBotAPI.Configuration
 {
-    public interface IConfigurationProvider
+    public interface IConfigurationProvider : ITTService
     {
         /// <summary>
         /// Gets a configuration value by key.

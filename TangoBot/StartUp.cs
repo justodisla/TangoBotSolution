@@ -7,6 +7,8 @@ using HttpClientLib.OrderApi;
 using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
 using TangoBotAPI.Configuration;
+using TangoBotAPI.DI;
+using TangoBotAPI.Persistence;
 using TangoBotAPI.Streaming;
 using TangoBotAPI.TokenManagement;
 using TangoBotAPI.Toolkit;
@@ -31,7 +33,7 @@ namespace TangoBot
                 return;
             }
 
-            TangoBotServiceProvider.AddService<IConfigurationProvider>(provider => new ConfigurationProvider());
+            //TangoBotServiceProvider.AddService<IConfigurationProvider>(provider => new ConfigurationProvider());
 
             SetupConfigurations();
 
@@ -45,6 +47,22 @@ namespace TangoBot
         /// </summary>
         private static void SetupServices()
         {
+
+            var tango = TangoBotServiceProviderExp.GetTransientService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var hc1 = tango.GetHashCode();
+
+            var fango = TangoBotServiceProviderExp.GetSingletonService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var hc2 = fango.GetHashCode();
+
+            var pango = TangoBotServiceProviderExp.GetSingletonService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var hc3 = pango.GetHashCode();
+
+            var dango = TangoBotServiceProviderExp.GetTransientService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var hc4 = dango.GetHashCode();
+
+            //var aacn = tango.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+
+            /*
             TangoBotServiceProvider.AddService<HttpClient>(provider => new HttpClient());
             TangoBotServiceProvider.AddService<ITokenProvider>(provider => new TokenProvider());
             TangoBotServiceProvider.AddService<AccountComponent>(provider => new AccountComponent());
@@ -54,18 +72,23 @@ namespace TangoBot
             TangoBotServiceProvider.AddService<MarketStatusChecker>(provider => new MarketStatusChecker());
             //TangoBotServiceProvider.AddSingletonService<IStreamService<?>>(new StreamingService());
 
+            //TangoBotServiceProvider.AddService<IPersistence>(provider => new (), typeof(StreamingService).Name);
+
             //Configure streaming service
             TangoBotServiceProvider.AddService<TangoBotAPI.Streaming.IStreamingService>(provider => new StreamingService(), typeof(StreamingService).Name);
-            var _streamingService = TangoBotServiceProvider.GetSingletonService<IStreamingService>(typeof(StreamingService).Name);
-            ((IObservable<HistoricDataReceivedEvent>)_streamingService).Subscribe(new HistoryDataStreamObserver());
-            var hc = _streamingService.GetHashCode();
+            */
+            //var _streamingService = TangoBotServiceProvider.GetSingletonService<IStreamingService>(typeof(StreamingService).Name);
+            //((IObservable<HistoricDataReceivedEvent>)_streamingService).Subscribe(new HistoryDataStreamObserver());
 
+            /*
             //Subscribe to the HttpResponseEvent
             ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<AccountComponent>()).Subscribe(new OrderObserver());
             ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<AccountComponent>()).Subscribe(new AccountObserver());
             ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<CustomerComponent>()).Subscribe(new OrderObserver());
             ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<OrderComponent>()).Subscribe(new OrderObserver());
             ((IObservable<HttpResponseEvent>)TangoBotServiceProvider.GetService<InstrumentComponent>()).Subscribe(new OrderObserver());
+            */
+
         }
 
         /// <summary>
@@ -73,7 +96,7 @@ namespace TangoBot
         /// </summary>
         private static void SetupConfigurations()
         {
-            IConfigurationProvider? configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>() ?? throw new Exception("Unable to access Configuration Provider");
+            IConfigurationProvider? configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("Unable to access Configuration Provider");
 
             #region Environment configuration
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HttpClientLib.InstrumentApi
 {
-    public class InstrumentComponent : BaseApiComponent
+    public class InstrumentComponent : BaseApiComponent, IInstrumentComponent
     {
         private const string BaseInstrumentUrl = "https://api.cert.tastyworks.com/instruments";
 

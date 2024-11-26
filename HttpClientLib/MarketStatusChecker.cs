@@ -8,7 +8,7 @@ using TangoBotAPI.Toolkit;
 
 namespace HttpClientLib
 {
-    public class MarketStatusChecker
+    public class MarketStatusChecker : ITTService
     {
         private readonly HttpClient? _httpClient;
         private readonly string? _apiKey;

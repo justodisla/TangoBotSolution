@@ -20,7 +20,7 @@ namespace TangoBotTests
 {
     public class AccountComponentTests
     {
-        private readonly AccountComponent _accountComponent;
+        private readonly IAccountComponent _accountComponent;
         private readonly IConfigurationProvider _configurationProvider;
 
         public AccountComponentTests()
@@ -29,8 +29,8 @@ namespace TangoBotTests
 
             StartUp.InitializeDI();
 
-            _configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
-
+            //_configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
+            _configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
 
             var activeAccount = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
             var sandboxAccountNumber = _configurationProvider.GetConfigurationValue(Constants.SANDBOX_ACCOUNT_NUMBER);
@@ -38,10 +38,8 @@ namespace TangoBotTests
             if (activeAccount != sandboxAccountNumber)
                 throw new Exception("Wrong account number used");
 
-            //_httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-            //_httpClient = TangoBotServiceProvider.GetService<HttpClient>();
-            _accountComponent = TangoBotServiceProvider.GetService<AccountComponent>() ?? throw new Exception("AccountComponent is null");
-
+            _accountComponent = TangoBotServiceProviderExp.GetSingletonService<IAccountComponent>() 
+                ?? throw new Exception("AccountComponent is null");
         }
 
         [Fact]
@@ -103,7 +101,9 @@ namespace TangoBotTests
         public async Task GetAccountPositionsAsync_ReturnsAccountPositions_WhenResponseIsSuccessful()
         {
             // Arrange
-            var _orderComponent = TangoBotServiceProvider.GetService<OrderComponent>() ?? throw new Exception("OrderComponent null");
+            var _orderComponent = TangoBotServiceProviderExp.GetSingletonService<IOrderComponent<Order>>("HttpClientLib.OrderApi.OrderComponent") 
+                ?? throw new Exception("OrderComponent null");
+
             var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
 
             //var msc = TangoBotServiceProvider.GetService<MarketStatusChecker>();

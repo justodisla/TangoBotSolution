@@ -324,19 +324,19 @@ namespace TangoBot
         private static async Task TestStreaming()
         {
             // Replace these values with valid ones
-            var streamService = TangoBotServiceProvider.GetSingletonService<TangoBotAPI.Streaming.IStreamingService>(typeof(StreamingService).Name);
+            //var streamService = TangoBotServiceProvider.GetSingletonService<TangoBotAPI.Streaming.IStreamingService>(typeof(StreamingService).Name);
 
-            var hc = streamService.GetHashCode();
+            IStreamingService _streaService = TangoBotServiceProviderExp.GetSingletonService<IStreamingService>() ?? throw new Exception("Stream service is null");
 
-            streamService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddYears(-2), DateTime.Now.Date, Timeframe.Daily, 1);
+            var hc = _streaService.GetHashCode();
+
+            _streaService.StreamHistoricDataAsync("AAPL", DateTime.Now.Date.AddYears(-2), DateTime.Now.Date, Timeframe.Daily, 1);
 
             Thread.Sleep(5000);
 
             //var eso = await streamService.StreamHistoricDataAsync("SPY", DateTime.Now.Date.AddYears(-10), DateTime.Now.Date, Timeframe.Daily, 1);
 
         }
-
-
 
         #region Tests
 

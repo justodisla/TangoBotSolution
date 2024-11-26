@@ -11,7 +11,7 @@ namespace DatabaseLib.Tests
 {
     public class SQLitePersistenceTests : IDisposable
     {
-        private readonly SQLitePersistence _persistence;
+        private readonly IPersistence _persistence;
         private readonly string _dataDirectory;
         private readonly string _databaseFilePath;
 
@@ -21,8 +21,10 @@ namespace DatabaseLib.Tests
             _dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestData");
             _databaseFilePath = Path.Combine(_dataDirectory, "test_database.db");
 
-            TangoBotServiceProvider.AddService<IPersistence>(provider => new SQLitePersistence(), typeof(SQLitePersistence).Name);
-            _persistence = TangoBotServiceProvider.GetSingletonService<IPersistence>(typeof(SQLitePersistence).Name) as SQLitePersistence ?? throw new System.Exception("Service not found");
+            //TangoBotServiceProvider.AddService<IPersistence>(provider => new SQLitePersistence(), typeof(SQLitePersistence).Name);
+            //_persistence = TangoBotServiceProvider.GetSingletonService<IPersistence>(typeof(SQLitePersistence).Name) as SQLitePersistence ?? throw new System.Exception("Service not found");
+
+            _persistence = TangoBotServiceProviderExp.GetSingletonService<IPersistence>("DatabaseLib.SQLitePersistence") ?? throw new System.Exception("Service not found");
 
             try
             {
@@ -43,7 +45,7 @@ namespace DatabaseLib.Tests
             // Create an instance of SQLitePersistence with the test database file path
             //_persistence = new SQLitePersistence();
         
-            _persistence.TableName = typeof(User).Name;
+            //_persistence.TableName = typeof(User).Name;
         }
 
         [Fact]
@@ -177,6 +179,21 @@ namespace DatabaseLib.Tests
         public void AfterSave()
         {
             // Implement actions after saving
+        }
+
+        public string GetEntityName()
+        {
+            return GetType().Name;
+        }
+
+        public string GetDescription()
+        {
+            return "Represents a user entity in the system.";
+        }
+
+        public string GetTableName()
+        {
+            return "Users";
         }
     }
 }

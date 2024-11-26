@@ -1,5 +1,6 @@
 namespace TangoBotAPI.Persistence
 {
+
     public abstract class AbstractEntity : IEntity
     {
         public Guid Id { get; set; }
@@ -22,5 +23,11 @@ namespace TangoBotAPI.Persistence
         {
             // Default action after saving, can be overridden by derived classes
         }
+
+        public abstract string GetEntityName();
+
+        public abstract string GetDescription();
+
+        public abstract string GetTableName();
     }
 }

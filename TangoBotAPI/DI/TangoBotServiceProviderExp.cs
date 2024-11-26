@@ -1,0 +1,174 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+
+namespace TangoBotAPI.DI
+{
+    public static class TangoBotServiceProviderExp
+    {
+        private static IServiceProvider? _wrappedServiceProvider;
+        private static bool initialize = false;
+        private static ServiceCollection? services;
+        private static readonly Dictionary<string, Type> namedServices = new();
+        private static readonly Dictionary<string, object> singletonInstances = new();
+
+        /// <summary>
+        /// Initializes the service provider if it has not been initialized already.
+        /// </summary>
+        public static void Initialize()
+        {
+            if (initialize)
+            {
+                return;
+            }
+
+            services = new ServiceCollection();
+            _wrappedServiceProvider = services.BuildServiceProvider() ?? throw new Exception("ServiceProvider build failed");
+
+            initialize = true;
+        }
+
+        /// <summary>
+        /// Gets a singleton service from the service provider.
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        /// <param name="name">The fully qualified name of the service implementation class (optional).</param>
+        /// <returns>The service instance, or null if not found.</returns>
+        public static T? GetSingletonService<T>(string name = "") where T : class
+        {
+            if (!initialize)
+            {
+                Initialize();
+            }
+
+            if (_wrappedServiceProvider == null)
+            {
+                throw new Exception("Service provider is null");
+            }
+
+            var serviceType = DiscoverServiceType<T>(name) ?? throw new Exception($"Service implementation '{name}' not found for interface '{typeof(T).Name}'");
+            
+            //name = string.IsNullOrEmpty(name) ? serviceType.FullName : name;
+
+            if (!singletonInstances.ContainsKey(name))
+            {
+                if (!namedServices.ContainsKey(name))
+                {
+                    services?.AddSingleton(typeof(T), serviceType);
+                    namedServices[name] = serviceType;
+                    _wrappedServiceProvider = services?.BuildServiceProvider();
+                }
+
+                var instance = _wrappedServiceProvider.GetService<T>();
+                if (instance != null)
+                {
+                    singletonInstances[name] = instance;
+                }
+            }
+
+            return singletonInstances[name] as T;
+        }
+
+        /// <summary>
+        /// Gets a transient service from the service provider.
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        /// <param name="name">The fully qualified name of the service implementation class (optional).</param>
+        /// <returns>The service instance, or null if not found.</returns>
+        public static T? GetTransientService<T>(string name = "") where T : class
+        {
+            if (!initialize)
+            {
+                Initialize();
+            }
+
+            if (_wrappedServiceProvider == null)
+            {
+                throw new Exception("Service provider is null");
+            }
+
+            var serviceType = DiscoverServiceType<T>(name);
+            if (serviceType == null)
+            {
+                throw new Exception($"Service implementation '{name}' not found for interface '{typeof(T).Name}'");
+            }
+
+            if (!namedServices.ContainsKey(name))
+            {
+                services?.AddTransient(typeof(T), serviceType);
+                namedServices[name] = serviceType;
+                _wrappedServiceProvider = services?.BuildServiceProvider();
+            }
+
+            return _wrappedServiceProvider.GetService<T>();
+        }
+
+        /// <summary>
+        /// Discovers the service type that implements the specified interface and matches the given name.
+        /// </summary>
+        /// <typeparam name="T">The type of the service interface.</typeparam>
+        /// <param name="name">The fully qualified name of the service implementation class (optional).</param>
+        /// <returns>The service type, or null if not found.</returns>
+        private static Type? DiscoverServiceType<T>(string name) where T : class
+        {
+            var interfaceType = typeof(T);
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var parentDirectory = (Directory.GetParent(currentAssembly.Location)?.Parent?.Parent?.FullName) ?? throw new Exception("Parent directory not found.");
+            var assemblies = Directory.GetFiles(parentDirectory, "*.dll", SearchOption.AllDirectories)
+                .Where(IsAssembly)
+                .Select(Assembly.LoadFrom)
+                .ToList();
+
+            var serviceTypes = assemblies
+                .SelectMany(a => a.GetTypes())
+                .Where(t => interfaceType.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .ToList();
+
+            if (serviceTypes.Count == 0)
+            {
+                return null;
+            }
+
+            if (serviceTypes.Count > 1 && string.IsNullOrEmpty(name))
+            {
+                throw new Exception($"Multiple implementations found for interface '{interfaceType.Name}'. Please specify the implementation name.");
+            }
+
+            var serviceType = string.IsNullOrEmpty(name)
+                ? serviceTypes.FirstOrDefault()
+                : serviceTypes.FirstOrDefault(t => t.FullName.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (serviceType == null)
+            {
+                throw new Exception($"Service implementation '{name}' not found for interface '{interfaceType.Name}'");
+            }
+
+            return serviceType;
+        }
+
+        /// <summary>
+        /// Checks if the file is a valid .NET assembly.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <returns>True if the file is a valid .NET assembly, otherwise false.</returns>
+        private static bool IsAssembly(string filePath)
+        {
+            try
+            {
+                AssemblyName.GetAssemblyName(filePath);
+                return true;
+            }
+            catch (BadImageFormatException)
+            {
+                return false;
+            }
+            catch (FileLoadException)
+            {
+                return false;
+            }
+        }
+    }
+}

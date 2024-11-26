@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using TangoBotAPI.DI;
+using TangoBotAPI.Persistence;
 using TangoBotAPI.Streaming;
 
 namespace TangoBotStreaming.Observables
@@ -12,17 +14,30 @@ namespace TangoBotStreaming.Observables
         private readonly HashSet<DateTime> _receivedDates = new();
         private readonly QuoteDataHistory _quoteDataHistory;
         private bool _isHistoricalDataComplete = false;
+        private IPersistence? _persistence;
 
         public HistoryDataStreamObserver()
         {
             _quoteDataHistory = new QuoteDataHistory();
+            TangoBotServiceProvider.AddService<IPersistence>(provider => new InMemoryPersistence(), typeof(InMemoryPersistence).Name);
+            _persistence = TangoBotServiceProvider.GetTransientService<IPersistence>(typeof(InMemoryPersistence).Name);
         }
 
         public void OnCompleted()
         {
+            if(_persistence == null)
+            {
+                throw new InvalidOperationException("Persistence service is not available.");
+            }
+
             // Handle the completion of the data stream
             Console.WriteLine("HistoryDataStreamObserver: Data stream completed.");
-         }
+
+            foreach (var dataPoint in _quoteDataHistory.DataPoints)
+            {
+                _persistence.CreateAsync(dataPoint).Wait();
+            }
+        }
 
         public void OnError(Exception error)
         {
@@ -54,7 +69,7 @@ namespace TangoBotStreaming.Observables
 
                 // Append the converted DataPoint to QuoteDataHistory
                 _quoteDataHistory.AppendData(quoteDataHistoryDataPoint);
- 
+
             }
         }
 
@@ -66,92 +81,6 @@ namespace TangoBotStreaming.Observables
             }
             return 0.0;
         }
-
-
-        //Process the message which is a Candle event, 
-        //Convert it to a DataPoint to append it to the QuoteDataHistory object
-
-        //Console.WriteLine("HistoryDataStreamObserver: Received data.");
-
-        /*
-                    if (value != null && !string.IsNullOrEmpty(value.ReceivedData))
-                    {
-                        // Process the received data
-                        var jsonDocument = JsonDocument.Parse(value.ReceivedData);
-                        var root = jsonDocument.RootElement;
-
-                        int counter = 0;
-
-                        if (root.GetProperty("type").GetString() == "FEED_DATA")
-                        {
-                            var dataArray = root.GetProperty("data").EnumerateArray();
-                            foreach (var data in dataArray)
-                            {
-                                if (data.GetProperty("eventType").GetString() == "Candle")
-                                {
-                                    //Turn data into a QuoteDataHistory.DataPoint object
-                                    QuoteDataHistory.DataPoint quoteDataHistoryDataPoint = null;
-                                    try
-                                    {
-                                        if (data.GetProperty("open").ValueKind == JsonValueKind.Number &&
-                                                data.GetProperty("high").ValueKind == JsonValueKind.Number &&
-                                                data.GetProperty("low").ValueKind == JsonValueKind.Number &&
-                                                data.GetProperty("close").ValueKind == JsonValueKind.Number)
-                                        {
-                                            quoteDataHistoryDataPoint = new QuoteDataHistory.DataPoint(
-                                                data.GetProperty("open").GetDecimal(),
-                                                data.GetProperty("high").GetDecimal(),
-                                                data.GetProperty("low").GetDecimal(),
-                                                data.GetProperty("close").GetDecimal(),
-                                                DateTimeOffset.FromUnixTimeMilliseconds(data.GetProperty("time").GetInt64()).UtcDateTime,
-                                                data.GetProperty("volume").GetDouble(),
-                                                GetDoubleOrDefault(data, "vwap"),
-                                                GetDoubleOrDefault(data, "bidVolume"),
-                                                GetDoubleOrDefault(data, "askVolume"),
-                                                GetDoubleOrDefault(data, "impVolatility"));
-
-                                            _quoteDataHistory.AppendData(quoteDataHistoryDataPoint);
-                                        }
-                                        else
-                                        {
-                                            // Handle the case where the expected properties are not numbers
-                                            //Console.WriteLine("Received data with incorrect types.");
-                                        }
-
-                                        //Console.WriteLine($"[Info] date: {quoteDataHistoryDataPoint.Time} counter:{counter} Received historical data for \n{data.ToString()}\n");
-
-                                    }
-                                    catch (Exception)
-                                    {
-                                        throw;
-                                    }
-
-                                    var eventTime = DateTimeOffset.FromUnixTimeMilliseconds(data.GetProperty("time").GetInt64()).UtcDateTime;
-
-                                    //Console.WriteLine($"[Info] date: {eventTime} counter:{counter} Received historical data for \n{data.ToString()}\n");
-                                    counter++;
-
-                                    // Check if the event time is already in the received dates
-                                    if (_receivedDates.Contains(eventTime))
-                                    {
-                                        _isHistoricalDataComplete = true;
-                                        //Console.WriteLine("[Info] Historical data is complete. Closing connection.");
-                                        // Close the WebSocket connection
-                                        // Note: You need to have a reference to the WebSocket client to close it here
-                                        // _websocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "Historical data received", CancellationToken.None);
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        _receivedDates.Add(eventTime);
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                */
-
 
         public bool IsHistoricalDataComplete => _isHistoricalDataComplete;
     }

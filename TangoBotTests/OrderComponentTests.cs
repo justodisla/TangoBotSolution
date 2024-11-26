@@ -1,3 +1,4 @@
+using HttpClientLib.AccountApi;
 using HttpClientLib.OrderApi;
 using HttpClientLib.OrderApi.Models;
 using Moq;
@@ -18,9 +19,11 @@ namespace TangoBotTests
     {
         private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
         private readonly HttpClient _httpClient;
-        private readonly OrderComponent _orderComponent;
+        private readonly IOrderComponent<Order> _orderComponent;
         private readonly string _accountNumber;
         private readonly List<int> _createdOrderIds;
+
+        private readonly IConfigurationProvider _configurationProvider;
 
         public OrderComponentTests()
         {
@@ -28,9 +31,14 @@ namespace TangoBotTests
 
             _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
             _httpClient = new HttpClient(_httpMessageHandlerMock.Object);
-            _orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
-            _accountNumber = TangoBotServiceProvider.GetService<IConfigurationProvider>()
-                .GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+
+            _orderComponent = TangoBotServiceProviderExp.GetSingletonService<IOrderComponent<Order>>() 
+                ?? throw new Exception("Account component is null.");
+            
+            _configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("Configuration provider is null");
+
+            _accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
+
             _createdOrderIds = new List<int>();
 
             // Cancel all cancellable orders at the start

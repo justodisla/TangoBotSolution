@@ -1,4 +1,6 @@
-﻿using HttpClientLib.TokenManagement;
+﻿using HttpClientLib.AccountApi.Observer;
+using HttpClientLib.OrderApi.Observer;
+using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -8,13 +10,14 @@ using TangoBot.HttpClientLib;
 
 namespace HttpClientLib.AccountApi
 {
-    public class AccountComponent : BaseApiComponent
+    public class AccountComponent : BaseApiComponent, IAccountComponent
     {
         private const string BaseAccountUrl = "https://api.cert.tastyworks.com/accounts";
 
         public AccountComponent()
             : base()
         {
+            this.Subscribe(new AccountObserver());
         }
 
         /// <summary>
