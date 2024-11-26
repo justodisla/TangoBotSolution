@@ -342,8 +342,6 @@ namespace TangoBotStreaming.Services
 
         }
 
-
-
         /// <inheritdoc />
         public void PatchHistoricData<T>(T quoteDataHistory)
         {
