@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.WebSockets;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -120,6 +121,8 @@ namespace TangoBotStreaming.Services
             var buffer = new byte[1024 * 4];
             var messageBuilder = new StringBuilder();
 
+            bool isDataFullyReceived = false;
+
             while (client.State == WebSocketState.Open)
             {
                 WebSocketReceiveResult result;
@@ -143,30 +146,84 @@ namespace TangoBotStreaming.Services
 
                 } while (!result.EndOfMessage);//A message is complete when the EndOfMessage is true
 
-                //Extracting the events from the message
+                WsResponse wsresponse = new(messageBuilder.ToString());
 
-                //Reject any message of all type but FEED_DATA
+                //If the message is not a FEED_DATA message, skip
+                if (wsresponse.Type != "FEED_DATA")
+                {
+                    continue;
+                }
 
                 //In the data array filter events of type Candle
+                wsresponse.Data.ForEach(item =>
+                {
+                    if (item.EventType == "Candle" && !isDataFullyReceived)
+                    {
+                        Thread.Sleep(10);
 
+                        //Extract the time of the event
+                        var timeInUnixMss = item.Time;
+                        var timeOfEvent = DateTimeOffset.FromUnixTimeMilliseconds(timeInUnixMss).UtcDateTime;
+
+                        //If timeOfEvent is earliear than yesterday do not execute the next two statements
+                        if (timeOfEvent.Date < DateTime.UtcNow.Date.AddDays(-5))
+                        {
+                            Console.WriteLine($"[Received Date] {item.High}");
+                            Console.WriteLine($"[Received Date] {timeOfEvent.ToString()}\n");
+
+                            //Notify the observers
+                            //var _historicDataReceivedEvent = new HistoricDataReceivedEvent(messageBuilder.ToString());
+
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{timeOfEvent.ToString()} IS TOO EARLY");
+                        }
+
+                        //If timeOfEvent is older than 01-01-2015 break
+                        if (timeOfEvent.Date < new DateTime(2023, 1, 1))
+                        {
+                            isDataFullyReceived = true;
+                            return;
+                        }
+
+                        //if timeOfEvent ouside of the range defined by fromDate and toDate, skip
+                        bool isTimeOfEventInRange = timeOfEvent.Date <= fromTime && timeOfEvent.Date >= toTime;
+
+                        if (isTimeOfEventInRange)
+                        {
+                            //Console.WriteLine($"[Info] Skipping event outside of the range: {timeOfEvent.ToString()}");
+                            return;
+                        }
+
+                        //Console.WriteLine($"[Info] Data in range: {timeOfEvent.ToString()}");
+
+                    }
+                });
+
+                if (isDataFullyReceived)
+                {
+                    Console.WriteLine("[Info] Data fully received.");
+                    break;
+                }
                 //Verify if within the date range
 
                 //The message must be analized to find if it is a candle event
 
 
 
-                Console.WriteLine($"\n[Received] Message of length: {messageBuilder.ToString().Length} \n{messageBuilder.ToString()}\n[Received] Message of length: {messageBuilder.ToString().Length}\n\n");
+                //Console.WriteLine($"\n[Received] Message of length: {messageBuilder.ToString().Length} \n{messageBuilder.ToString()}\n[Received] Message of length: {messageBuilder.ToString().Length}\n\n");
 
                 //Send a hartbeat to the websocket
                 await StreamingUtils.SendMessageAsync(client, "{\"type\":\"KEEPALIVE\",\"channel\":0}");
                 
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
 
             }
 
-            var message = messageBuilder.ToString();
+            //var message = messageBuilder.ToString();
 
-            Console.WriteLine($"\n\n\n[Received] {message}");
+            //Console.WriteLine($"\n\n\n[Received] {message}");
 
             return;
 
@@ -174,6 +231,7 @@ namespace TangoBotStreaming.Services
 
         int count = 0;
 
+        [Obsolete("This method is not used in the current implementation.")]
         /// <summary>
         /// Receives messages asynchronously from the WebSocket connection.
         /// </summary>
