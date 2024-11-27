@@ -5,81 +5,75 @@ using System.Threading.Tasks;
 
 namespace TangoBotAPI.Persistence
 {
-    public class InMemoryPersistence : IPersistence
+    public class InMemoryPersistence<T> : IPersistence<T> where T : class, IEntity
     {
-        private readonly Dictionary<string, List<IEntity>> _tables = new();
+        private readonly Dictionary<Guid, Table> _tables = new();
 
-        public async Task<IEntity> CreateAsync(IEntity entity)
+        public async Task<T> CreateAsync(IEntity entity)
         {
-            var tableName = entity.GetTableName();
-            if (!_tables.ContainsKey(tableName))
+            var tableName = entity.GetEntityName();
+            var table = GetOrCreateTable(tableName);
+
+            table.Entities.Add((T)entity);
+            return await Task.FromResult((T)entity);
+        }
+
+        public async Task<T?> ReadAsync(Guid id)
+        {
+            foreach (var table in _tables.Values)
             {
-                _tables[tableName] = new List<IEntity>();
-            }
-
-            _tables[tableName].Add(entity);
-            return await Task.FromResult(entity);
-        }
-
-        public async Task<IEntity> ReadAsync(Guid id)
-        {
-            throw new NotImplementedException("Use the overload with tableName parameter.");
-
-        }
-
-        public async Task<IEntity> ReadAsync(Guid id, string tableName)
-        {
-            if (_tables.ContainsKey(tableName))
-            {
-                var entity = _tables[tableName].FirstOrDefault(e => e.Id == id);
-                return await Task.FromResult(entity);
-            }
-            return await Task.FromResult<IEntity>(null);
-        }
-
-        public async Task<IEnumerable<IEntity>> ReadAllAsync()
-        {
-            throw new NotImplementedException("Use the overload with tableName parameter.");
-        }
-
-        public async Task<IEnumerable<IEntity>> ReadAllAsync(string tableName)
-        {
-            if (_tables.ContainsKey(tableName))
-            {
-                return await Task.FromResult(_tables[tableName].AsEnumerable());
-            }
-            return await Task.FromResult(Enumerable.Empty<IEntity>());
-        }
-
-        public async Task<IEntity> UpdateAsync(IEntity entity)
-        {
-            var tableName = entity.GetTableName();
-            if (_tables.ContainsKey(tableName))
-            {
-                var existingEntity = _tables[tableName].FirstOrDefault(e => e.Id == entity.Id);
-                if (existingEntity != null)
+                var entity = table.Entities.FirstOrDefault(e => e.Id == id);
+                if (entity != null)
                 {
-                    _tables[tableName].Remove(existingEntity);
-                    _tables[tableName].Add(entity);
+                    return await Task.FromResult(entity);
                 }
             }
-            return await Task.FromResult(entity);
+
+            return await Task.FromResult<T?>(null);
+        }
+
+        public async Task<IEnumerable<T>> ReadAllAsync()
+        {
+            var allEntities = _tables.Values.SelectMany(t => t.Entities).ToList();
+            return await Task.FromResult(allEntities);
+        }
+
+        public async Task<T> UpdateAsync(IEntity entity)
+        {
+            var tableName = entity.GetEntityName();
+            var table = GetOrCreateTable(tableName);
+
+            var existingEntity = table.Entities.FirstOrDefault(e => e.Id == entity.Id);
+            if (existingEntity != null)
+            {
+                table.Entities.Remove(existingEntity);
+                table.Entities.Add((T)entity);
+            }
+            return await Task.FromResult((T)entity);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            return true;
-            //throw new NotImplementedException("Use the overload with tableName parameter.");
-        }
-
-        public async Task<bool> DeleteAsync(Guid id, string tableName)
-        {
-            if (_tables.ContainsKey(tableName))
+            foreach (var table in _tables.Values)
             {
-                var entity = _tables[tableName].FirstOrDefault(e => e.Id == id);
+                var entity = table.Entities.FirstOrDefault(e => e.Id == id);
                 if (entity != null)
                 {
-                    _tables[tableName].Remove(entity);
+                    table.Entities.Remove(entity);
+                    return await Task.FromResult(true);
+                }
+            }
+            return await Task.FromResult(false);
+        }
+
+        public async Task<bool> DeleteAsync(T entity)
+        {
+            var tableName = entity.GetEntityName();
+            if (_tables.Values.Any(t => t.Name == tableName))
+            {
+                var table = _tables.Values.First(t => t.Name == tableName);
+                if (table.Entities.Remove(entity))
+                {
                     return await Task.FromResult(true);
                 }
             }
@@ -88,9 +82,10 @@ namespace TangoBotAPI.Persistence
 
         public async Task<bool> RemoveTableAsync(string tableName)
         {
-            if (_tables.ContainsKey(tableName))
+            var table = _tables.Values.FirstOrDefault(t => t.Name == tableName);
+            if (table != null)
             {
-                _tables.Remove(tableName);
+                _tables.Remove(table.Id);
                 return await Task.FromResult(true);
             }
             return await Task.FromResult(false);
@@ -98,7 +93,33 @@ namespace TangoBotAPI.Persistence
 
         public async Task<IEnumerable<string>> ListTablesAsync()
         {
-            return await Task.FromResult(_tables.Keys.AsEnumerable());
+            var tableNames = _tables.Values.Select(t => t.Name).ToList();
+            return await Task.FromResult(tableNames);
+        }
+
+        private Table GetOrCreateTable(string tableName)
+        {
+            var table = _tables.Values.FirstOrDefault(t => t.Name == tableName);
+            if (table == null)
+            {
+                table = new Table
+                {
+                    Id = Guid.NewGuid(),
+                    Name = tableName,
+                    Description = $"Description for {tableName}",
+                    Entities = new List<T>()
+                };
+                _tables[table.Id] = table;
+            }
+            return table;
+        }
+
+        private class Table
+        {
+            public Guid Id { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            public List<T> Entities { get; set; } = new List<T>();
         }
     }
 }

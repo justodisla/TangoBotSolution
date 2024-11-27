@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using TangoBotAPI.DI;
 using TangoBotAPI.Persistence;
 using TangoBotAPI.Streaming;
@@ -14,13 +15,24 @@ namespace TangoBotStreaming.Observables
         private readonly HashSet<DateTime> _receivedDates = new();
         private readonly QuoteDataHistory _quoteDataHistory;
         private bool _isHistoricalDataComplete = false;
-        private IPersistence? _persistence;
+
+        private IPersistence<QuoteDataHistory.DataPoint>? _persistence;
 
         public HistoryDataStreamObserver()
         {
             _quoteDataHistory = new QuoteDataHistory();
-            _persistence = TangoBotServiceProviderExp.GetTransientService<IPersistence>(typeof(InMemoryPersistence).FullName);
-            //_persistence = TangoBotServiceProvider.GetTransientService<IPersistence>(typeof(InMemoryPersistence).Name);
+            string? fullName = typeof(InMemoryPersistence<QuoteDataHistory.DataPoint>).FullName;
+
+            if (fullName == null)
+            {
+                throw new InvalidOperationException("Persistence service is not available.");
+            }
+
+            // Reformat fullName to be used as a dictionary key
+            fullName = Regex.Replace(fullName, @"[^a-zA-Z0-9_]", "_");
+
+            _persistence = TangoBotServiceProviderExp
+                .GetTransientService<IPersistence<QuoteDataHistory.DataPoint>>("TangoBotAPI.Persistence.InMemoryPersistence");
         }
 
         public void OnCompleted()

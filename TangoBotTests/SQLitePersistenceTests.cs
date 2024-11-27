@@ -11,7 +11,7 @@ namespace DatabaseLib.Tests
 {
     public class SQLitePersistenceTests : IDisposable
     {
-        private readonly IPersistence _persistence;
+        private readonly IPersistence<User> _persistence;
         private readonly string _dataDirectory;
         private readonly string _databaseFilePath;
 
@@ -24,11 +24,12 @@ namespace DatabaseLib.Tests
             //TangoBotServiceProvider.AddService<IPersistence>(provider => new SQLitePersistence(), typeof(SQLitePersistence).Name);
             //_persistence = TangoBotServiceProvider.GetSingletonService<IPersistence>(typeof(SQLitePersistence).Name) as SQLitePersistence ?? throw new System.Exception("Service not found");
 
-            _persistence = TangoBotServiceProviderExp.GetSingletonService<IPersistence>("DatabaseLib.SQLitePersistence") ?? throw new System.Exception("Service not found");
+            _persistence = TangoBotServiceProviderExp.GetSingletonService<IPersistence<User>>("DatabaseLib.SQLitePersistence") ?? throw new System.Exception("Service not found");
 
             try
             {
-                Directory.Delete(_databaseFilePath, true);
+                if(Directory.Exists(_databaseFilePath))
+                    Directory.Delete(_databaseFilePath, true);
             }
             catch (Exception)
             {

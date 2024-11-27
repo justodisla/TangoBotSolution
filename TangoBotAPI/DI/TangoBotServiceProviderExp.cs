@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace TangoBotAPI.DI
 {
@@ -50,8 +52,8 @@ namespace TangoBotAPI.DI
             }
 
             var serviceType = DiscoverServiceType<T>(name) ?? throw new Exception($"Service implementation '{name}' not found for interface '{typeof(T).Name}'");
-            
-            name = string.IsNullOrEmpty(name) ? serviceType.FullName : name;
+
+            name = LevelName(name, serviceType);
 
             if (!singletonInstances.ContainsKey(name))
             {
@@ -72,13 +74,22 @@ namespace TangoBotAPI.DI
             return singletonInstances[name] as T;
         }
 
+        private static string LevelName(string name, Type serviceType)
+        {
+            name = string.IsNullOrEmpty(name) ? serviceType.FullName : name;
+
+            // Reformat fullName to be used as a dictionary key
+            name = Regex.Replace(name, @"[^a-zA-Z0-9_]", "_");
+            return name;
+        }
+
         /// <summary>
         /// Gets a transient service from the service provider.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
-        /// <param name="name">The fully qualified name of the service implementation class (optional).</param>
+        /// <param name="qualifiedName">The fully qualified name of the service implementation class (optional).</param>
         /// <returns>The service instance, or null if not found.</returns>
-        public static T? GetTransientService<T>(string name = "") where T : class
+        public static T? GetTransientService<T>(string qualifiedName = "") where T : class
         {
             if (!initialize)
             {
@@ -90,16 +101,19 @@ namespace TangoBotAPI.DI
                 throw new Exception("Service provider is null");
             }
 
-            var serviceType = DiscoverServiceType<T>(name);
+            var serviceType = DiscoverServiceType<T>(qualifiedName);
+
+            qualifiedName = LevelName(qualifiedName, serviceType);
+
             if (serviceType == null)
             {
-                throw new Exception($"Service implementation '{name}' not found for interface '{typeof(T).Name}'");
+                throw new Exception($"Service implementation '{qualifiedName}' not found for interface '{typeof(T).Name}'");
             }
 
-            if (!namedServices.ContainsKey(name))
+            if (!namedServices.ContainsKey(qualifiedName))
             {
                 services?.AddTransient(typeof(T), serviceType);
-                namedServices[name] = serviceType;
+                namedServices[qualifiedName] = serviceType;
                 _wrappedServiceProvider = services?.BuildServiceProvider();
             }
 
@@ -135,6 +149,11 @@ namespace TangoBotAPI.DI
             if (serviceTypes.Count > 1 && string.IsNullOrEmpty(name))
             {
                 throw new Exception($"Multiple implementations found for interface '{interfaceType.Name}'. Please specify the implementation name.");
+            }
+
+            if (!string.IsNullOrEmpty(name) && !name.Contains('.'))
+            {
+                throw new Exception($"The name '{name}' is not a fully qualified type name.");
             }
 
             var serviceType = string.IsNullOrEmpty(name)

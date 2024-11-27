@@ -18,8 +18,5 @@ namespace TangoBotAPI.Persistence
 
         // Method to get the description of the entity
         string GetDescription();
-
-        // Method to get the table name of the entity
-        string GetTableName();
     }
 }

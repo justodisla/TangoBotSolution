@@ -10,14 +10,14 @@ namespace TangoBotAPI.Tests
 {
     public class InMemoryPersistenceTests
     {
-        private readonly IPersistence _persistence;
+        private readonly IPersistence<User> _persistence;
 
         public InMemoryPersistenceTests()
         {
-            //TangoBotServiceProviderExp.AddSingletonService<IPersistence>(typeof(InMemoryPersistence).FullName);
+            //TangoBotServiceProviderExp.AddSingletonService<IPersistence<User>>(typeof(InMemoryPersistence<User>).FullName);
 
-            _persistence = TangoBotServiceProviderExp.GetTransientService<IPersistence>(typeof(InMemoryPersistence).FullName)  ?? throw new System.Exception("Service not found");
-            //_persistence = new InMemoryPersistence();
+            _persistence = TangoBotServiceProviderExp.GetTransientService<IPersistence<User>>(typeof(InMemoryPersistence<User>).FullName) ?? throw new System.Exception("Service not found");
+            //_persistence = new InMemoryPersistence<User>();
         }
 
         [Fact]

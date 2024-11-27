@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Principal;
 using System.Text.Json;
 using System.Threading.Tasks;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
 using TangoBotAPI.Persistence;
 
 namespace FilePersistence
 {
-    public class FilePersistence : IPersistence
+    public class FilePersistence<T> : IPersistence<T> where T : IEntity
     {
         private const string FILE_PERSISTENCE_FILE = "FileBasedPersistence";
         private readonly string _basePath;
@@ -23,7 +20,7 @@ namespace FilePersistence
                 Directory.CreateDirectory(_basePath);
         }
 
-        public async Task<IEntity> CreateAsync(IEntity entity)
+        public async Task<T> CreateAsync(IEntity entity)
         {
             var tableName = entity.GetEntityName();
             var table = await LoadTableAsync(tableName);
@@ -35,10 +32,10 @@ namespace FilePersistence
 
             table.Records.Add(record);
             await SaveTableAsync(table);
-            return entity;
+            return (T)entity;
         }
 
-        public async Task<IEntity> ReadAsync(Guid id)
+        public async Task<T> ReadAsync(Guid id)
         {
             foreach (var file in Directory.GetFiles(_basePath, "*.json"))
             {
@@ -46,28 +43,28 @@ namespace FilePersistence
                 var record = table.Records.Find(r => r.Id == id);
                 if (record != null)
                 {
-                    return JsonSerializer.Deserialize<IEntity>(record.Data);
+                    return JsonSerializer.Deserialize<T>(record.Data);
                 }
             }
 
-            throw new Exception("Record not found.");
+            return default(T);
         }
 
-        public async Task<IEnumerable<IEntity>> ReadAllAsync()
+        public async Task<IEnumerable<T>> ReadAllAsync()
         {
-            var entities = new List<IEntity>();
+            var entities = new List<T>();
             foreach (var file in Directory.GetFiles(_basePath, "*.json"))
             {
                 var table = await LoadTableAsync(Path.GetFileNameWithoutExtension(file));
                 foreach (var record in table.Records)
                 {
-                    entities.Add(JsonSerializer.Deserialize<IEntity>(record.Data));
+                    entities.Add(JsonSerializer.Deserialize<T>(record.Data));
                 }
             }
             return entities;
         }
 
-        public async Task<IEntity> UpdateAsync(IEntity entity)
+        public async Task<T> UpdateAsync(IEntity entity)
         {
             var tableName = entity.GetEntityName();
             var table = await LoadTableAsync(tableName);
@@ -79,7 +76,7 @@ namespace FilePersistence
 
             record.Data = JsonSerializer.Serialize(entity);
             await SaveTableAsync(table);
-            return entity;
+            return (T)entity;
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -97,6 +94,32 @@ namespace FilePersistence
             }
 
             return false;
+        }
+
+        public async Task<bool> DeleteAsync(T entity)
+        {
+            return await DeleteAsync(entity.Id);
+        }
+
+        public async Task<bool> RemoveTableAsync(string tableName)
+        {
+            var tablePath = GetTablePath(tableName);
+            if (File.Exists(tablePath))
+            {
+                File.Delete(tablePath);
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<IEnumerable<string>> ListTablesAsync()
+        {
+            var tables = new List<string>();
+            foreach (var file in Directory.GetFiles(_basePath, "*.json"))
+            {
+                tables.Add(Path.GetFileNameWithoutExtension(file));
+            }
+            return tables;
         }
 
         private string GetTablePath(string tableName) => Path.Combine(_basePath, $"{tableName}.json");
@@ -128,16 +151,6 @@ namespace FilePersistence
             var tablePath = GetTablePath(table.Name);
             var json = JsonSerializer.Serialize(table);
             await File.WriteAllTextAsync(tablePath, json);
-        }
-
-        public Task<bool> RemoveTableAsync(string tableName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<string>> ListTablesAsync()
-        {
-            throw new NotImplementedException();
         }
 
         private class Table

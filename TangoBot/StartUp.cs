@@ -1,4 +1,5 @@
-﻿using HttpClientLib;
+﻿using DatabaseLib;
+using HttpClientLib;
 using HttpClientLib.AccountApi;
 using HttpClientLib.AccountApi.Observer;
 using HttpClientLib.CustomerApi;
@@ -47,18 +48,22 @@ namespace TangoBot
         /// </summary>
         private static void SetupServices()
         {
+            /*
+            IEntity UserRole = EntityFactory.CreateEntity("UserRole", "User Role");
 
-            var tango = TangoBotServiceProviderExp.GetTransientService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var tango = TangoBotServiceProviderExp.GetTransientService<IPersistence<IEntity>>(typeof(SQLitePersistence<IEntity>).FullName);
             var hc1 = tango.GetHashCode();
 
-            var fango = TangoBotServiceProviderExp.GetSingletonService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var fango = TangoBotServiceProviderExp.GetSingletonService<IPersistence<IEntity>>("DatabaseLib.SQLitePersistence");
             var hc2 = fango.GetHashCode();
 
-            var pango = TangoBotServiceProviderExp.GetSingletonService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var pango = TangoBotServiceProviderExp.GetSingletonService<IPersistence<IEntity>>("DatabaseLib.SQLitePersistence");
             var hc3 = pango.GetHashCode();
 
-            var dango = TangoBotServiceProviderExp.GetTransientService<IPersistence>("DatabaseLib.SQLitePersistence");
+            var dango = TangoBotServiceProviderExp.GetTransientService<IPersistence<IEntity>>("DatabaseLib.SQLitePersistence");
             var hc4 = dango.GetHashCode();
+
+            */
 
             //var aacn = tango.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
 

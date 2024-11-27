@@ -8,7 +8,7 @@ using TangoBotAPI.Persistence;
 
 namespace DatabaseLib
 {
-    public class SQLitePersistence : IPersistence
+    public class SQLitePersistence<T> : IPersistence<T> where T : IEntity
     {
         private readonly DatabaseManager _databaseManager;
         private readonly string _dataDirectory;
@@ -29,9 +29,9 @@ namespace DatabaseLib
             _databaseManager.InitializeDatabase();
         }
 
-        public async Task<IEntity> CreateAsync(IEntity entity)
+        public async Task<T> CreateAsync(IEntity entity)
         {
-            var tableName = entity.GetTableName();
+            var tableName = entity.GetEntityName();
             EnsureTableExists(tableName);
 
             entity.BeforeSave();
@@ -40,7 +40,7 @@ namespace DatabaseLib
             await connection.OpenAsync();
 
             // Check if the entity already exists
-            var existingEntity = await ReadAsync(entity.Id, tableName);
+            var existingEntity = await ReadAsync(entity.Id);
             if (existingEntity != null)
             {
                 throw new SqliteException("UNIQUE constraint failed: Entities.Id", 19);
@@ -57,16 +57,17 @@ namespace DatabaseLib
             await command.ExecuteNonQueryAsync();
 
             entity.AfterSave();
-            return entity;
+            return (T)entity;
         }
 
-        public async Task<IEntity> ReadAsync(Guid id)
+        public async Task<T> ReadAsync(Guid id)
         {
-            throw new NotImplementedException("Use the overload with tableName parameter.");
-        }
+            var tableName = typeof(T).GetMethod("GetEntityName")?.Invoke(null, null)?.ToString();
+            if (string.IsNullOrEmpty(tableName))
+            {
+                throw new Exception("Table name could not be determined from entity type.");
+            }
 
-        public async Task<IEntity> ReadAsync(Guid id, string tableName)
-        {
             EnsureTableExists(tableName);
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
@@ -81,16 +82,17 @@ namespace DatabaseLib
             command.Parameters.AddWithValue("@id", id.ToString());
 
             var result = await command.ExecuteScalarAsync();
-            return result != null ? DeserializeEntity(result.ToString() ?? string.Empty) : null;
+            return result != null ? DeserializeEntity(result.ToString() ?? string.Empty) : default(T);
         }
 
-        public async Task<IEnumerable<IEntity>> ReadAllAsync()
+        public async Task<IEnumerable<T>> ReadAllAsync()
         {
-            throw new NotImplementedException("Use the overload with tableName parameter.");
-        }
+            var tableName = typeof(T).GetMethod("GetEntityName")?.Invoke(null, null)?.ToString();
+            if (string.IsNullOrEmpty(tableName))
+            {
+                throw new Exception("Table name could not be determined from entity type.");
+            }
 
-        public async Task<IEnumerable<IEntity>> ReadAllAsync(string tableName)
-        {
             EnsureTableExists(tableName);
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
@@ -102,7 +104,7 @@ namespace DatabaseLib
                     FROM {tableName};
                 ";
 
-            var entities = new List<IEntity>();
+            var entities = new List<T>();
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -112,9 +114,9 @@ namespace DatabaseLib
             return entities;
         }
 
-        public async Task<IEntity> UpdateAsync(IEntity entity)
+        public async Task<T> UpdateAsync(IEntity entity)
         {
-            var tableName = entity.GetTableName();
+            var tableName = entity.GetEntityName();
             EnsureTableExists(tableName);
 
             entity.BeforeSave();
@@ -134,29 +136,17 @@ namespace DatabaseLib
             await command.ExecuteNonQueryAsync();
 
             entity.AfterSave();
-            return entity;
+            return (T)entity;
         }
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            EnsureTableExists("");
+            var tableName = typeof(T).GetMethod("GetEntityName")?.Invoke(null, null)?.ToString();
+            if (string.IsNullOrEmpty(tableName))
+            {
+                throw new Exception("Table name could not be determined from entity type.");
+            }
 
-            using var connection = new SqliteConnection(_databaseManager.ConnectionString);
-            await connection.OpenAsync();
-
-            var command = connection.CreateCommand();
-            command.CommandText = $@"
-                    DELETE FROM {""}
-                    WHERE Id = @id;
-                ";
-            command.Parameters.AddWithValue("@id", id.ToString());
-
-            var rowsAffected = await command.ExecuteNonQueryAsync();
-            return rowsAffected > 0;
-        }
-
-        public async Task<bool> DeleteAsync(Guid id, string tableName)
-        {
             EnsureTableExists(tableName);
 
             using var connection = new SqliteConnection(_databaseManager.ConnectionString);
@@ -171,6 +161,12 @@ namespace DatabaseLib
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             return rowsAffected > 0;
+        }
+
+        public async Task<bool> DeleteAsync(T entity)
+        {
+            var tableName = entity.GetEntityName();
+            return await DeleteAsync(entity.Id);
         }
 
         public async Task<bool> RemoveTableAsync(string tableName)
@@ -236,10 +232,10 @@ namespace DatabaseLib
             return System.Text.Json.JsonSerializer.Serialize(entity);
         }
 
-        private IEntity DeserializeEntity(string data)
+        private T DeserializeEntity(string data)
         {
             // Deserialize to the concrete type
-            return (IEntity)(System.Text.Json.JsonSerializer.Deserialize<Entity>(data) ?? throw new Exception("Could not deserialize entity"));
+            return (T)(System.Text.Json.JsonSerializer.Deserialize<T>(data) ?? throw new Exception("Could not deserialize entity"));
         }
     }
 }
