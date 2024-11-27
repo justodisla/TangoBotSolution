@@ -5,20 +5,20 @@ using System.Threading.Tasks;
 
 namespace TangoBotAPI.Persistence
 {
-    public class InMemoryPersistence<T> : IPersistence<T> where T : class, IEntity
+    public class InMemoryPersistence : IPersistence
     {
         private readonly Dictionary<Guid, Table> _tables = new();
 
-        public async Task<T> CreateAsync(IEntity entity)
+        public async Task<IEntity> CreateAsync(IEntity entity)
         {
             var tableName = entity.GetEntityName();
             var table = GetOrCreateTable(tableName);
 
-            table.Entities.Add((T)entity);
-            return await Task.FromResult((T)entity);
+            table.Entities.Add(entity);
+            return await Task.FromResult(entity);
         }
 
-        public async Task<T?> ReadAsync(Guid id)
+        public async Task<IEntity?> ReadAsync(Guid id)
         {
             foreach (var table in _tables.Values)
             {
@@ -29,16 +29,16 @@ namespace TangoBotAPI.Persistence
                 }
             }
 
-            return await Task.FromResult<T?>(null);
+            return await Task.FromResult<IEntity?>(null);
         }
 
-        public async Task<IEnumerable<T>> ReadAllAsync()
+        public async Task<IEnumerable<IEntity>> ReadAllAsync()
         {
             var allEntities = _tables.Values.SelectMany(t => t.Entities).ToList();
             return await Task.FromResult(allEntities);
         }
 
-        public async Task<T> UpdateAsync(IEntity entity)
+        public async Task<IEntity> UpdateAsync(IEntity entity)
         {
             var tableName = entity.GetEntityName();
             var table = GetOrCreateTable(tableName);
@@ -47,9 +47,9 @@ namespace TangoBotAPI.Persistence
             if (existingEntity != null)
             {
                 table.Entities.Remove(existingEntity);
-                table.Entities.Add((T)entity);
+                table.Entities.Add(entity);
             }
-            return await Task.FromResult((T)entity);
+            return await Task.FromResult(entity);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -66,7 +66,7 @@ namespace TangoBotAPI.Persistence
             return await Task.FromResult(false);
         }
 
-        public async Task<bool> DeleteAsync(T entity)
+        public async Task<bool> DeleteAsync(IEntity entity)
         {
             var tableName = entity.GetEntityName();
             if (_tables.Values.Any(t => t.Name == tableName))
@@ -107,7 +107,7 @@ namespace TangoBotAPI.Persistence
                     Id = Guid.NewGuid(),
                     Name = tableName,
                     Description = $"Description for {tableName}",
-                    Entities = new List<T>()
+                    Entities = new List<IEntity>()
                 };
                 _tables[table.Id] = table;
             }
@@ -119,7 +119,40 @@ namespace TangoBotAPI.Persistence
             public Guid Id { get; set; }
             public string Name { get; set; } = string.Empty;
             public string Description { get; set; } = string.Empty;
-            public List<T> Entities { get; set; } = new List<T>();
+            public List<IEntity> Entities { get; set; } = new List<IEntity>();
+        }
+    }
+
+    public class InMemoryPersistence<T> : InMemoryPersistence, IPersistence<T> where T : class, IEntity
+    {
+        public new async Task<T> CreateAsync(IEntity entity)
+        {
+            return (T)await base.CreateAsync(entity);
+        }
+
+        public new async Task<T?> ReadAsync(Guid id)
+        {
+            return (T?)await base.ReadAsync(id);
+        }
+
+        public new async Task<IEnumerable<T>> ReadAllAsync()
+        {
+            return (IEnumerable<T>)await base.ReadAllAsync();
+        }
+
+        public new async Task<T> UpdateAsync(IEntity entity)
+        {
+            return (T)await base.UpdateAsync(entity);
+        }
+
+        public new async Task<bool> DeleteAsync(Guid id)
+        {
+            return await base.DeleteAsync(id);
+        }
+
+        public async Task<bool> DeleteAsync(T entity)
+        {
+            return await base.DeleteAsync((IEntity)entity);
         }
     }
 }

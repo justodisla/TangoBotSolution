@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBotAPI.Persistence;
@@ -20,6 +21,49 @@ namespace FilePersistence
                 Directory.CreateDirectory(_basePath);
         }
 
+        // Explicit interface implementation for non-generic IPersistence methods
+        async Task<IEntity> IPersistence.CreateAsync(IEntity entity)
+        {
+            return await CreateAsync((T)entity);
+        }
+
+        async Task<IEntity?> IPersistence.ReadAsync(Guid id)
+        {
+            return await ReadAsync(id);
+        }
+
+        async Task<IEnumerable<IEntity>> IPersistence.ReadAllAsync()
+        {
+            var entities = await ReadAllAsync();
+            return entities.Cast<IEntity>();
+        }
+
+        async Task<IEntity> IPersistence.UpdateAsync(IEntity entity)
+        {
+            return await UpdateAsync((T)entity);
+        }
+
+        async Task<bool> IPersistence.DeleteAsync(Guid id)
+        {
+            return await DeleteAsync(id);
+        }
+
+        async Task<bool> IPersistence.DeleteAsync(IEntity entity)
+        {
+            return await DeleteAsync(entity.Id);
+        }
+
+        async Task<bool> IPersistence.RemoveTableAsync(string tableName)
+        {
+            return await RemoveTableAsync(tableName);
+        }
+
+        async Task<IEnumerable<string>> IPersistence.ListTablesAsync()
+        {
+            return await ListTablesAsync();
+        }
+
+        // Generic methods
         public async Task<T> CreateAsync(IEntity entity)
         {
             var tableName = entity.GetEntityName();
@@ -35,7 +79,7 @@ namespace FilePersistence
             return (T)entity;
         }
 
-        public async Task<T> ReadAsync(Guid id)
+        public async Task<T?> ReadAsync(Guid id)
         {
             foreach (var file in Directory.GetFiles(_basePath, "*.json"))
             {
