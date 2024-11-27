@@ -33,9 +33,9 @@ namespace HttpClientLib.TokenManagement
         /// </summary>
         public TokenProvider()
         {
-            _httpClient = TangoBotServiceProvider.GetService<HttpClient>() ?? throw new Exception("HttpClient is null");
+            _httpClient = new HttpClient();
 
-             _configurationProvider = TangoBotServiceProvider.GetService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
+             _configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
             _streamingTokenEndpoint = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_API_URL) +
                 _configurationProvider.GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN_ENDPOINT);
 
@@ -195,7 +195,7 @@ namespace HttpClientLib.TokenManagement
         /// <returns>True if the streaming token is valid; otherwise, false.</returns>
         private static async Task<bool> IsStreamingTokenValid(string streamingToken)
         {
-            var streamingService = TangoBotServiceProvider.GetService<IStreamingService>();
+            var streamingService = TangoBotServiceProviderExp.GetSingletonService<IStreamingService>();
 
             return streamingService == null
                 ? throw new Exception("Streaming service is not available.")

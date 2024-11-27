@@ -15,8 +15,8 @@ namespace HttpClientLib
 
         public MarketStatusChecker()
         {
-            _httpClient = TangoBotServiceProvider.GetService<HttpClient>();
-            _apiKey = TangoBotServiceProvider.GetService<IConfigurationProvider>()?.GetConfigurationValue(Constants.ALPHA_VANTAGE_API_KEY);
+            _httpClient = new HttpClient();
+            _apiKey = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>()?.GetConfigurationValue(Constants.ALPHA_VANTAGE_API_KEY);
         }
 
         public async Task<bool> IsMarketOpenAsync()

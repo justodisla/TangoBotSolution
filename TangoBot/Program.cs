@@ -46,7 +46,7 @@ namespace TangoBot
             using var httpClient = new HttpClient();
 
             // Create a TokenProvider instance (assuming you have a suitable constructor)
-            var tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>();
+            var tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>();
 
             // Create AccountComponent instance
             var accountComponent = new AccountComponent();
@@ -98,7 +98,7 @@ namespace TangoBot
             await TestGetActiveInstrumentsAsync(instrumentComponent);
 
             // Create OrderComponent instance
-            var orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
+            var orderComponent = TangoBotServiceProviderExp.GetSingletonService<OrderComponent>();
             await TestGetAccountOrdersAsync(accountNumber, orderComponent);
             await TestGetAccountLiveOrdersAsync(accountNumber, orderComponent);
             await TestGetOrderByIdAsync(accountNumber, 155008, orderComponent);
@@ -215,7 +215,7 @@ namespace TangoBot
 
                 var choice = Console.ReadLine();
 
-                OrderComponent? orderComponent = TangoBotServiceProvider.GetService<OrderComponent>();
+                OrderComponent? orderComponent = TangoBotServiceProviderExp.GetSingletonService<OrderComponent>();
                 switch (choice)
                 {
                     case "1":

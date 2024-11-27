@@ -60,7 +60,7 @@ namespace TangoBotAPI.DI
         /// <typeparam name="T">The type of the service.</typeparam>
         /// <param name="name">An optional name for the service to support multiple implementations.</param>
         /// <returns>The service instance, or null if not found.</returns>
-        public static T? GetSingletonService<T>(string name = "")
+        public static T? xGetSingletonService<T>(string name = "")
         {
             if (!initialize)
             {
@@ -79,14 +79,14 @@ namespace TangoBotAPI.DI
 
             return _wrappedServiceProvider.GetService<T>();
         }
-
+        [Obsolete("This method is obsolete, use GetSingletonService<T> instead")]
         /// <summary>
         /// Gets a transient service from the service provider.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
         /// <param name="name">An optional name for the service to support multiple implementations.</param>
         /// <returns>The service instance, or null if not found.</returns>
-        public static T? GetTransientService<T>(string name = "")
+        public static T? xGetTransientService<T>(string name = "")
         {
             if (!initialize)
             {
@@ -112,9 +112,9 @@ namespace TangoBotAPI.DI
         /// <typeparam name="T">The type of the service.</typeparam>
         /// <param name="name">An optional name for the service to support multiple implementations.</param>
         /// <returns>The service instance, or null if not found.</returns>
-        public static T? GetService<T>(string name = "")
+        public static T? xGetService<T>(string name = "")
         {
-            return GetSingletonService<T>(name);
+            return xGetSingletonService<T>(name);
         }
     }
 }

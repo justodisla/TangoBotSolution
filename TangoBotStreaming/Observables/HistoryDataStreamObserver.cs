@@ -19,8 +19,8 @@ namespace TangoBotStreaming.Observables
         public HistoryDataStreamObserver()
         {
             _quoteDataHistory = new QuoteDataHistory();
-            TangoBotServiceProvider.AddService<IPersistence>(provider => new InMemoryPersistence(), typeof(InMemoryPersistence).Name);
-            _persistence = TangoBotServiceProvider.GetTransientService<IPersistence>(typeof(InMemoryPersistence).Name);
+            _persistence = TangoBotServiceProviderExp.GetTransientService<IPersistence>(typeof(InMemoryPersistence).FullName);
+            //_persistence = TangoBotServiceProvider.GetTransientService<IPersistence>(typeof(InMemoryPersistence).Name);
         }
 
         public void OnCompleted()

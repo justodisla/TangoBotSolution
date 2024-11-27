@@ -53,7 +53,7 @@ namespace TangoBotStreaming.Services
             //Define that the toDate is the previous day
             toTime = toTime.AddDays(-1);
 
-            var _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>()
+            var _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>()
                 ?? throw new Exception("TokenProvider is null");
 
             _apiQuoteToken = _tokenProvider.GetValidStreamingToken().Result;

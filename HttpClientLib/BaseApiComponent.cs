@@ -16,7 +16,9 @@ namespace HttpClientLib
 
         protected BaseApiComponent()
         {
-            _httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
+            _httpClient = new HttpClient();
+
+            //_httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
             _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
             _observerManager = new ObserverManager<HttpResponseEvent>();
         }

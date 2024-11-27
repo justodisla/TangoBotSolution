@@ -109,7 +109,7 @@ namespace TangoBotTests
             //var msc = TangoBotServiceProvider.GetService<MarketStatusChecker>();
             //bool isMarketOpened = await msc.IsMarketOpenAsync();
 
-            MarketStatusChecker? marketStatusChecker = TangoBotServiceProvider.GetService<MarketStatusChecker>() ?? throw new Exception("Unable to load MarketStatusChecker");
+            MarketStatusChecker? marketStatusChecker = (MarketStatusChecker?)(TangoBotServiceProviderExp.GetSingletonService<ITTService>(typeof(MarketStatusChecker).FullName) ?? throw new Exception("Unable to load MarketStatusChecker"));
             if (!await marketStatusChecker.IsMarketOpenAsync())
             {
                 Assert.True(true);

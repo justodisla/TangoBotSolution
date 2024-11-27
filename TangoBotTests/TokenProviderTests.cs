@@ -9,12 +9,13 @@ namespace TangoBotTests
 {
     public class TokenProviderTests
     {
-        private readonly TokenProvider? _tokenProvider;
+        private readonly ITokenProvider? _tokenProvider;
 
         public TokenProviderTests()
         {
             StartUp.InitializeDI();
-            _tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() as TokenProvider;
+            //_tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() as TokenProvider;
+            _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>() ?? throw new Exception("Token provider cannot be null");
         }
 
         [Fact]

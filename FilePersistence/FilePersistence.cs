@@ -130,6 +130,16 @@ namespace FilePersistence
             await File.WriteAllTextAsync(tablePath, json);
         }
 
+        public Task<bool> RemoveTableAsync(string tableName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<string>> ListTablesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         private class Table
         {
             public string Name { get; set; }

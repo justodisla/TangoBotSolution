@@ -24,6 +24,7 @@ namespace TangoBotAPI.Persistence
         public async Task<IEntity> ReadAsync(Guid id)
         {
             throw new NotImplementedException("Use the overload with tableName parameter.");
+
         }
 
         public async Task<IEntity> ReadAsync(Guid id, string tableName)

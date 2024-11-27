@@ -51,7 +51,7 @@ namespace TangoBotAPI.DI
 
             var serviceType = DiscoverServiceType<T>(name) ?? throw new Exception($"Service implementation '{name}' not found for interface '{typeof(T).Name}'");
             
-            //name = string.IsNullOrEmpty(name) ? serviceType.FullName : name;
+            name = string.IsNullOrEmpty(name) ? serviceType.FullName : name;
 
             if (!singletonInstances.ContainsKey(name))
             {

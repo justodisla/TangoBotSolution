@@ -139,7 +139,20 @@ namespace DatabaseLib
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException("Use the overload with tableName parameter.");
+            EnsureTableExists("");
+
+            using var connection = new SqliteConnection(_databaseManager.ConnectionString);
+            await connection.OpenAsync();
+
+            var command = connection.CreateCommand();
+            command.CommandText = $@"
+                    DELETE FROM {""}
+                    WHERE Id = @id;
+                ";
+            command.Parameters.AddWithValue("@id", id.ToString());
+
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
         }
 
         public async Task<bool> DeleteAsync(Guid id, string tableName)

@@ -20,7 +20,7 @@ namespace HttpClientLib.OrderApi
         public OrderComponent()
             : base()
         {
-            _baseUrl = TangoBotServiceProvider.GetService<IConfigurationProvider>()
+            _baseUrl = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>()
                 .GetConfigurationValue(Constants.ACTIVE_API_URL);
 
             //_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
