@@ -158,7 +158,7 @@ namespace TangoBotAPI.DI
 
             var serviceType = string.IsNullOrEmpty(name)
                 ? serviceTypes.FirstOrDefault()
-                : serviceTypes.FirstOrDefault(t => t.FullName.Equals(name, StringComparison.OrdinalIgnoreCase));
+                : serviceTypes.FirstOrDefault(t => t.FullName.Equals(name, StringComparison.OrdinalIgnoreCase) || t.FullName.Split('`')[0].Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (serviceType == null)
             {
@@ -167,6 +167,7 @@ namespace TangoBotAPI.DI
 
             return serviceType;
         }
+
 
         /// <summary>
         /// Checks if the file is a valid .NET assembly.

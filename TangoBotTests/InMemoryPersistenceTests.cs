@@ -1,33 +1,86 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TangoBotAPI.DI;
 using TangoBotAPI.Persistence;
-using TangoBotAPI.Persistence.Examples;
+using InMemoryLib;
 using Xunit;
 
 namespace TangoBotAPI.Tests
 {
     public class InMemoryPersistenceTests
     {
-        private readonly IPersistence<User> _persistence;
+        private readonly InMemoryPersistence _persistence;
 
         public InMemoryPersistenceTests()
         {
-            //TangoBotServiceProviderExp.AddSingletonService<IPersistence<User>>(typeof(InMemoryPersistence<User>).FullName);
+            _persistence = new InMemoryPersistence();
+        }
 
-            _persistence = TangoBotServiceProviderExp.GetTransientService<IPersistence<User>>(typeof(InMemoryPersistence<User>).FullName) ?? throw new System.Exception("Service not found");
-            //_persistence = new InMemoryPersistence<User>();
+        [Fact]
+        public async Task CreateCollectionAsync_ShouldCreateCollection()
+        {
+            // Act
+            var result = await _persistence.CreateCollectionAsync<User>("Users");
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task GetCollectionAsync_ShouldReturnCollection()
+        {
+            // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+
+            // Act
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
+
+            // Assert
+            Assert.NotNull(collection);
+        }
+
+        [Fact]
+        public async Task ListCollectionsAsync_ShouldReturnAllCollections()
+        {
+            // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            await _persistence.CreateCollectionAsync<User>("Orders");
+
+            // Act
+            var collections = await _persistence.ListCollectionsAsync();
+
+            // Assert
+            Assert.NotNull(collections);
+            Assert.Contains("Users", collections);
+            Assert.Contains("Orders", collections);
+        }
+
+        [Fact]
+        public async Task RemoveCollectionAsync_ShouldRemoveCollection()
+        {
+            // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+
+            // Act
+            var result = await _persistence.RemoveCollectionAsync("Users");
+            var collections = await _persistence.ListCollectionsAsync();
+
+            // Assert
+            Assert.True(result);
+            Assert.DoesNotContain("Users", collections);
         }
 
         [Fact]
         public async Task CreateAsync_ShouldAddEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
 
             // Act
-            var createdEntity = await _persistence.CreateAsync(user);
+            var createdEntity = await collection.CreateAsync(user);
 
             // Assert
             Assert.NotNull(createdEntity);
@@ -38,11 +91,13 @@ namespace TangoBotAPI.Tests
         public async Task ReadAsync_ShouldReturnEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
-            await _persistence.CreateAsync(user);
+            await collection.CreateAsync(user);
 
             // Act
-            var retrievedEntity = await _persistence.ReadAsync(user.Id);
+            var retrievedEntity = await collection.ReadAsync(user.Id);
 
             // Assert
             Assert.NotNull(retrievedEntity);
@@ -53,13 +108,15 @@ namespace TangoBotAPI.Tests
         public async Task ReadAllAsync_ShouldReturnAllEntities()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user1 = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
             var user2 = new User { Id = Guid.NewGuid(), Name = "Jane Doe", Email = "jane.doe@example.com" };
-            await _persistence.CreateAsync(user1);
-            await _persistence.CreateAsync(user2);
+            await collection.CreateAsync(user1);
+            await collection.CreateAsync(user2);
 
             // Act
-            var entities = await _persistence.ReadAllAsync();
+            var entities = await collection.ReadAllAsync();
 
             // Assert
             Assert.NotNull(entities);
@@ -70,12 +127,14 @@ namespace TangoBotAPI.Tests
         public async Task UpdateAsync_ShouldUpdateEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
-            await _persistence.CreateAsync(user);
+            await collection.CreateAsync(user);
             user.Name = "John Smith";
 
             // Act
-            var updatedEntity = await _persistence.UpdateAsync(user);
+            var updatedEntity = await collection.UpdateAsync(user);
 
             // Assert
             Assert.NotNull(updatedEntity);
@@ -86,16 +145,34 @@ namespace TangoBotAPI.Tests
         public async Task DeleteAsync_ShouldRemoveEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
-            await _persistence.CreateAsync(user);
+            await collection.CreateAsync(user);
 
             // Act
-            var result = await _persistence.DeleteAsync(user.Id);
-            var deletedEntity = await _persistence.ReadAsync(user.Id);
+            var result = await collection.DeleteAsync(user.Id);
+            var deletedEntity = await collection.ReadAsync(user.Id);
 
             // Assert
             Assert.True(result);
             Assert.Null(deletedEntity);
+        }
+    }
+
+    public class User : IEntity
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+
+        public void BeforeSave() { }
+        public void AfterSave() { }
+        public string GetEntityName() => "User";
+
+        public bool Validate()
+        {
+            return true;
         }
     }
 }

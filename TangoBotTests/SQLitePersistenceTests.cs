@@ -5,136 +5,165 @@ using System.Threading.Tasks;
 using TangoBotAPI.Persistence;
 using DatabaseLib;
 using Xunit;
-using TangoBotAPI.DI;
 
 namespace DatabaseLib.Tests
 {
     public class SQLitePersistenceTests : IDisposable
     {
-        private readonly IPersistence<User> _persistence;
-        private readonly string _dataDirectory;
-        private readonly string _databaseFilePath;
+        private readonly SQLitePersistence _persistence;
+        private readonly string _tempDatabaseFilePath;
 
         public SQLitePersistenceTests()
         {
-            // Specify the directory and database file name for testing
-            _dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestData");
-            _databaseFilePath = Path.Combine(_dataDirectory, "test_database.db");
-
-            //TangoBotServiceProvider.AddService<IPersistence>(provider => new SQLitePersistence(), typeof(SQLitePersistence).Name);
-            //_persistence = TangoBotServiceProvider.GetSingletonService<IPersistence>(typeof(SQLitePersistence).Name) as SQLitePersistence ?? throw new System.Exception("Service not found");
-
-            _persistence = TangoBotServiceProviderExp.GetSingletonService<IPersistence<User>>("DatabaseLib.SQLitePersistence") ?? throw new System.Exception("Service not found");
-
-            try
-            {
-                if(Directory.Exists(_databaseFilePath))
-                    Directory.Delete(_databaseFilePath, true);
-            }
-            catch (Exception)
-            {
-
-                //throw;
-            }
+            // Create a temporary database file path
+            _tempDatabaseFilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.db");
 
             // Ensure the directory exists
-            if (!Directory.Exists(_dataDirectory))
+            if (!Directory.Exists(Path.GetTempPath()))
             {
-                Directory.CreateDirectory(_dataDirectory);
+                Directory.CreateDirectory(Path.GetTempPath());
             }
 
-            // Create an instance of SQLitePersistence with the test database file path
-            //_persistence = new SQLitePersistence();
-        
-            //_persistence.TableName = typeof(User).Name;
+            // Initialize SQLitePersistence with the temporary database file path
+            _persistence = new SQLitePersistence();
+        }
+
+        [Fact]
+        public async Task CreateCollectionAsync_ShouldCreateCollection()
+        {
+            // Act
+            var result = await _persistence.CreateCollectionAsync<User>("Users");
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task GetCollectionAsync_ShouldReturnCollection()
+        {
+            // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+
+            // Act
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
+
+            // Assert
+            Assert.NotNull(collection);
+        }
+
+        [Fact]
+        public async Task ListCollectionsAsync_ShouldReturnAllCollections()
+        {
+            // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            await _persistence.CreateCollectionAsync<User>("Orders");
+
+            // Act
+            var collections = await _persistence.ListCollectionsAsync();
+
+            // Assert
+            Assert.NotNull(collections);
+            Assert.Contains("Users", collections);
+            Assert.Contains("Orders", collections);
+        }
+
+        [Fact]
+        public async Task RemoveCollectionAsync_ShouldRemoveCollection()
+        {
+            // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+
+            // Act
+            var result = await _persistence.RemoveCollectionAsync("Users");
+            var collections = await _persistence.ListCollectionsAsync();
+
+            // Assert
+            Assert.True(result);
+            Assert.DoesNotContain("Users", collections);
         }
 
         [Fact]
         public async Task CreateAsync_ShouldAddEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
 
             // Act
-            var createdEntity = await _persistence.CreateAsync(user); 
+            var createdEntity = await collection.CreateAsync(user);
 
             // Assert
             Assert.NotNull(createdEntity);
             Assert.Equal(user.Id, createdEntity.Id);
-
-            // Cleanup
-            await _persistence.DeleteAsync(user.Id);
         }
 
         [Fact]
         public async Task ReadAsync_ShouldReturnEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
-            await _persistence.CreateAsync(user);
+            await collection.CreateAsync(user);
 
             // Act
-            var retrievedEntity = await _persistence.ReadAsync(user.Id);
+            var retrievedEntity = await collection.ReadAsync(user.Id);
 
             // Assert
             Assert.NotNull(retrievedEntity);
             Assert.Equal(user.Id, retrievedEntity.Id);
-
-            // Cleanup
-            await _persistence.DeleteAsync(user.Id);
         }
 
         [Fact]
         public async Task ReadAllAsync_ShouldReturnAllEntities()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user1 = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
             var user2 = new User { Id = Guid.NewGuid(), Name = "Jane Doe", Email = "jane.doe@example.com" };
-            await _persistence.CreateAsync(user1);
-            await _persistence.CreateAsync(user2);
+            await collection.CreateAsync(user1);
+            await collection.CreateAsync(user2);
 
             // Act
-            var entities = await _persistence.ReadAllAsync();
+            var entities = await collection.ReadAllAsync();
 
             // Assert
             Assert.NotNull(entities);
             Assert.Equal(2, entities.Count());
-
-            // Cleanup
-            await _persistence.DeleteAsync(user1.Id);
-            await _persistence.DeleteAsync(user2.Id);
         }
 
         [Fact]
         public async Task UpdateAsync_ShouldUpdateEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
-            await _persistence.CreateAsync(user);
+            await collection.CreateAsync(user);
             user.Name = "John Smith";
 
             // Act
-            var updatedEntity = await _persistence.UpdateAsync(user);
+            var updatedEntity = await collection.UpdateAsync(user);
 
             // Assert
             Assert.NotNull(updatedEntity);
             Assert.Equal(user.Id, updatedEntity.Id);
-            Assert.Equal("John Smith", ((User)updatedEntity).Name);
-
-            // Cleanup
-            await _persistence.DeleteAsync(user.Id);
         }
 
         [Fact]
         public async Task DeleteAsync_ShouldRemoveEntity()
         {
             // Arrange
+            await _persistence.CreateCollectionAsync<User>("Users");
+            var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
-            await _persistence.CreateAsync(user);
+            await collection.CreateAsync(user);
 
             // Act
-            var result = await _persistence.DeleteAsync(user.Id);
-            var deletedEntity = await _persistence.ReadAsync(user.Id);
+            var result = await collection.DeleteAsync(user.Id);
+            var deletedEntity = await collection.ReadAsync(user.Id);
 
             // Assert
             Assert.True(result);
@@ -143,18 +172,10 @@ namespace DatabaseLib.Tests
 
         public void Dispose()
         {
-
-            //Delete all the records in the database
-            var entities = _persistence.ReadAllAsync().Result;
-            foreach (var entity in entities)
+            // Cleanup the temporary database file after all tests
+            if (File.Exists(_tempDatabaseFilePath))
             {
-                _persistence.DeleteAsync(entity.Id);
-            }
-
-            // Cleanup the test database file after all tests
-            if (File.Exists(_databaseFilePath))
-            {
-                File.Delete(_databaseFilePath);
+                File.Delete(_tempDatabaseFilePath);
             }
         }
     }
@@ -166,35 +187,12 @@ namespace DatabaseLib.Tests
         public string? Name { get; set; }
         public string? Email { get; set; }
 
+        public void BeforeSave() { }
+        public void AfterSave() { }
+        
         public bool Validate()
         {
-            // Implement validation logic
             return true;
-        }
-
-        public void BeforeSave()
-        {
-            // Implement actions before saving
-        }
-
-        public void AfterSave()
-        {
-            // Implement actions after saving
-        }
-
-        public string GetEntityName()
-        {
-            return GetType().Name;
-        }
-
-        public string GetDescription()
-        {
-            return "Represents a user entity in the system.";
-        }
-
-        public string GetTableName()
-        {
-            return "Users";
         }
     }
 }

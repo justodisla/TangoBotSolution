@@ -1,7 +1,4 @@
-﻿using HttpClientLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using InMemoryLib;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using TangoBotAPI.DI;
@@ -16,12 +13,13 @@ namespace TangoBotStreaming.Observables
         private readonly QuoteDataHistory _quoteDataHistory;
         private bool _isHistoricalDataComplete = false;
 
-        private IPersistence<QuoteDataHistory.DataPoint>? _persistence;
+        private IPersistence? _persistence;
+        private TangoBotAPI.Persistence.ICollection<QuoteDataHistory.DataPoint>? _quoteDataHistoryCollection;
 
         public HistoryDataStreamObserver()
         {
             _quoteDataHistory = new QuoteDataHistory();
-            string? fullName = typeof(InMemoryPersistence<QuoteDataHistory.DataPoint>).FullName;
+            string? fullName = typeof(InMemoryPersistence).FullName;
 
             if (fullName == null)
             {
@@ -32,7 +30,12 @@ namespace TangoBotStreaming.Observables
             fullName = Regex.Replace(fullName, @"[^a-zA-Z0-9_]", "_");
 
             _persistence = TangoBotServiceProviderExp
-                .GetTransientService<IPersistence<QuoteDataHistory.DataPoint>>("TangoBotAPI.Persistence.InMemoryPersistence");
+                .GetTransientService<IPersistence>("InMemoryLib.InMemoryPersistence");
+
+            _persistence.CreateCollectionAsync<QuoteDataHistory.DataPoint>("QuoteDataHistory").Wait();
+
+            _quoteDataHistoryCollection = _persistence.GetCollectionAsync<QuoteDataHistory.DataPoint>("QuoteDataHistory").Result;
+
         }
 
         public void OnCompleted()
@@ -47,7 +50,7 @@ namespace TangoBotStreaming.Observables
 
             foreach (var dataPoint in _quoteDataHistory.DataPoints)
             {
-                _persistence.CreateAsync(dataPoint).Wait();
+                _quoteDataHistoryCollection?.CreateAsync(dataPoint).Wait();
             }
         }
 

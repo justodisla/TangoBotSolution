@@ -1,158 +1,107 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TangoBotAPI.Persistence;
 
-namespace TangoBotAPI.Persistence
+namespace InMemoryLib
 {
     public class InMemoryPersistence : IPersistence
     {
-        private readonly Dictionary<Guid, Table> _tables = new();
+        private readonly ConcurrentDictionary<string, object> _collections = new();
 
-        public async Task<IEntity> CreateAsync(IEntity entity)
+        public Task<TangoBotAPI.Persistence.ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
         {
-            var tableName = entity.GetEntityName();
-            var table = GetOrCreateTable(tableName);
+            if (!_collections.ContainsKey(collectionName))
+            {
+                throw new KeyNotFoundException($"Collection '{collectionName}' does not exist.");
+            }
 
-            table.Entities.Add(entity);
-            return await Task.FromResult(entity);
+            var collection = _collections[collectionName] as TangoBotAPI.Persistence.ICollection<T>;
+            if (collection == null)
+            {
+                throw new InvalidCastException($"Collection '{collectionName}' is not of the expected type.");
+            }
+
+            return Task.FromResult(collection);
         }
 
-        public async Task<IEntity?> ReadAsync(Guid id)
+        public Task<IEnumerable<string>> ListCollectionsAsync()
         {
-            foreach (var table in _tables.Values)
+            var collectionNames = _collections.Keys.ToList();
+            return Task.FromResult((IEnumerable<string>)collectionNames);
+        }
+
+        public Task<bool> CreateCollectionAsync<T>(string collectionName) where T : IEntity
+        {
+            if (_collections.ContainsKey(collectionName))
             {
-                var entity = table.Entities.FirstOrDefault(e => e.Id == id);
-                if (entity != null)
+                return Task.FromResult(false);
+            }
+
+            _collections[collectionName] = new Collection<T>();
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> RemoveCollectionAsync(string collectionName)
+        {
+            return Task.FromResult(_collections.TryRemove(collectionName, out _));
+        }
+
+        
+
+        private class Collection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity
+        {
+            private readonly ConcurrentDictionary<Guid, T> _entities = new();
+
+            public Task<T> CreateAsync(T entity)
+            {
+                if (_entities.ContainsKey(entity.Id))
                 {
-                    return await Task.FromResult(entity);
+                    throw new InvalidOperationException("Entity with the same ID already exists.");
                 }
+
+                entity.BeforeSave();
+                _entities[entity.Id] = entity;
+                entity.AfterSave();
+                return Task.FromResult(entity);
             }
 
-            return await Task.FromResult<IEntity?>(null);
-        }
-
-        public async Task<IEnumerable<IEntity>> ReadAllAsync()
-        {
-            var allEntities = _tables.Values.SelectMany(t => t.Entities).ToList();
-            return await Task.FromResult(allEntities);
-        }
-
-        public async Task<IEntity> UpdateAsync(IEntity entity)
-        {
-            var tableName = entity.GetEntityName();
-            var table = GetOrCreateTable(tableName);
-
-            var existingEntity = table.Entities.FirstOrDefault(e => e.Id == entity.Id);
-            if (existingEntity != null)
+            public Task<T?> ReadAsync(Guid id)
             {
-                table.Entities.Remove(existingEntity);
-                table.Entities.Add(entity);
+                _entities.TryGetValue(id, out var entity);
+                return Task.FromResult(entity);
             }
-            return await Task.FromResult(entity);
-        }
 
-        public async Task<bool> DeleteAsync(Guid id)
-        {
-            foreach (var table in _tables.Values)
+            public Task<IEnumerable<T>> ReadAllAsync()
             {
-                var entity = table.Entities.FirstOrDefault(e => e.Id == id);
-                if (entity != null)
+                var entities = _entities.Values.ToList();
+                return Task.FromResult((IEnumerable<T>)entities);
+            }
+
+            public Task<T> UpdateAsync(T entity)
+            {
+                if (!_entities.ContainsKey(entity.Id))
                 {
-                    table.Entities.Remove(entity);
-                    return await Task.FromResult(true);
+                    throw new KeyNotFoundException("Entity not found.");
                 }
-            }
-            return await Task.FromResult(false);
-        }
 
-        public async Task<bool> DeleteAsync(IEntity entity)
-        {
-            var tableName = entity.GetEntityName();
-            if (_tables.Values.Any(t => t.Name == tableName))
+                entity.BeforeSave();
+                _entities[entity.Id] = entity;
+                entity.AfterSave();
+                return Task.FromResult(entity);
+            }
+
+            public Task<bool> DeleteAsync(Guid id)
             {
-                var table = _tables.Values.First(t => t.Name == tableName);
-                if (table.Entities.Remove(entity))
-                {
-                    return await Task.FromResult(true);
-                }
+                return Task.FromResult(_entities.TryRemove(id, out _));
             }
-            return await Task.FromResult(false);
-        }
 
-        public async Task<bool> RemoveTableAsync(string tableName)
-        {
-            var table = _tables.Values.FirstOrDefault(t => t.Name == tableName);
-            if (table != null)
+            public Task<bool> DeleteAsync(T entity)
             {
-                _tables.Remove(table.Id);
-                return await Task.FromResult(true);
+                return DeleteAsync(entity.Id);
             }
-            return await Task.FromResult(false);
-        }
-
-        public async Task<IEnumerable<string>> ListTablesAsync()
-        {
-            var tableNames = _tables.Values.Select(t => t.Name).ToList();
-            return await Task.FromResult(tableNames);
-        }
-
-        private Table GetOrCreateTable(string tableName)
-        {
-            var table = _tables.Values.FirstOrDefault(t => t.Name == tableName);
-            if (table == null)
-            {
-                table = new Table
-                {
-                    Id = Guid.NewGuid(),
-                    Name = tableName,
-                    Description = $"Description for {tableName}",
-                    Entities = new List<IEntity>()
-                };
-                _tables[table.Id] = table;
-            }
-            return table;
-        }
-
-        private class Table
-        {
-            public Guid Id { get; set; }
-            public string Name { get; set; } = string.Empty;
-            public string Description { get; set; } = string.Empty;
-            public List<IEntity> Entities { get; set; } = new List<IEntity>();
-        }
-    }
-
-    public class InMemoryPersistence<T> : InMemoryPersistence, IPersistence<T> where T : class, IEntity
-    {
-        public new async Task<T> CreateAsync(IEntity entity)
-        {
-            return (T)await base.CreateAsync(entity);
-        }
-
-        public new async Task<T?> ReadAsync(Guid id)
-        {
-            return (T?)await base.ReadAsync(id);
-        }
-
-        public new async Task<IEnumerable<T>> ReadAllAsync()
-        {
-            return (IEnumerable<T>)await base.ReadAllAsync();
-        }
-
-        public new async Task<T> UpdateAsync(IEntity entity)
-        {
-            return (T)await base.UpdateAsync(entity);
-        }
-
-        public new async Task<bool> DeleteAsync(Guid id)
-        {
-            return await base.DeleteAsync(id);
-        }
-
-        public async Task<bool> DeleteAsync(T entity)
-        {
-            return await base.DeleteAsync((IEntity)entity);
         }
     }
 }
