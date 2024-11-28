@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,8 +15,9 @@ namespace TangoBotAPI.DI
         private static IServiceProvider? _wrappedServiceProvider;
         private static bool initialize = false;
         private static ServiceCollection? services;
-        private static readonly Dictionary<string, Type> namedServices = new();
-        private static readonly Dictionary<string, object> singletonInstances = new();
+        private static readonly ConcurrentDictionary<string, Type> namedServices = new();
+        private static readonly ConcurrentDictionary<string, object> singletonInstances = new();
+        private static readonly object serviceCollectionLock = new();
 
         /// <summary>
         /// Initializes the service provider if it has not been initialized already.
@@ -27,10 +29,18 @@ namespace TangoBotAPI.DI
                 return;
             }
 
-            services = new ServiceCollection();
-            _wrappedServiceProvider = services.BuildServiceProvider() ?? throw new Exception("ServiceProvider build failed");
+            lock (serviceCollectionLock)
+            {
+                if (initialize)
+                {
+                    return;
+                }
 
-            initialize = true;
+                services = new ServiceCollection();
+                _wrappedServiceProvider = services.BuildServiceProvider() ?? throw new Exception("ServiceProvider build failed");
+
+                initialize = true;
+            }
         }
 
         /// <summary>
@@ -57,24 +67,33 @@ namespace TangoBotAPI.DI
 
             if (!singletonInstances.ContainsKey(name))
             {
-                if (!namedServices.ContainsKey(name))
+                lock (serviceCollectionLock)
                 {
-                    services?.AddSingleton(typeof(T), serviceType);
-                    namedServices[name] = serviceType;
-                    _wrappedServiceProvider = services?.BuildServiceProvider();
-                }
 
-                var instance = _wrappedServiceProvider.GetService<T>();
-                if (instance != null)
-                {
-                    singletonInstances[name] = instance;
+                    if (!namedServices.ContainsKey(name))
+                    {
+                        services?.AddSingleton(typeof(T), serviceType);
+                        namedServices[name] = serviceType;
+                        _wrappedServiceProvider = services?.BuildServiceProvider();
+                    }
+
+                    if(_wrappedServiceProvider == null)
+                    {
+                        throw new Exception("ServiceProvider build failed");
+                    }
+
+                    var instance = _wrappedServiceProvider.GetService<T>();
+                    if (instance != null)
+                    {
+                        singletonInstances[name] = instance;
+                    }
                 }
             }
 
             return singletonInstances[name] as T;
         }
 
-        private static string LevelName(string name, Type serviceType)
+        private static string LevelName(string? name, Type serviceType)
         {
             name = string.IsNullOrEmpty(name) ? serviceType.FullName : name;
 
@@ -112,9 +131,15 @@ namespace TangoBotAPI.DI
 
             if (!namedServices.ContainsKey(qualifiedName))
             {
-                services?.AddTransient(typeof(T), serviceType);
-                namedServices[qualifiedName] = serviceType;
-                _wrappedServiceProvider = services?.BuildServiceProvider();
+                lock (serviceCollectionLock)
+                {
+                    if (!namedServices.ContainsKey(qualifiedName))
+                    {
+                        services?.AddTransient(typeof(T), serviceType);
+                        namedServices[qualifiedName] = serviceType;
+                        _wrappedServiceProvider = services?.BuildServiceProvider();
+                    }
+                }
             }
 
             return _wrappedServiceProvider.GetService<T>();
@@ -167,7 +192,6 @@ namespace TangoBotAPI.DI
 
             return serviceType;
         }
-
 
         /// <summary>
         /// Checks if the file is a valid .NET assembly.
