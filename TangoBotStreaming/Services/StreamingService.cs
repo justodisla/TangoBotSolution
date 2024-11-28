@@ -238,7 +238,7 @@ namespace TangoBotStreaming.Services
         }
 
         /// <inheritdoc />
-        public void CloseWsConnection()
+        private void CloseWsConnection()
         {
             if (_websocketClient != null && _websocketClient.State == WebSocketState.Open)
             {

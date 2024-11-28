@@ -36,11 +36,6 @@ namespace TangoBotAPI.Streaming
         void StreamLiveMarketData<T>(T quoteDataHistory);
 
         /// <summary>
-        /// Closes the WebSocket connection.
-        /// </summary>
-        void CloseWsConnection();
-
-        /// <summary>
         /// Validates the streaming authentication token.
         /// </summary>
         /// <param name="streamingToken">The streaming authentication token to validate.</param>

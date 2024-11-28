@@ -49,7 +49,10 @@ namespace InMemoryLib
             return Task.FromResult(_collections.TryRemove(collectionName, out _));
         }
 
-        
+        public void Setup(Dictionary<string, object> conf)
+        {
+            throw new NotImplementedException();
+        }
 
         private class Collection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity
         {

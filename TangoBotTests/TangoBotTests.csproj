@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FilePersistence\FSPersistence.csproj" />
     <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBotAPI.csproj" />
     <ProjectReference Include="..\TangoBot\TangoBot.csproj" />

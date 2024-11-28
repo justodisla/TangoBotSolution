@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBotAPI.Persistence;
 
-namespace FilePersistence
+namespace FSPersistence
 {
     public class FilePersistence : IPersistence
     {
@@ -77,6 +77,11 @@ namespace FilePersistence
             var tablePath = GetTablePath(table.Name);
             var json = JsonSerializer.Serialize(table);
             await File.WriteAllTextAsync(tablePath, json);
+        }
+
+        public void Setup(Dictionary<string, object> conf)
+        {
+            throw new NotImplementedException();
         }
 
         private class FileCollection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity

@@ -30,7 +30,7 @@ namespace TangoBotStreaming.Observables
             fullName = Regex.Replace(fullName, @"[^a-zA-Z0-9_]", "_");
 
             _persistence = TangoBotServiceProviderExp
-                .GetTransientService<IPersistence>("InMemoryLib.InMemoryPersistence");
+                .GetTransientService<IPersistence>("FSPersistence.FilePersistence");
 
             _persistence.CreateCollectionAsync<QuoteDataHistory.DataPoint>("QuoteDataHistory").Wait();
 

@@ -75,40 +75,5 @@ namespace TangoBotStreaming.Tests
             // Add assertions to verify the behavior
         }
 
-        [Fact(Skip = "Later")]
-        public void CloseWsConnection_ShouldCloseConnection()
-        {
-            // Act
-            _streamingService.CloseWsConnection();
-
-            // Assert
-            //_mockWebSocketClient.Verify(ws => ws.CloseAsync(It.IsAny<WebSocketCloseStatus>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        [Fact(Skip = "Later")]
-        public async Task IsStreamingAuthTokenValid_ShouldReturnTrueForValidToken()
-        {
-            // Arrange
-            var validToken = "valid_token";
-
-            // Act
-            var result = await _streamingService.IsStreamingAuthTokenValid(validToken);
-
-            // Assert
-            Assert.True(result);
-        }
-
-        [Fact(Skip = "Later")]
-        public void Subscribe_ShouldReturnDisposable()
-        {
-            // Arrange
-            var observer = new Mock<IObserver<HistoricDataReceivedEvent>>();
-
-            // Act
-            var disposable = "";// _streamingService.Subscribe(observer.Object);
-
-            // Assert
-            Assert.NotNull(disposable);
-        }
     }
 }

@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotAPI", "TangoBotAPI\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JSonConfiguration", "JSonConfiguration\JSonConfiguration.csproj", "{F819D59B-D5C0-4847-B186-FC58DF247E06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePersistence", "FilePersistence\FilePersistence.csproj", "{9266AA69-033E-4A29-A29A-EB52A0D808D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FSPersistence", "FilePersistence\FSPersistence.csproj", "{9266AA69-033E-4A29-A29A-EB52A0D808D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

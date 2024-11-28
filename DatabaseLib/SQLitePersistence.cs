@@ -98,7 +98,10 @@ namespace DatabaseLib
             command.ExecuteNonQuery();
         }
 
-        
+        public void Setup(Dictionary<string, object> conf)
+        {
+            throw new NotImplementedException();
+        }
 
         private class SQLiteCollection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity
         {
