@@ -1,3 +1,5 @@
+using HttpClientLib;
+using HttpClientLib.OrderApi;
 using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
 using System;
@@ -11,7 +13,7 @@ using TangoBot.API.Toolkit;
 using TangoBot.API.TTServices;
 using TangoBot.DependecyInjection;
 
-namespace HttpClientLib.OrderApi
+namespace TangoBot.HttpClientLib.OrderApi
 {
     public class OrderComponent : BaseApiComponent, IOrderComponent<Order>
     {
@@ -24,7 +26,7 @@ namespace HttpClientLib.OrderApi
                 .GetConfigurationValue(Constants.ACTIVE_API_URL);
 
             //_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
-            
+
             Subscribe(new OrderObserver());
 
         }
@@ -86,7 +88,7 @@ namespace HttpClientLib.OrderApi
             else
             {
                 // Handle error response
-                throw new HttpRequestException($"Failed to get order with ID {orderId}. Status code: " + ((response == null) ? "Unknown" : response.StatusCode));
+                throw new HttpRequestException($"Failed to get order with ID {orderId}. Status code: " + (response == null ? "Unknown" : response.StatusCode));
             }
         }
 

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
+    <ProjectReference Include="..\DependecyInjection\TangoBot.DependecyInjection.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
   </ItemGroup>
 

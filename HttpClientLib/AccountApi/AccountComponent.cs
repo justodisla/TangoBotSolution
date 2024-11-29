@@ -1,4 +1,5 @@
-﻿using HttpClientLib.AccountApi.Observer;
+﻿using HttpClientLib;
+using HttpClientLib.AccountApi.Observer;
 using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
 using System;
@@ -7,9 +8,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.API.TTServices;
-using TangoBot.HttpClientLib;
 
-namespace HttpClientLib.AccountApi
+namespace TangoBot.HttpClientLib.AccountApi
 {
     public class AccountComponent : BaseApiComponent, IAccountComponent
     {
@@ -18,7 +18,7 @@ namespace HttpClientLib.AccountApi
         public AccountComponent()
             : base()
         {
-            this.Subscribe(new AccountObserver());
+            Subscribe(new AccountObserver());
         }
 
         /// <summary>

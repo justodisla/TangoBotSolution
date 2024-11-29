@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>TangoBot.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
+    <ProjectReference Include="..\DependecyInjection\TangoBot.DependecyInjection.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
   </ItemGroup>
 

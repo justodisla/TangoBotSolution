@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Moq;
 using TangoBot.API.Persistence;
 using TangoBot.DependecyInjection;
-using TangoBot.FSPersistence;
+using TangoBot.Persistence.FSPersistence;
 using Xunit;
 
 namespace FSPersistence.Tests

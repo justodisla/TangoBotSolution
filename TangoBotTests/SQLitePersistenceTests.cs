@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using TangoBot.DatabaseLib;
 using TangoBot.API.Persistence;
+using TangoBot.DatabaseLib;
 
 namespace DatabaseLib.Tests
 {

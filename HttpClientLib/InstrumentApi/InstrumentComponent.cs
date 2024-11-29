@@ -1,3 +1,5 @@
+using HttpClientLib;
+using HttpClientLib.InstrumentApi;
 using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TangoBot.API.TTServices;
 
-namespace HttpClientLib.InstrumentApi
+namespace TangoBot.HttpClientLib.InstrumentApi
 {
     public class InstrumentComponent : BaseApiComponent, IInstrumentComponent
     {

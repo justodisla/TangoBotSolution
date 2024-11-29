@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.API.Persistence;
 
-namespace TangoBot.FSPersistence
+namespace TangoBot.Persistence.FSPersistence
 {
     public class FilePersistence : IPersistence
     {

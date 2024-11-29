@@ -14,7 +14,7 @@ using TangoBot.DependecyInjection;
 using TangoBotStreaming.Observables;
 using TangoBotStreaming.Utilities;
 
-namespace TangoBotStreaming.Services
+namespace TangoBot.Streaming.Services
 {
     /// <summary>
     /// Service for streaming market data.
@@ -39,7 +39,7 @@ namespace TangoBotStreaming.Services
 
             _websocketClient = new ClientWebSocket();
 
-            this.Subscribe(new HistoryDataStreamObserver());
+            Subscribe(new HistoryDataStreamObserver());
         }
 
         /// <inheritdoc />
@@ -207,11 +207,11 @@ namespace TangoBotStreaming.Services
                     Console.WriteLine("[Info] Data fully received.");
                     break;
                 }
-                
+
                 //Send a heartbeat to the websocket
                 await StreamingUtils.SendMessageAsync(client, "{\"type\":\"KEEPALIVE\",\"channel\":0}");
 
-               // Thread.Sleep(1000);
+                // Thread.Sleep(1000);
 
             }
 
@@ -223,7 +223,7 @@ namespace TangoBotStreaming.Services
             {
                 observer.OnCompleted();
             }
-            
+
         }
 
         /// <inheritdoc />
@@ -317,7 +317,7 @@ namespace TangoBotStreaming.Services
 
         public IDisposable Subscribe(IObserver<HistoricDataReceivedEvent> observer)
         {
-            if ((!_observers.Contains(observer)))
+            if (!_observers.Contains(observer))
             {
                 _observers.Add(observer);
             }

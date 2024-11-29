@@ -1,24 +1,12 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using HttpClientLib.TokenManagement;
-using HttpClientLib.OrderApi;
-using HttpClientLib.InstrumentApi;
-using HttpClientLib.AccountApi;
-using HttpClientLib.CustomerApi;
-using TangoBotStreaming.Services;
-
-using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
-using TangoBot.HttpClientLib;
-using System.Net;
-using Nancy.Json;
-using System.Text.Json;
-using TangoBotAPI.Configuration;
-using TangoBot.DependecyInjection;
-using TangoBot.API.TTServices;
+﻿using TangoBot.API.TTServices;
 using TangoBot.API.TokenManagement;
 using TangoBot.API.Streaming;
+using TangoBot.HttpClientLib.AccountApi;
+using TangoBot.DependecyInjection;
+using TangoBot.HttpClientLib.CustomerApi;
+using TangoBot.HttpClientLib.InstrumentApi;
+using TangoBot.HttpClientLib.OrderApi;
+
 
 namespace TangoBot
 {

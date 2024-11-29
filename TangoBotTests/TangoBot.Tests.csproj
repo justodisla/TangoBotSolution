@@ -23,8 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DatabaseLib\TangoBot.DatabaseLib.csproj" />
     <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
-    <ProjectReference Include="..\FilePersistence\FSPersistence.csproj" />
+    <ProjectReference Include="..\FilePersistence\TangoBot.Persistence.FSPersistence.csproj" />
     <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
     <ProjectReference Include="..\TangoBot\TangoBot.csproj" />

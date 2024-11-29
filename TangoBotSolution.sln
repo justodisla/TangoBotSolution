@@ -5,23 +5,23 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot", "TangoBot\TangoBot.csproj", "{88C48BC7-443D-4F3E-AC77-0FD2EB22DC39}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpClientLib", "HttpClientLib\HttpClientLib.csproj", "{F5D5C709-6A35-4391-9F55-EFD49C2991BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.HttpClientLib", "HttpClientLib\TangoBot.HttpClientLib.csproj", "{F5D5C709-6A35-4391-9F55-EFD49C2991BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseLib", "DatabaseLib\DatabaseLib.csproj", "{4B6622C3-946E-4EB7-B15C-BF8293FF9709}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.DatabaseLib", "DatabaseLib\TangoBot.DatabaseLib.csproj", "{4B6622C3-946E-4EB7-B15C-BF8293FF9709}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IndicatorsLib", "IndicatorsLib\IndicatorsLib.csproj", "{CB9A53DA-2DC4-4189-B1D2-0B7C9E1A550B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotTests", "TangoBotTests\TangoBotTests.csproj", "{9B77D7D2-83FE-429D-B179-2F291DDA42F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Tests", "TangoBotTests\TangoBot.Tests.csproj", "{9B77D7D2-83FE-429D-B179-2F291DDA42F6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotStreaming", "TangoBotStreaming\TangoBotStreaming.csproj", "{BAD736FF-EB3B-4C93-81B2-E0266D34EA4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Streaming", "TangoBotStreaming\TangoBot.Streaming.csproj", "{BAD736FF-EB3B-4C93-81B2-E0266D34EA4A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Strategies", "Strategies", "{10257662-AB88-40C5-8B13-21E9C83E2745}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.API", "TangoBotAPI\TangoBot.API.csproj", "{BE20C3A4-5421-499D-8F93-C030F8C7D795}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JSonConfiguration", "JSonConfiguration\JSonConfiguration.csproj", "{F819D59B-D5C0-4847-B186-FC58DF247E06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.JSonConfiguration", "JSonConfiguration\TangoBot.JSonConfiguration.csproj", "{F819D59B-D5C0-4847-B186-FC58DF247E06}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FSPersistence", "FilePersistence\FSPersistence.csproj", "{9266AA69-033E-4A29-A29A-EB52A0D808D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Persistence.FSPersistence", "FilePersistence\TangoBot.Persistence.FSPersistence.csproj", "{9266AA69-033E-4A29-A29A-EB52A0D808D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{FE7895B6-00B5-4F2C-B4C3-D88CC93A8A81}"
 EndProject
@@ -33,7 +33,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F75EB198
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Core", "TangoBot.Core\TangoBot.Core.csproj", "{B54B293D-F6E5-4125-A077-9D39E5639570}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependecyInjection", "DependecyInjection\DependecyInjection.csproj", "{E9A001B7-DA9C-425F-87B5-C65A97855B5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.DependecyInjection", "DependecyInjection\TangoBot.DependecyInjection.csproj", "{E9A001B7-DA9C-425F-87B5-C65A97855B5D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Infrastructure.Logging", "Infrastructure.Logging\TangoBot.Infrastructure.Logging.csproj", "{2EEFD7A5-9065-44D3-9A3A-C957C6CFCDE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +87,10 @@ Global
 		{E9A001B7-DA9C-425F-87B5-C65A97855B5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9A001B7-DA9C-425F-87B5-C65A97855B5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9A001B7-DA9C-425F-87B5-C65A97855B5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EEFD7A5-9065-44D3-9A3A-C957C6CFCDE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EEFD7A5-9065-44D3-9A3A-C957C6CFCDE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EEFD7A5-9065-44D3-9A3A-C957C6CFCDE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EEFD7A5-9065-44D3-9A3A-C957C6CFCDE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,10 +101,12 @@ Global
 		{4B6622C3-946E-4EB7-B15C-BF8293FF9709} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
 		{9B77D7D2-83FE-429D-B179-2F291DDA42F6} = {F75EB198-ACD8-4786-A356-C5329A323875}
 		{BAD736FF-EB3B-4C93-81B2-E0266D34EA4A} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
+		{10257662-AB88-40C5-8B13-21E9C83E2745} = {FE7895B6-00B5-4F2C-B4C3-D88CC93A8A81}
 		{F819D59B-D5C0-4847-B186-FC58DF247E06} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
 		{9266AA69-033E-4A29-A29A-EB52A0D808D3} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
 		{B54B293D-F6E5-4125-A077-9D39E5639570} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
 		{E9A001B7-DA9C-425F-87B5-C65A97855B5D} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
+		{2EEFD7A5-9065-44D3-9A3A-C957C6CFCDE5} = {A0E2B9FD-E07B-4A03-9AAA-522921AD4A16}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {56390FCD-32A0-4E90-A914-A41AC69A7112}

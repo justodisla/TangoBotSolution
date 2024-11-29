@@ -7,7 +7,7 @@ using TangoBot.API.DI;
 using TangoBot.API.Toolkit;
 using TangoBot.DependecyInjection;
 
-namespace HttpClientLib
+namespace TangoBot.HttpClientLib
 {
     public class MarketStatusChecker : ITTService
     {

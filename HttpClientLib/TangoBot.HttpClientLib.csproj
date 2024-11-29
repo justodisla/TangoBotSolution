@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>TangoBot.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="CustomerApi\CustomerInfo._cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="CustomerApi\CustomerInfo._cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="OrderApi\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DependecyInjection\TangoBot.DependecyInjection.csproj" />
+    <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
+  </ItemGroup>
+
+</Project>

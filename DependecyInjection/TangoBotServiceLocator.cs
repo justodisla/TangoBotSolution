@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,10 +8,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using TangoBot.API.Logging;
 
 namespace TangoBot.DependecyInjection
 {
-    public static class TangoBotServiceLocator
+    public class TangoBotServiceLocator
     {
         private static IServiceProvider? _wrappedServiceProvider;
         private static bool initialize = false;
@@ -18,6 +20,7 @@ namespace TangoBot.DependecyInjection
         private static readonly ConcurrentDictionary<string, Type> namedServices = new();
         private static readonly ConcurrentDictionary<string, object> singletonInstances = new();
         private static readonly object serviceCollectionLock = new();
+        private static API.Logging.ILoggingService<TangoBotServiceLocator>? _logger;
 
         /// <summary>
         /// Initializes the service provider if it has not been initialized already.
@@ -40,6 +43,9 @@ namespace TangoBot.DependecyInjection
                 _wrappedServiceProvider = services.BuildServiceProvider() ?? throw new Exception("ServiceProvider build failed");
 
                 initialize = true;
+
+                //_logger = GetSingletonService<ILoggingService<TangoBotServiceLocator>>();
+
             }
         }
 
@@ -157,13 +163,24 @@ namespace TangoBot.DependecyInjection
             var currentAssembly = Assembly.GetExecutingAssembly();
             var parentDirectory = (Directory.GetParent(currentAssembly.Location)?.Parent?.Parent?.FullName) ?? throw new Exception("Parent directory not found.");
             var assemblies = Directory.GetFiles(parentDirectory, "*.dll", SearchOption.AllDirectories)
-                .Where(IsAssembly)
-                .Select(Assembly.LoadFrom)
-                .ToList();
+                 .Where(IsAssembly)
+                 .Select(Assembly.LoadFrom)
+                 .Where(ServiceLocatorHelper.IsSolutionAssembly) // Filter assemblies using the new method
+                 .ToList();
+
+            Console.WriteLine("\n\nAssemblies found: " + assemblies.Count);
+            foreach ( var assembly in assemblies ) {
+                //Console.WriteLine("Assembly " + assembly.GetName());
+                if(assembly.GetName().Name.ToLower().Contains("tangobot"))
+                {
+                    Console.WriteLine("---------------> API Assembly " + assembly.GetName());
+                }
+            }
+
 
             var serviceTypes = assemblies
                 .SelectMany(a => a.GetTypes())
-                .Where(t => interfaceType.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .Where(t => t.IsClass && !t.IsAbstract && ServiceLocatorHelper.NamespaceCleared(t) && ServiceLocatorHelper.ResolveAssignable(interfaceType, t))
                 .ToList();
 
             if (serviceTypes.Count == 0)

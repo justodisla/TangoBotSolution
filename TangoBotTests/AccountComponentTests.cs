@@ -1,4 +1,3 @@
-using HttpClientLib;
 using HttpClientLib.CustomerApi;
 using HttpClientLib.InstrumentApi;
 using Moq;
@@ -13,6 +12,7 @@ using TangoBot.API.DI;
 using TangoBot.API.Toolkit;
 using TangoBot.API.TTServices;
 using TangoBot.DependecyInjection;
+using TangoBot.HttpClientLib;
 using Xunit;
 
 namespace TangoBotTests
@@ -100,7 +100,7 @@ namespace TangoBotTests
         public async Task GetAccountPositionsAsync_ReturnsAccountPositions_WhenResponseIsSuccessful()
         {
             // Arrange
-            var _orderComponent = TangoBotServiceLocator.GetSingletonService<IOrderComponent<Order>>("HttpClientLib.OrderApi.OrderComponent") 
+            var _orderComponent = TangoBotServiceLocator.GetSingletonService<IOrderComponent<Order>>("TangoBot.HttpClientLib.OrderApi.OrderComponent") 
                 ?? throw new Exception("OrderComponent null");
 
             var accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);

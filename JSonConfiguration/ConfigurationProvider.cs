@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.API.Configuration;
 
-namespace TangoBotAPI.Configuration
+namespace TangoBot.Infrastructure.Configuration.JSonConfiguration
 {
     public class ConfigurationProvider : IConfigurationProvider
     {
@@ -14,7 +14,7 @@ namespace TangoBotAPI.Configuration
 
         public ConfigurationProvider()
         {
-            if(IsInitialized)
+            if (IsInitialized)
             {
                 return;
             }

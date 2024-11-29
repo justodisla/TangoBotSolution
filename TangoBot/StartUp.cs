@@ -10,8 +10,6 @@ using HttpClientLib.TokenManagement;
 using TangoBot.API.Configuration;
 using TangoBot.API.Toolkit;
 using TangoBot.DependecyInjection;
-using TangoBotStreaming.Observables;
-using TangoBotStreaming.Services;
 
 namespace TangoBot
 {

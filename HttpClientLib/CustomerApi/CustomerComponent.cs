@@ -1,4 +1,6 @@
-﻿using HttpClientLib.AccountApi.Models;
+﻿using HttpClientLib;
+using HttpClientLib.AccountApi.Models;
+using HttpClientLib.CustomerApi;
 using HttpClientLib.TokenManagement;
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.HttpClientLib;
 
-namespace HttpClientLib.CustomerApi
+namespace TangoBot.HttpClientLib.CustomerApi
 {
     public class CustomerComponent : BaseApiComponent
     {

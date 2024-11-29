@@ -10,8 +10,9 @@ using TangoBot.DependecyInjection;
 using TangoBot.API.Toolkit;
 using TangoBot.API.TokenManagement;
 using TangoBot.API.Streaming;
+using HttpClientLib.TokenManagement;
 
-namespace HttpClientLib.TokenManagement
+namespace TangoBot.HttpClientLib.TokenManagement
 {
     /// <summary>
     /// Provides a valid session token by handling authentication and validation.
@@ -35,7 +36,7 @@ namespace HttpClientLib.TokenManagement
         {
             _httpClient = new HttpClient();
 
-             _configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
+            _configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
             _streamingTokenEndpoint = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_API_URL) +
                 _configurationProvider.GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN_ENDPOINT);
 
