@@ -1,8 +1,8 @@
 using HttpClientLib.TokenManagement;
 using System.Threading.Tasks;
 using TangoBot;
-using TangoBotAPI.DI;
-using TangoBotAPI.TokenManagement;
+using TangoBot.API.TokenManagement;
+using TangoBot.DependecyInjection;
 using Xunit;
 
 namespace TangoBotTests
@@ -15,7 +15,7 @@ namespace TangoBotTests
         {
             StartUp.InitializeDI();
             //_tokenProvider = TangoBotServiceProvider.GetService<ITokenProvider>() as TokenProvider;
-            _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>() ?? throw new Exception("Token provider cannot be null");
+            _tokenProvider = TangoBotServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("Token provider cannot be null");
         }
 
         [Fact]

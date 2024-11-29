@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using TangoBot.API.TTServices;
 
 namespace HttpClientLib.InstrumentApi
 {

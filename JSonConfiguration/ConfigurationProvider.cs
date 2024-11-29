@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBot.API.Configuration;
 
 namespace TangoBotAPI.Configuration
 {

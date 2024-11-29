@@ -1,4 +1,4 @@
-﻿namespace TangoBotAPI.Toolkit
+﻿namespace TangoBot.API.Toolkit
 {
     public static class Constants
     {

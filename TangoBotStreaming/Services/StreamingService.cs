@@ -5,11 +5,12 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
-using TangoBotAPI.Streaming;
-using TangoBotAPI.TokenManagement;
-using TangoBotAPI.Toolkit;
+using TangoBot.API.Configuration;
+using TangoBot.API.Observable;
+using TangoBot.API.Streaming;
+using TangoBot.API.TokenManagement;
+using TangoBot.API.Toolkit;
+using TangoBot.DependecyInjection;
 using TangoBotStreaming.Observables;
 using TangoBotStreaming.Utilities;
 
@@ -33,7 +34,7 @@ namespace TangoBotStreaming.Services
         {
             _observerManager = new ObserverManager<HistoricDataReceivedEvent>();
 
-            _webSocketUrl = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>()
+            _webSocketUrl = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>()
                 .GetConfigurationValue(Constants.DX_LINK_WS_URL);
 
             _websocketClient = new ClientWebSocket();
@@ -53,7 +54,7 @@ namespace TangoBotStreaming.Services
             //Define that the toDate is the previous day
             toTime = toTime.AddDays(-1);
 
-            var _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>()
+            var _tokenProvider = TangoBotServiceLocator.GetSingletonService<ITokenProvider>()
                 ?? throw new Exception("TokenProvider is null");
 
             _apiQuoteToken = _tokenProvider.GetValidStreamingToken().Result;

@@ -7,18 +7,18 @@ using HttpClientLib.InstrumentApi;
 using HttpClientLib.AccountApi;
 using HttpClientLib.CustomerApi;
 using TangoBotStreaming.Services;
-using TangoBotAPI.Streaming;
 
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using TangoBot.HttpClientLib;
-using TangoBotAPI.DI;
-using TangoBotAPI.TokenManagement;
-using HttpClientLib.OrderApi.Models;
 using System.Net;
 using Nancy.Json;
 using System.Text.Json;
 using TangoBotAPI.Configuration;
+using TangoBot.DependecyInjection;
+using TangoBot.API.TTServices;
+using TangoBot.API.TokenManagement;
+using TangoBot.API.Streaming;
 
 namespace TangoBot
 {
@@ -46,7 +46,7 @@ namespace TangoBot
             using var httpClient = new HttpClient();
 
             // Create a TokenProvider instance (assuming you have a suitable constructor)
-            var tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>();
+            var tokenProvider = TangoBotServiceLocator.GetSingletonService<ITokenProvider>();
 
             // Create AccountComponent instance
             var accountComponent = new AccountComponent();
@@ -98,7 +98,7 @@ namespace TangoBot
             await TestGetActiveInstrumentsAsync(instrumentComponent);
 
             // Create OrderComponent instance
-            var orderComponent = TangoBotServiceProviderExp.GetSingletonService<OrderComponent>();
+            var orderComponent = TangoBotServiceLocator.GetSingletonService<OrderComponent>();
             await TestGetAccountOrdersAsync(accountNumber, orderComponent);
             await TestGetAccountLiveOrdersAsync(accountNumber, orderComponent);
             await TestGetOrderByIdAsync(accountNumber, 155008, orderComponent);
@@ -215,7 +215,7 @@ namespace TangoBot
 
                 var choice = Console.ReadLine();
 
-                OrderComponent? orderComponent = TangoBotServiceProviderExp.GetSingletonService<OrderComponent>();
+                OrderComponent? orderComponent = TangoBotServiceLocator.GetSingletonService<OrderComponent>();
                 switch (choice)
                 {
                     case "1":
@@ -326,7 +326,7 @@ namespace TangoBot
             // Replace these values with valid ones
             //var streamService = TangoBotServiceProvider.GetSingletonService<TangoBotAPI.Streaming.IStreamingService>(typeof(StreamingService).Name);
 
-            IStreamingService _streaService = TangoBotServiceProviderExp.GetSingletonService<IStreamingService>() ?? throw new Exception("Stream service is null");
+            IStreamingService _streaService = TangoBotServiceLocator.GetSingletonService<IStreamingService>() ?? throw new Exception("Stream service is null");
 
             var hc = _streaService.GetHashCode();
 

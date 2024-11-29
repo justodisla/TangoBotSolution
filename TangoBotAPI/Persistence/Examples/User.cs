@@ -1,6 +1,6 @@
 using System;
 
-namespace TangoBotAPI.Persistence.Examples
+namespace TangoBot.API.Persistence.Examples
 {
     public class User : AbstractEntity
     {

@@ -1,4 +1,3 @@
-using HttpClientLib.OrderApi.Models;
 using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
 using System;
@@ -7,9 +6,10 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
-using TangoBotAPI.Toolkit;
+using TangoBot.API.Configuration;
+using TangoBot.API.Toolkit;
+using TangoBot.API.TTServices;
+using TangoBot.DependecyInjection;
 
 namespace HttpClientLib.OrderApi
 {
@@ -20,7 +20,7 @@ namespace HttpClientLib.OrderApi
         public OrderComponent()
             : base()
         {
-            _baseUrl = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>()
+            _baseUrl = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>()
                 .GetConfigurationValue(Constants.ACTIVE_API_URL);
 
             //_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));

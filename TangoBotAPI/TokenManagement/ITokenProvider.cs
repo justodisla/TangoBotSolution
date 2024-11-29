@@ -1,6 +1,6 @@
-﻿using TangoBotAPI.DI;
+﻿using TangoBot.API.DI;
 
-namespace TangoBotAPI.TokenManagement
+namespace TangoBot.API.TokenManagement
 {
     /// <summary>
     /// Interface for providing tokens.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace TangoBotAPI.Streaming
+namespace TangoBot.API.Streaming
 {
     /// <summary>
     /// Interface for streaming services that handle market data.

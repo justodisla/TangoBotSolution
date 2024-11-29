@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using TangoBotAPI.Persistence;
+using TangoBot.API.Persistence;
 
-namespace FSPersistence
+namespace TangoBot.FSPersistence
 {
     public class FilePersistence : IPersistence
     {
@@ -22,7 +22,7 @@ namespace FSPersistence
                 Directory.CreateDirectory(_basePath);
         }
 
-        public async Task<TangoBotAPI.Persistence.ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
+        public async Task<API.Persistence.ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
         {
             EnsureTableExists(collectionName);
             return new FileCollection<T>(_basePath, collectionName);
@@ -84,7 +84,7 @@ namespace FSPersistence
             throw new NotImplementedException();
         }
 
-        private class FileCollection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity
+        private class FileCollection<T> : API.Persistence.ICollection<T> where T : IEntity
         {
             private readonly string _basePath;
             private readonly string _tableName;

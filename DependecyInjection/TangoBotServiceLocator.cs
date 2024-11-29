@@ -8,9 +8,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace TangoBotAPI.DI
+namespace TangoBot.DependecyInjection
 {
-    public static class TangoBotServiceProviderExp
+    public static class TangoBotServiceLocator
     {
         private static IServiceProvider? _wrappedServiceProvider;
         private static bool initialize = false;
@@ -77,7 +77,7 @@ namespace TangoBotAPI.DI
                         _wrappedServiceProvider = services?.BuildServiceProvider();
                     }
 
-                    if(_wrappedServiceProvider == null)
+                    if (_wrappedServiceProvider == null)
                     {
                         throw new Exception("ServiceProvider build failed");
                     }

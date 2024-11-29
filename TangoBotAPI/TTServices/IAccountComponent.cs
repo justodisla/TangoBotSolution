@@ -1,5 +1,4 @@
-﻿
-namespace HttpClientLib.AccountApi
+﻿namespace TangoBot.API.TTServices
 {
     public interface IAccountComponent
     {

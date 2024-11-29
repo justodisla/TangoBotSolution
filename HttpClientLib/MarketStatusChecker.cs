@@ -2,9 +2,10 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
-using TangoBotAPI.Toolkit;
+using TangoBot.API.Configuration;
+using TangoBot.API.DI;
+using TangoBot.API.Toolkit;
+using TangoBot.DependecyInjection;
 
 namespace HttpClientLib
 {
@@ -16,7 +17,7 @@ namespace HttpClientLib
         public MarketStatusChecker()
         {
             _httpClient = new HttpClient();
-            _apiKey = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>()?.GetConfigurationValue(Constants.ALPHA_VANTAGE_API_KEY);
+            _apiKey = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>()?.GetConfigurationValue(Constants.ALPHA_VANTAGE_API_KEY);
         }
 
         public async Task<bool> IsMarketOpenAsync()

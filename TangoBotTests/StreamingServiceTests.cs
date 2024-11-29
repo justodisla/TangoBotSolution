@@ -3,9 +3,10 @@ using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
-using TangoBotAPI.Streaming;
-using TangoBotAPI.DI;
 using TangoBot;
+using TangoBot.DependecyInjection;
+using TangoBot.API.Observable;
+using TangoBot.API.Streaming;
 
 namespace TangoBotStreaming.Tests
 {
@@ -13,7 +14,7 @@ namespace TangoBotStreaming.Tests
     {
         //private readonly Mock<ClientWebSocket> _mockWebSocketClient;
         private readonly Mock<ObserverManager<HistoricDataReceivedEvent>> _mockObserverManager;
-        private readonly TangoBotAPI.Streaming.IStreamingService _streamingService;
+        private readonly IStreamingService _streamingService;
 
         public StreamingServiceTests()
         {
@@ -27,7 +28,7 @@ namespace TangoBotStreaming.Tests
 
             StartUp.InitializeDI();
 
-            _streamingService = TangoBotServiceProviderExp.GetSingletonService<IStreamingService>();
+            _streamingService = TangoBotServiceLocator.GetSingletonService<IStreamingService>();
 
         }
 

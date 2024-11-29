@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HttpClientLib
+namespace TangoBot.API.Http
 {
     public class HttpResponseEvent
     {

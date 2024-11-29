@@ -1,24 +1,28 @@
-using TangoBotAPI.Persistence;
 
-public class Entity : IEntity
+using TangoBot.API.Persistence;
+
+namespace TangoBot.DatabaseLib
 {
-    public Guid Id { get; set; }
-    public bool Validate() => true;
-    public void BeforeSave() { }
-    public void AfterSave() { }
-
-    public string GetEntityName()
+    public class Entity : IEntity
     {
-        return "Entity";
-    }
+        public Guid Id { get; set; }
+        public bool Validate() => true;
+        public void BeforeSave() { }
+        public void AfterSave() { }
 
-    public string GetDescription()
-    {
-        throw new NotImplementedException();
-    }
+        public string GetEntityName()
+        {
+            return "Entity";
+        }
 
-    public string GetTableName()
-    {
-        throw new NotImplementedException();
+        public string GetDescription()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetTableName()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

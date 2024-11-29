@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBot.API.TTServices;
 using TangoBot.HttpClientLib;
 
 namespace HttpClientLib.AccountApi

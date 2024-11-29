@@ -3,22 +3,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TangoBotAPI.Persistence;
 
-namespace InMemoryLib
+namespace TangoBot.API.Persistence.Examples
 {
     public class InMemoryPersistence : IPersistence
     {
         private readonly ConcurrentDictionary<string, object> _collections = new();
 
-        public Task<TangoBotAPI.Persistence.ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
+        public Task<ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
         {
             if (!_collections.ContainsKey(collectionName))
             {
                 throw new KeyNotFoundException($"Collection '{collectionName}' does not exist.");
             }
 
-            var collection = _collections[collectionName] as TangoBotAPI.Persistence.ICollection<T>;
+            var collection = _collections[collectionName] as ICollection<T>;
             if (collection == null)
             {
                 throw new InvalidCastException($"Collection '{collectionName}' is not of the expected type.");
@@ -54,7 +53,7 @@ namespace InMemoryLib
             throw new NotImplementedException();
         }
 
-        private class Collection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity
+        private class Collection<T> : ICollection<T> where T : IEntity
         {
             private readonly ConcurrentDictionary<Guid, T> _entities = new();
 

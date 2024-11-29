@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TangoBotAPI.DI
+namespace TangoBot.API.DI
 {
     public interface ITTService
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace HttpClientLib.InstrumentApi
+namespace TangoBot.API.TTServices
 {
     public class Instrument
     {

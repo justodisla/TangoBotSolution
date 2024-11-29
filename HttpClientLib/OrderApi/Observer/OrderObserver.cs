@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TangoBot.API.Http;
 
 namespace HttpClientLib.OrderApi.Observer
 {

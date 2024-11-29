@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TangoBotAPI.Persistence;
+using TangoBot.API.Persistence;
 
-namespace TangoBotAPI.Streaming
+namespace TangoBot.API.Streaming
 {
     /// <summary>
     /// QuoteDataHistory is a class that holds the historic and live market data for a given symbol.

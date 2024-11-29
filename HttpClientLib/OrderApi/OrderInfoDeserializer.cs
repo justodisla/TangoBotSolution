@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using HttpClientLib.OrderApi.Models;
+using TangoBot.API.TTServices;
 
 namespace HttpClientLib.OrderApi
 {

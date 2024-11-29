@@ -24,7 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TangoBotAPI\TangoBotAPI.csproj" />
+    <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
+    <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
   </ItemGroup>
 
 </Project>

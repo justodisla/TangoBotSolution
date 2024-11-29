@@ -1,6 +1,4 @@
 using HttpClientLib.AccountApi;
-using HttpClientLib.OrderApi;
-using HttpClientLib.OrderApi.Models;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -8,9 +6,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TangoBot;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
-using TangoBotAPI.Toolkit;
+using TangoBot.API.Configuration;
+using TangoBot.API.Toolkit;
+using TangoBot.API.TTServices;
+using TangoBot.DependecyInjection;
 using Xunit;
 
 namespace TangoBotTests
@@ -32,10 +31,10 @@ namespace TangoBotTests
             _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
             _httpClient = new HttpClient(_httpMessageHandlerMock.Object);
 
-            _orderComponent = TangoBotServiceProviderExp.GetSingletonService<IOrderComponent<Order>>() 
+            _orderComponent = TangoBotServiceLocator.GetSingletonService<IOrderComponent<Order>>() 
                 ?? throw new Exception("Account component is null.");
             
-            _configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("Configuration provider is null");
+            _configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("Configuration provider is null");
 
             _accountNumber = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_ACCOUNT_NUMBER);
 

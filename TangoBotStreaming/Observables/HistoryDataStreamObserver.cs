@@ -1,9 +1,10 @@
-﻿using InMemoryLib;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.RegularExpressions;
-using TangoBotAPI.DI;
-using TangoBotAPI.Persistence;
-using TangoBotAPI.Streaming;
+using TangoBot.API.Persistence;
+using TangoBot.API.Persistence.Examples;
+using TangoBot.API.Streaming;
+using TangoBot.DependecyInjection;
+
 
 namespace TangoBotStreaming.Observables
 {
@@ -14,7 +15,7 @@ namespace TangoBotStreaming.Observables
         private bool _isHistoricalDataComplete = false;
 
         private IPersistence? _persistence;
-        private TangoBotAPI.Persistence.ICollection<QuoteDataHistory.DataPoint>? _quoteDataHistoryCollection;
+        private TangoBot.API.Persistence.ICollection<QuoteDataHistory.DataPoint>? _quoteDataHistoryCollection;
 
         public HistoryDataStreamObserver()
         {
@@ -29,8 +30,8 @@ namespace TangoBotStreaming.Observables
             // Reformat fullName to be used as a dictionary key
             fullName = Regex.Replace(fullName, @"[^a-zA-Z0-9_]", "_");
 
-            _persistence = TangoBotServiceProviderExp
-                .GetTransientService<IPersistence>("FSPersistence.FilePersistence");
+            _persistence = TangoBotServiceLocator
+                .GetTransientService<IPersistence>("TangoBot.FSPersistence.FilePersistence");
 
             _persistence.CreateCollectionAsync<QuoteDataHistory.DataPoint>("QuoteDataHistory").Wait();
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace TangoBotAPI.Persistence
+namespace TangoBot.API.Persistence
 {
     public static class EntityFactory
     {

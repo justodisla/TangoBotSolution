@@ -3,8 +3,11 @@ using System;
 using System.Net.Http;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using TangoBotAPI.DI;
-using TangoBotAPI.TokenManagement;
+using TangoBot.API.DI;
+using TangoBot.API.Http;
+using TangoBot.API.Observable;
+using TangoBot.API.TokenManagement;
+using TangoBot.DependecyInjection;
 
 namespace HttpClientLib
 {
@@ -19,7 +22,7 @@ namespace HttpClientLib
             _httpClient = new HttpClient();
 
             //_httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
-            _tokenProvider = TangoBotServiceProviderExp.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            _tokenProvider = TangoBotServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
             _observerManager = new ObserverManager<HttpResponseEvent>();
         }
 

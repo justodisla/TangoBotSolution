@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TangoBotAPI.Persistence;
-using InMemoryLib;
 using Xunit;
+using TangoBot.API.Persistence.Examples;
+using TangoBot.API.Persistence;
 
 namespace TangoBotAPI.Tests
 {

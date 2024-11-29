@@ -1,5 +1,4 @@
-﻿using DatabaseLib;
-using HttpClientLib;
+﻿using HttpClientLib;
 using HttpClientLib.AccountApi;
 using HttpClientLib.AccountApi.Observer;
 using HttpClientLib.CustomerApi;
@@ -7,15 +6,12 @@ using HttpClientLib.InstrumentApi;
 using HttpClientLib.OrderApi;
 using HttpClientLib.OrderApi.Observer;
 using HttpClientLib.TokenManagement;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
-using TangoBotAPI.Persistence;
-using TangoBotAPI.Streaming;
-using TangoBotAPI.TokenManagement;
-using TangoBotAPI.Toolkit;
+
+using TangoBot.API.Configuration;
+using TangoBot.API.Toolkit;
+using TangoBot.DependecyInjection;
 using TangoBotStreaming.Observables;
 using TangoBotStreaming.Services;
-using TangoBotServiceProvider = TangoBotAPI.DI.TangoBotServiceProvider;
 
 namespace TangoBot
 {
@@ -101,7 +97,7 @@ namespace TangoBot
         /// </summary>
         private static void SetupConfigurations()
         {
-            IConfigurationProvider? configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("Unable to access Configuration Provider");
+            IConfigurationProvider? configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("Unable to access Configuration Provider");
 
             #region Environment configuration
 

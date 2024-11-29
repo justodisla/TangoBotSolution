@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using TangoBotAPI.Configuration;
-using TangoBotAPI.DI;
-using TangoBotAPI.Streaming;
-using TangoBotAPI.TokenManagement;
-using TangoBotAPI.Toolkit;
+using TangoBot.API.Configuration;
+using TangoBot.API.Streaming;
+using TangoBot.API.TokenManagement;
+using TangoBot.API.Toolkit;
+using TangoBot.DependecyInjection;
 
 namespace TangoBot.Core.TokenManagement
 {
@@ -35,7 +35,7 @@ namespace TangoBot.Core.TokenManagement
         {
             _httpClient = new HttpClient();
 
-            _configurationProvider = TangoBotServiceProviderExp.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
+            _configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
             _streamingTokenEndpoint = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_API_URL) +
                 _configurationProvider.GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN_ENDPOINT);
 
@@ -195,7 +195,7 @@ namespace TangoBot.Core.TokenManagement
         /// <returns>True if the streaming token is valid; otherwise, false.</returns>
         private static async Task<bool> IsStreamingTokenValid(string streamingToken)
         {
-            var streamingService = TangoBotServiceProviderExp.GetSingletonService<IStreamingService>();
+            var streamingService = TangoBotServiceLocator.GetSingletonService<IStreamingService>();
 
             return streamingService == null
                 ? throw new Exception("Streaming service is not available.")

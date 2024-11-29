@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
-using TangoBotAPI.DI;
-using TangoBotAPI.Persistence;
+using TangoBot.API.Persistence;
+using TangoBot.DependecyInjection;
+using TangoBot.FSPersistence;
 using Xunit;
 
 namespace FSPersistence.Tests
@@ -16,7 +17,7 @@ namespace FSPersistence.Tests
 
         public FilePersistenceTests()
         {
-            _filePersistence = TangoBotServiceProviderExp.GetSingletonService<IPersistence>(typeof(FilePersistence).FullName) as FilePersistence;
+            _filePersistence = TangoBotServiceLocator.GetSingletonService<IPersistence>(typeof(FilePersistence).FullName) as FilePersistence;
         }
 
         [Fact]

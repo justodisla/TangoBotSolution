@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HttpClientLib
+namespace TangoBot.API.Http
 {
     public class HttpInspector
     {
         public static void InspectTransit(HttpResponseEvent value)
         {
             Console.WriteLine($"[Info] AccountObserverEvent Request: {value.Request}");
-            var _content = (value.Request == null || value.Request.Content == null) 
+            var _content = value.Request == null || value.Request.Content == null
                 ? null : value.Request.Content.ReadAsStringAsync().Result;
 
             if (_content != null)

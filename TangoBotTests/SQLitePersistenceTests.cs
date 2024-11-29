@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TangoBotAPI.Persistence;
-using DatabaseLib;
 using Xunit;
+using TangoBot.DatabaseLib;
+using TangoBot.API.Persistence;
 
 namespace DatabaseLib.Tests
 {
@@ -31,6 +31,7 @@ namespace DatabaseLib.Tests
         [Fact]
         public async Task CreateCollectionAsync_ShouldCreateCollection()
         {
+            
             // Act
             var result = await _persistence.CreateCollectionAsync<User>("Users");
 

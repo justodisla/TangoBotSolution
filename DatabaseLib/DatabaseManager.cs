@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
 
-namespace DatabaseLib
+namespace TangoBot.DatabaseLib
 {
     public class DatabaseManager
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TangoBotAPI.Indicator
+namespace TangoBot.API.Indicator
 {
     /// <summary>
     /// Implementer is an indicator that receives inputs and renders

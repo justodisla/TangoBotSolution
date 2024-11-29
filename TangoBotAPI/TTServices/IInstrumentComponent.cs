@@ -1,5 +1,4 @@
-﻿
-namespace HttpClientLib.InstrumentApi
+﻿namespace TangoBot.API.TTServices
 {
     public interface IInstrumentComponent
     {

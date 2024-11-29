@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
-using TangoBotAPI.Persistence;
+using TangoBot.API.Persistence;
 
-namespace DatabaseLib
+namespace TangoBot.DatabaseLib
 {
     public class SQLitePersistence : IPersistence
     {
@@ -29,7 +29,7 @@ namespace DatabaseLib
             _databaseManager.InitializeDatabase();
         }
 
-        public async Task<TangoBotAPI.Persistence.ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
+        public async Task<TangoBot.API.Persistence.ICollection<T>> GetCollectionAsync<T>(string collectionName) where T : IEntity
         {
             EnsureTableExists(collectionName);
             return new SQLiteCollection<T>(_databaseManager, collectionName);
@@ -103,7 +103,7 @@ namespace DatabaseLib
             throw new NotImplementedException();
         }
 
-        private class SQLiteCollection<T> : TangoBotAPI.Persistence.ICollection<T> where T : IEntity
+        private class SQLiteCollection<T> : TangoBot.API.Persistence.ICollection<T> where T : IEntity
         {
             private readonly DatabaseManager _databaseManager;
             private readonly string _tableName;

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TangoBotAPI.DI;
+using TangoBot.API.DI;
 
-namespace TangoBotAPI.Configuration
+namespace TangoBot.API.Configuration
 {
     public interface IConfigurationProvider : ITTService
     {

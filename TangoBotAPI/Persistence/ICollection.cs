@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TangoBotAPI.Persistence
+namespace TangoBot.API.Persistence
 {
     public interface ICollection<T> where T : IEntity
     {

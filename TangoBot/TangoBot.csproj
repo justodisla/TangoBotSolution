@@ -17,10 +17,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DatabaseLib\DatabaseLib.csproj" />
+    <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
     <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
     <ProjectReference Include="..\IndicatorsLib\IndicatorsLib.csproj" />
     <ProjectReference Include="..\JSonConfiguration\JSonConfiguration.csproj" />
-    <ProjectReference Include="..\TangoBotAPI\TangoBotAPI.csproj" />
+    <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
     <ProjectReference Include="..\TangoBotStreaming\TangoBotStreaming.csproj" />
   </ItemGroup>
 

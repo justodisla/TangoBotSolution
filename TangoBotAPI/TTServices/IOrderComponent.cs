@@ -1,6 +1,4 @@
-﻿using HttpClientLib.OrderApi.Models;
-
-namespace HttpClientLib.OrderApi
+﻿namespace TangoBot.API.TTServices
 {
     public interface IOrderComponent<T>
     {

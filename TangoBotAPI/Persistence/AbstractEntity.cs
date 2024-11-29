@@ -1,4 +1,4 @@
-namespace TangoBotAPI.Persistence
+namespace TangoBot.API.Persistence
 {
 
     public abstract class AbstractEntity : IEntity

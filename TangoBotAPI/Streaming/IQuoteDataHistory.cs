@@ -1,4 +1,4 @@
-﻿namespace TangoBotAPI.Streaming
+﻿namespace TangoBot.API.Streaming
 {
     public interface IQuoteDataHistory
     {
