@@ -174,6 +174,12 @@ namespace TangoBotAPI.DI
             if (serviceTypes.Count > 1 && string.IsNullOrEmpty(name))
             {
                 throw new Exception($"Multiple implementations found for interface '{interfaceType.Name}'. Please specify the implementation name.");
+                /*
+                throw new InvalidOperationException(
+    $"Multiple implementations found for {typeof(T).FullName}. " +
+    $"Please specify the full name of the desired implementation. Available implementations: " +
+    $"{string.Join(", ", discoveredTypes.Select(t => t.FullName))}"
+);*/
             }
 
             if (!string.IsNullOrEmpty(name) && !name.Contains('.'))
@@ -214,5 +220,9 @@ namespace TangoBotAPI.DI
                 return false;
             }
         }
+
+        //A method that return true if a type belongs in any of a given collection of 
+        //namespaces
+
     }
 }
