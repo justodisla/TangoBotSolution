@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -13,14 +13,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DatabaseLib\DatabaseLib.csproj" />
-    <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
-    <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
+    <ProjectReference Include="..\DatabaseLib\TangoBot.DatabaseLib.csproj" />
+    <ProjectReference Include="..\DependecyInjection\TangoBot.DependecyInjection.csproj" />
+    <ProjectReference Include="..\FilePersistence\TangoBot.Persistence.FSPersistence.csproj" />
     <ProjectReference Include="..\HttpClientLib\TangoBot.HttpClientLib.csproj" />
     <ProjectReference Include="..\IndicatorsLib\IndicatorsLib.csproj" />
-    <ProjectReference Include="..\JSonConfiguration\JSonConfiguration.csproj" />
+    <ProjectReference Include="..\Infrastructure.Logging\TangoBot.Infrastructure.Logging.csproj" />
+    <ProjectReference Include="..\JSonConfiguration\TangoBot.JSonConfiguration.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
-    <ProjectReference Include="..\TangoBotStreaming\TangoBotStreaming.csproj" />
+    <ProjectReference Include="..\TangoBotStreaming\TangoBot.Streaming.csproj" />
   </ItemGroup>
 
 </Project>

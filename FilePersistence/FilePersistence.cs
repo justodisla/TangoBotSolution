@@ -84,6 +84,18 @@ namespace TangoBot.Persistence.FSPersistence
             throw new NotImplementedException();
         }
 
+       public bool CollectionExists(string collectionName)
+{
+    if (string.IsNullOrWhiteSpace(collectionName))
+    {
+        throw new ArgumentException("Collection name cannot be null or whitespace.", nameof(collectionName));
+    }
+
+    var tablePath = GetTablePath(collectionName);
+    return File.Exists(tablePath);
+}
+
+
         private class FileCollection<T> : API.Persistence.ICollection<T> where T : IEntity
         {
             private readonly string _basePath;

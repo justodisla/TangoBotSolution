@@ -53,6 +53,16 @@ namespace TangoBot.API.Persistence.Examples
             throw new NotImplementedException();
         }
 
+        public bool CollectionExists(string collectionName)
+        {
+            if (string.IsNullOrWhiteSpace(collectionName))
+            {
+                throw new ArgumentException("Collection name cannot be null or whitespace.", nameof(collectionName));
+            }
+
+            return _collections.ContainsKey(collectionName);
+        }
+
         private class Collection<T> : ICollection<T> where T : IEntity
         {
             private readonly ConcurrentDictionary<Guid, T> _entities = new();

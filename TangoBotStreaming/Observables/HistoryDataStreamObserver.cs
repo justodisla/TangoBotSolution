@@ -31,7 +31,7 @@ namespace TangoBotStreaming.Observables
             fullName = Regex.Replace(fullName, @"[^a-zA-Z0-9_]", "_");
 
             _persistence = TangoBotServiceLocator
-                .GetTransientService<IPersistence>("TangoBot.FSPersistence.FilePersistence");
+                .GetTransientService<IPersistence>("TangoBot.Persistence.FSPersistence.FilePersistence");
 
             _persistence.CreateCollectionAsync<QuoteDataHistory.DataPoint>("QuoteDataHistory").Wait();
 
@@ -51,6 +51,7 @@ namespace TangoBotStreaming.Observables
 
             foreach (var dataPoint in _quoteDataHistory.DataPoints)
             {
+                
                 _quoteDataHistoryCollection?.CreateAsync(dataPoint).Wait();
             }
         }
@@ -81,6 +82,7 @@ namespace TangoBotStreaming.Observables
                     dataItem.BidVolume,
                     dataItem.AskVolume,
                     dataItem.ImpVolatility
+                    
                 );
 
                 // Append the converted DataPoint to QuoteDataHistory

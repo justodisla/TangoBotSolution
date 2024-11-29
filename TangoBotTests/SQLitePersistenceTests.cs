@@ -120,7 +120,12 @@ namespace DatabaseLib.Tests
         public async Task ReadAllAsync_ShouldReturnAllEntities()
         {
             // Arrange
-            await _persistence.CreateCollectionAsync<User>("Users");
+            //Clean up the collecton before adding new entities
+            if (_persistence.CollectionExists("Users"))
+            {
+                await _persistence.RemoveCollectionAsync("Users");
+            }
+
             var collection = await _persistence.GetCollectionAsync<User>("Users");
             var user1 = new User { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com" };
             var user2 = new User { Id = Guid.NewGuid(), Name = "Jane Doe", Email = "jane.doe@example.com" };
@@ -133,6 +138,10 @@ namespace DatabaseLib.Tests
             // Assert
             Assert.NotNull(entities);
             Assert.Equal(2, entities.Count());
+
+            //Delete all entities from the collection to reset the database
+            await collection.DeleteAsync(user1.Id);
+
         }
 
         [Fact]

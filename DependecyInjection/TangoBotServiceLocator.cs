@@ -162,21 +162,12 @@ namespace TangoBot.DependecyInjection
             var interfaceType = typeof(T);
             var currentAssembly = Assembly.GetExecutingAssembly();
             var parentDirectory = (Directory.GetParent(currentAssembly.Location)?.Parent?.Parent?.FullName) ?? throw new Exception("Parent directory not found.");
+
             var assemblies = Directory.GetFiles(parentDirectory, "*.dll", SearchOption.AllDirectories)
                  .Where(IsAssembly)
                  .Select(Assembly.LoadFrom)
                  .Where(ServiceLocatorHelper.IsSolutionAssembly) // Filter assemblies using the new method
                  .ToList();
-
-            Console.WriteLine("\n\nAssemblies found: " + assemblies.Count);
-            foreach ( var assembly in assemblies ) {
-                //Console.WriteLine("Assembly " + assembly.GetName());
-                if(assembly.GetName().Name.ToLower().Contains("tangobot"))
-                {
-                    Console.WriteLine("---------------> API Assembly " + assembly.GetName());
-                }
-            }
-
 
             var serviceTypes = assemblies
                 .SelectMany(a => a.GetTypes())
@@ -190,7 +181,12 @@ namespace TangoBot.DependecyInjection
 
             if (serviceTypes.Count > 1 && string.IsNullOrEmpty(name))
             {
-                throw new Exception($"Multiple implementations found for interface '{interfaceType.Name}'. Please specify the implementation name.");
+
+                var implementations = serviceTypes.Select(t => $"Namespace: {t.GetType().Namespace}, Type: {t.GetType().Name}, DLL: {t.GetType().Assembly.Location}");
+                var message = $"Multiple implementations found for interface '{interfaceType.Name}'. Please specify the implementation name. Available implementations:\n{string.Join("\n", implementations)}";
+                throw new Exception(message);
+
+                //throw new Exception($"Multiple implementations found for interface '{interfaceType.Name}'. Please specify the implementation name.");
                 /*
                 throw new InvalidOperationException(
     $"Multiple implementations found for {typeof(T).FullName}. " +

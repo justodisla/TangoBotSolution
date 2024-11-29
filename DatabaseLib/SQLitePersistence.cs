@@ -103,6 +103,28 @@ namespace TangoBot.DatabaseLib
             throw new NotImplementedException();
         }
 
+        public bool CollectionExists(string collectionName)
+        {
+            if (string.IsNullOrWhiteSpace(collectionName))
+            {
+                throw new ArgumentException("Collection name cannot be null or whitespace.", nameof(collectionName));
+            }
+
+            using var connection = new SqliteConnection(_databaseManager.ConnectionString);
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+        SELECT COUNT(*)
+        FROM sqlite_master
+        WHERE type = 'table' AND name = @collectionName;
+    ";
+            command.Parameters.AddWithValue("@collectionName", collectionName);
+
+            var result = (long)command.ExecuteScalar();
+            return result > 0;
+        }
+
         private class SQLiteCollection<T> : TangoBot.API.Persistence.ICollection<T> where T : IEntity
         {
             private readonly DatabaseManager _databaseManager;

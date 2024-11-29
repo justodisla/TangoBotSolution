@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -24,9 +24,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DatabaseLib\TangoBot.DatabaseLib.csproj" />
-    <ProjectReference Include="..\DependecyInjection\DependecyInjection.csproj" />
+    <ProjectReference Include="..\DependecyInjection\TangoBot.DependecyInjection.csproj" />
     <ProjectReference Include="..\FilePersistence\TangoBot.Persistence.FSPersistence.csproj" />
-    <ProjectReference Include="..\HttpClientLib\HttpClientLib.csproj" />
+    <ProjectReference Include="..\HttpClientLib\TangoBot.HttpClientLib.csproj" />
+    <ProjectReference Include="..\Infrastructure.Logging\TangoBot.Infrastructure.Logging.csproj" />
+    <ProjectReference Include="..\JSonConfiguration\TangoBot.JSonConfiguration.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
     <ProjectReference Include="..\TangoBot\TangoBot.csproj" />
   </ItemGroup>
