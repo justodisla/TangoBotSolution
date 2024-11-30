@@ -3,7 +3,14 @@ namespace TangoBot.API.Persistence
 
     public abstract class AbstractEntity : IEntity
     {
-        public Guid Id { get; set; }
+        private Guid _id;
+
+        protected AbstractEntity()
+        {
+            _id = Guid.NewGuid();
+        }
+
+        public Guid Id { get { return _id; } }
 
         // Default implementation of the Validate method
         public virtual bool Validate()

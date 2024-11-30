@@ -2,7 +2,7 @@ namespace TangoBot.API.Persistence
 {
     public interface IEntity
     {
-        Guid Id { get; set; }
+        Guid Id { get; }
 
         // Method to validate the entity
         bool Validate();

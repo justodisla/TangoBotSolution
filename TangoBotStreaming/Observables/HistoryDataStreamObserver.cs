@@ -82,7 +82,6 @@ namespace TangoBotStreaming.Observables
                     dataItem.BidVolume,
                     dataItem.AskVolume,
                     dataItem.ImpVolatility
-                    
                 );
 
                 // Append the converted DataPoint to QuoteDataHistory
