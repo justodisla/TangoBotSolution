@@ -35,7 +35,7 @@ namespace TangoBot.HttpClientLib.TokenManagement
         public TokenProvider()
         {
             _httpClient = new HttpClient();
-
+            
             _configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
             _streamingTokenEndpoint = _configurationProvider.GetConfigurationValue(Constants.ACTIVE_API_URL) +
                 _configurationProvider.GetConfigurationValue(Constants.STREAMING_AUTH_TOKEN_ENDPOINT);

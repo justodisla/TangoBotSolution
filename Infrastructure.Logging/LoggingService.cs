@@ -1,30 +1,34 @@
 using Microsoft.Extensions.Logging;
+using TangoBot.API.DI;
 using TangoBot.API.Logging;
 
 namespace TangoBot.Infrastructure.Logging
 {
-    public class LoggingService<T> : ILoggingService<T>
+    public class LoggingService : ILoggingService, ITTService
     {
-        private readonly ILogger<T> _logger;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public LoggingService(ILogger<T> logger)
+        public LoggingService(ILoggerFactory loggerFactory)
         {
-            _logger = logger;
+            _loggerFactory = loggerFactory;
         }
 
-        public void LogInformation(string message, params object[] args)
+        public void LogInformation(Type source, string message, params object[] args)
         {
-            _logger.LogInformation(message, args);
+            var logger = _loggerFactory.CreateLogger(source);
+            logger.LogInformation(message, args);
         }
 
-        public void LogWarning(string message, params object[] args)
+        public void LogWarning(Type source, string message, params object[] args)
         {
-            _logger.LogWarning(message, args);
+            var logger = _loggerFactory.CreateLogger(source);
+            logger.LogWarning(message, args);
         }
 
-        public void LogError(Exception exception, string message, params object[] args)
+        public void LogError(Type source, Exception exception, string message, params object[] args)
         {
-            _logger.LogError(exception, message, args);
+            var logger = _loggerFactory.CreateLogger(source);
+            logger.LogError(exception, message, args);
         }
     }
 }

@@ -12,7 +12,7 @@ using TangoBot.API.Logging;
 
 namespace TangoBot.DependecyInjection
 {
-    public class TangoBotServiceLocator
+    public class TangoBotServiceLocator1
     {
 
         private static IServiceProvider? _wrappedServiceProvider;
@@ -21,7 +21,7 @@ namespace TangoBot.DependecyInjection
         private static readonly ConcurrentDictionary<string, Type> namedServices = new();
         private static readonly ConcurrentDictionary<string, object> singletonInstances = new();
         private static readonly object serviceCollectionLock = new();
-        //private static API.Logging.ILoggingService<TangoBotServiceLocator1>? _logger;
+        private static API.Logging.ILoggingService<TangoBotServiceLocator1>? _logger;
 
         /// <summary>
         /// Initializes the service provider if it has not been initialized already.
@@ -45,9 +45,9 @@ namespace TangoBot.DependecyInjection
 
                 initialize = true;
 
-                //_logger = GetSingletonService<ILoggingService<TangoBotServiceLocator>>() ?? throw new Exception("Logger could not be loaded");
+                _logger = GetSingletonService<ILoggingService<TangoBotServiceLocator1>>() ?? throw new Exception("Logger could not be loaded");
 
-
+                
 
             }
         }

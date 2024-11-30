@@ -85,20 +85,118 @@ namespace TangoBot.DependecyInjection
 
         internal static bool ResolveAssignable(Type interfaceType, Type type)
         {
+            Assembly assembly = type.Assembly;
+            if (assembly.FullName.ToLower().Contains("logg"))
+            {
+                Console.WriteLine("Assembly: " + assembly.FullName);
+            }
+
+            if (interfaceType.IsGenericType && type.IsGenericType)
+            {
+                // Get the generic type definitions
+                var interfaceGenericTypeDefinition = interfaceType.GetGenericTypeDefinition();
+                var typeGenericTypeDefinition = type.GetGenericTypeDefinition();
+
+                // Check if the generic type definitions are the same
+                if (interfaceGenericTypeDefinition == typeGenericTypeDefinition)
+                {
+                    return true;
+                }
+
+                // Check if the type implements the interface
+                var implementedInterfaces = type.GetInterfaces();
+                foreach (var implementedInterface in implementedInterfaces)
+                {
+                    if (implementedInterface.IsGenericType)
+                    {
+                        var implementedInterfaceGenericTypeDefinition = implementedInterface.GetGenericTypeDefinition();
+
+                        // Check if the generic type definitions are the same
+                        if (interfaceGenericTypeDefinition == implementedInterfaceGenericTypeDefinition)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Fallback to the default IsAssignableFrom check
+            return interfaceType.IsAssignableFrom(type);
+        }
+
+
+
+        internal static bool xResolveAssignable(Type interfaceType, Type type)
+        {
 
             //if(type.FullName.Contains("logg") && interfaceType.FullName.Contains("logg"))
             //{
             //    Console.WriteLine("Type: " + type.FullName);
             //}
-            return interfaceType.IsAssignableFrom(type);
+
+            string interfaceName = interfaceType.Name ?? string.Empty;
+            string typeName = type.Name ?? string.Empty;
+            bool isAssignable = interfaceType.IsAssignableFrom(type);
+            Assembly assembly = type.Assembly;
+
+            if(assembly.FullName.ToLower().Contains("logg"))
+            {
+                Console.WriteLine("Assembly: " + assembly.FullName);
+            }
+
+            if (isAssignable)
+            {
+                Console.WriteLine($"Interface: {interfaceName}, Type: {typeName}, IsAssignable: {isAssignable}");
+            }
+            else
+            {
+                Console.WriteLine($"Interface: {interfaceName}, Type: {typeName}, IsAssignable: {isAssignable}");
+            }
+
+            if(type.FullName.ToLower().Contains("LoggingServic") && interfaceType.FullName.ToLower().Contains("logg"))
+            {
+                Console.WriteLine("Type: " + type.FullName);
+            }
+
+            return isAssignable;
         }
 
         internal static bool IsSolutionAssembly(Assembly assembly)
         {
+
+            if (!IsAssembly(assembly.Location))
+            {
+                Console.WriteLine("Not an assembly: " + assembly.Location);
+                return false;
+            }
+         
+            if (assembly.FullName.Contains("TangoBot"))
+            {
+                Console.WriteLine("Assembly: " + assembly.FullName);
+                return true;
+            }
+
             // Define your criteria for solution assemblies here.
             // For example, you might check if the assembly name starts with "TangoBot".
             //return assembly.GetName().Name?.StartsWith("TangoBot") ?? false;
-            return true;
+            return false;
+        }
+
+        private static bool IsAssembly(string filePath)
+        {
+            try
+            {
+                AssemblyName.GetAssemblyName(filePath);
+                return true;
+            }
+            catch (BadImageFormatException)
+            {
+                return false;
+            }
+            catch (FileLoadException)
+            {
+                return false;
+            }
         }
     }
 }
