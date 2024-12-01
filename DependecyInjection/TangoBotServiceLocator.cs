@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using TangoBot.API.Logging;
@@ -21,7 +22,9 @@ namespace TangoBot.DependecyInjection
         private static readonly ConcurrentDictionary<string, Type> namedServices = new();
         private static readonly ConcurrentDictionary<string, object> singletonInstances = new();
         private static readonly object serviceCollectionLock = new();
-        //private static API.Logging.ILoggingService<TangoBotServiceLocator1>? _logger;
+        private static ILoggingService _logger;
+
+        
 
         /// <summary>
         /// Initializes the service provider if it has not been initialized already.
@@ -30,6 +33,7 @@ namespace TangoBot.DependecyInjection
         {
             if (initialize)
             {
+                LogInfo("Initializing ServiceLocator", null);
                 return;
             }
 
@@ -45,9 +49,11 @@ namespace TangoBot.DependecyInjection
 
                 initialize = true;
 
-                //_logger = GetSingletonService<ILoggingService<TangoBotServiceLocator>>() ?? throw new Exception("Logger could not be loaded");
+                LogInfo("Logging before _logger", null);
 
+                _logger = GetSingletonService<ILoggingService>() ?? throw new Exception("Logger could not be loaded");
 
+                LogInfo("ServiceLocator initialized", null);
 
             }
         }
@@ -246,8 +252,91 @@ namespace TangoBot.DependecyInjection
             }
         }
 
-        //A method that return true if a type belongs in any of a given collection of 
-        //namespaces
+        #region Logging
+        private static void LogInfo(string message, object[] args)
+        {
+            Log("Info", message, args);
+        }
+
+        private static void LogError(Exception exception, string args)
+        {
+            Log("Error", null, null, exception, args);
+        }
+
+        private static void LogDebug(string message, object[] args)
+        {
+            Log("Debug", message, args);
+        }
+
+        private static void LogWarning(string message, object[] args)
+        {
+            Log("Warning", message, args);
+        }
+
+        private static void Log(string msType, string message, object[] args = null, Exception exception = null, string stArgs = null)
+        {
+
+            string className = typeof(TangoBotServiceLocator).Name;
+            Type locatorType = typeof(TangoBotServiceLocator);
+
+
+            switch (msType)
+            {
+                case "Info":
+                    if (_logger == null)
+                    {
+                        Console.WriteLine($"[{className}] {message}");
+                    }
+                    else
+                    {
+
+                        _logger.LogInformation(locatorType, message, args);
+                    }
+                    break;
+                case "Error":
+                    if (_logger == null)
+                    {
+                        Console.WriteLine($"[{className}] {message}");
+                    }
+                    else
+                    {
+                        _logger.LogError(locatorType, exception, stArgs);
+                    }
+                    break;
+                case "Debug":
+                    if (_logger == null)
+                    {
+                        Console.WriteLine($"[{className}] {message}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation(locatorType, message, args);
+                    }
+                    break;
+                case "Warning":
+                    if (_logger == null)
+                    {
+                        Console.WriteLine($"[{className}] {message}");
+                    }
+                    else
+                    {
+                        _logger.LogWarning(locatorType, message, args);
+                    }
+                    break;
+                default:
+                    if (_logger == null)
+                    {
+                        Console.WriteLine($"[{className}] {message}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation(locatorType, message, args);
+                    }
+                    break;
+            }
+
+        }
+        #endregion
 
     }
 }

@@ -20,6 +20,7 @@
     <ProjectReference Include="..\IndicatorsLib\IndicatorsLib.csproj" />
     <ProjectReference Include="..\Infrastructure.Logging\TangoBot.Infrastructure.Logging.csproj" />
     <ProjectReference Include="..\JSonConfiguration\TangoBot.JSonConfiguration.csproj" />
+    <ProjectReference Include="..\TangoBot.Core.Api\TangoBot.Core.Api.csproj" />
     <ProjectReference Include="..\TangoBotAPI\TangoBot.API.csproj" />
     <ProjectReference Include="..\TangoBotStreaming\TangoBot.Streaming.csproj" />
   </ItemGroup>

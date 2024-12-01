@@ -8,6 +8,14 @@ namespace TangoBot.Infrastructure.Logging
     {
         private readonly ILoggerFactory _loggerFactory;
 
+        public LoggingService()
+        {
+            _loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+            });
+        }
+
         public LoggingService(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;

@@ -124,8 +124,6 @@ namespace TangoBot.DependecyInjection
             return interfaceType.IsAssignableFrom(type);
         }
 
-
-
         internal static bool xResolveAssignable(Type interfaceType, Type type)
         {
 

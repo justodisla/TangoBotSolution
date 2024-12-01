@@ -14,6 +14,9 @@ namespace TangoBot
     {
         static async Task Main(string[] args)
         {
+
+            //ILoggerService loggerService = new LoggerService();
+
             StartUp.InitializeDI();
 
             RandomTests();
