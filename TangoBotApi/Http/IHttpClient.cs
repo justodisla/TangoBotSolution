@@ -1,7 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-
-namespace TangoBotApi.Http
+﻿namespace TangoBotApi.Http
 {
     internal interface IHttpClient
     {

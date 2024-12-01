@@ -1,8 +1,8 @@
 ﻿using TangoBotApi.DI;
 
-namespace TangoBot.API.Configuration
+namespace TangoBotApi.Configuration
 {
-    public interface IConfigurationProvider : ITTService
+    public interface IConfigurationProvider : IInfrService
     {
         /// <summary>
         /// Gets a configuration value by key.
@@ -15,7 +15,7 @@ namespace TangoBot.API.Configuration
         /// Gets all configuration values.
         /// </summary>
         /// <returns>A dictionary containing all configuration values.</returns>
-        IDictionary<string, string> GetAllConfigurationValues();
+         IDictionary<string, string> GetAllConfigurationValues()
 
         /// <summary>
         /// Sets a configuration value by key.
