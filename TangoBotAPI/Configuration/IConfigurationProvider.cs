@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using TangoBot.API.DI;
+﻿using TangoBotApi.DI;
 
 namespace TangoBot.API.Configuration
 {
