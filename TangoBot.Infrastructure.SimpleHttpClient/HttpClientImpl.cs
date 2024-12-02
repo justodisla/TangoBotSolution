@@ -51,5 +51,10 @@ namespace TangoBot.Infrastructure.HttpImpl
         {
             throw new NotImplementedException();
         }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

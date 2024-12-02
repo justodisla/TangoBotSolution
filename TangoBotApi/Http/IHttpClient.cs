@@ -50,5 +50,10 @@ namespace TangoBotApi.Http
         {
             return Array.Empty<string>();
         }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

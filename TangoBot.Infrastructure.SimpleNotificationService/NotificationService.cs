@@ -63,5 +63,10 @@ namespace TangoBotApi.Infrastructure
             //throw new System.NotImplementedException();
             return new[] { typeof(IHttpClient).FullName! };
         }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

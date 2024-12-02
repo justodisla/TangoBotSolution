@@ -52,6 +52,11 @@ namespace TangoBot.Infrastructure.Logger
         {
             throw new NotImplementedException();
         }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ConsoleLogger : ILogger
@@ -85,6 +90,11 @@ namespace TangoBot.Infrastructure.Logger
         }
 
         public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Setup(Dictionary<string, object> configuration)
         {
             throw new NotImplementedException();
         }
@@ -123,6 +133,11 @@ namespace TangoBot.Infrastructure.Logger
         }
 
         public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Setup(Dictionary<string, object> configuration)
         {
             throw new NotImplementedException();
         }
@@ -168,6 +183,11 @@ namespace TangoBot.Infrastructure.Logger
         }
 
         public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Setup(Dictionary<string, object> configuration)
         {
             throw new NotImplementedException();
         }

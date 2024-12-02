@@ -8,11 +8,10 @@ namespace TangoBotApi.Infrastructure
 {
     public class SQLitePersistence : IPersistence
     {
-        private readonly string _connectionString;
+        private string _connectionString;
 
-        public SQLitePersistence(string connectionString)
-        {
-            _connectionString = connectionString;
+        public SQLitePersistence()
+        {  
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(string collectionName) where TEntity : class, IEntity, new()
@@ -118,6 +117,17 @@ namespace TangoBotApi.Infrastructure
         {
             entity.Id = reader.GetInt32(reader.GetOrdinal("Id"));
             entity.Name = reader.GetString(reader.GetOrdinal("Name"));
+        }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            if(configuration != null)
+            {
+                if (configuration.ContainsKey("ConnectionString"))
+                {
+                    _connectionString = configuration["ConnectionString"] as string;
+                }
+            }
         }
     }
 }

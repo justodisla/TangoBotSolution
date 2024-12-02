@@ -88,5 +88,10 @@ namespace TangoBot.Infrastructure.BasicEventBus
         {
             throw new NotImplementedException();
         }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
