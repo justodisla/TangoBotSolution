@@ -1,56 +1,54 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBotApi.Configuration;
-using Microsoft.Extensions.Configuration;
 
 namespace ConfigurationImpl
 {
     /// <summary>
     /// Implements the <see cref="IConfigurationProvider"/> interface to provide configuration functionalities.
     /// </summary>
-    public class ConfigurationProvider : TangoBotApi.Configuration.IConfigurationProvider
+    public class ConfigurationProvider : IConfigurationProvider
     {
-        private readonly IConfiguration _configuration;
+        private readonly Dictionary<string, string> _configuration;
 
         public ConfigurationProvider()
         {
-            // Build the configuration from appsettings.json and environment variables
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
+            _configuration = LoadConfiguration("appsettings.json");
+        }
 
-            _configuration = builder.Build();
+        private Dictionary<string, string> LoadConfiguration(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                return new Dictionary<string, string>();
+            }
+
+            var json = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
         }
 
         public string GetConfigurationValue(string key)
         {
-            return _configuration[key];
+            return _configuration.TryGetValue(key, out var value) ? value : null;
         }
 
         public IDictionary<string, string> GetAllConfigurationValues()
         {
-            var configValues = new Dictionary<string, string>();
-            foreach (var kvp in _configuration.AsEnumerable())
-            {
-                configValues[kvp.Key] = kvp.Value;
-            }
-            return configValues;
+            return new Dictionary<string, string>(_configuration);
         }
 
         public void SetConfigurationValue(string key, string value)
         {
-            // Note: IConfiguration is generally read-only. To set values, you might need a custom implementation or use a writable configuration source.
-            // This is a placeholder implementation.
-            throw new NotImplementedException("Setting configuration values is not supported in this implementation.");
+            _configuration[key] = value;
+            SaveConfigurationAsync().Wait();
         }
 
-        public Task SaveConfigurationAsync()
+        public async Task SaveConfigurationAsync()
         {
-            // Note: Saving configuration is not typically supported with IConfiguration. This is a placeholder implementation.
-            throw new NotImplementedException("Saving configuration is not supported in this implementation.");
+            var json = JsonSerializer.Serialize(_configuration, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync("appsettings.json", json);
         }
     }
 }
-

@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using TangoBotApi.DI;
@@ -9,15 +13,31 @@ namespace TangoBotApi.Infrastructure
         private static IServiceProvider _serviceProvider;
         private static readonly Dictionary<Type, List<Type>> _serviceImplementations = new();
 
-        public static void Initialize(string baseDirectory)
+        private static bool _initialized = false;
+
+        public static void Initialize()
         {
+            if (_initialized)
+            {
+                return;
+            }
+
+            var baseDirectory = ServiceLocatorHelper.GetSearchDirectory();
+
             var serviceCollection = new ServiceCollection();
 
             // Scan for DLLs and load types that implement IInfrService
             var dllFiles = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories);
             foreach (var dll in dllFiles)
             {
-                var assembly = Assembly.LoadFrom(dll);
+                var assemblyName = AssemblyName.GetAssemblyName(dll);
+                var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName.FullName);
+
+                if (assembly == null)
+                {
+                    assembly = Assembly.LoadFrom(dll);
+                }
+
                 var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
                 foreach (var type in types)
                 {
@@ -29,21 +49,20 @@ namespace TangoBotApi.Infrastructure
                             _serviceImplementations[iface] = new List<Type>();
                         }
                         _serviceImplementations[iface].Add(type);
-                        serviceCollection.AddTransient(iface, type); // Register as transient by default
+                        serviceCollection.AddSingleton(iface, type); // Register as singleton by default
                     }
                 }
             }
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
-        }
 
-        public static void SetLocatorProvider(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
+            _initialized = true;
         }
 
         public static T GetSingletonService<T>(string qualifiedName = null) where T : class
         {
+            Initialize();
+
             if (qualifiedName == null)
             {
                 return _serviceProvider.GetRequiredService<T>();
@@ -55,6 +74,8 @@ namespace TangoBotApi.Infrastructure
 
         public static T GetTransientService<T>(string qualifiedName = null) where T : class
         {
+            Initialize();
+
             if (qualifiedName == null)
             {
                 return _serviceProvider.GetRequiredService<T>();
@@ -82,5 +103,3 @@ namespace TangoBotApi.Infrastructure
         }
     }
 }
-
-

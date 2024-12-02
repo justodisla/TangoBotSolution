@@ -1,9 +1,11 @@
+using TangoBotApi.DI;
+
 namespace TangoBotApi.EventBus
 {
     /// <summary>
     /// Provides methods for subscribing to and publishing events.
     /// </summary>
-    public interface IEventBus
+    public interface IEventBus : IInfrService
     {
         /// <summary>
         /// Subscribes to a specific named event.

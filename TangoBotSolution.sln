@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotConsole", "TangoBotConsole\TangoBotConsole.csproj", "{3DB420B4-200E-4558-AD6C-16A71E9AD591}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{54A4B222-5281-4B0E-A89B-E5F96340E950}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{5A2B27E7-E687-4884-93C0-BD55351459D3}"
@@ -15,13 +13,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E43D1A58
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigurationImpl", "ConfigurationImpl\ConfigurationImpl.csproj", "{80EA0BE3-23E0-454B-88F3-B5FE0D606979}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotApi", "TangoBotApi\TangoBotApi.csproj", "{6C38E048-C322-4D15-B03A-A60610BA9F88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotApi", "TangoBotApi\TangoBotApi.csproj", "{6C38E048-C322-4D15-B03A-A60610BA9F88}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{18B2F2DC-D445-4035-AC97-94741863ABAE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApi", "WebApi", "{A0DB861E-4C9A-4E24-A056-28E477138379}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection", "DependencyInjection\DependencyInjection.csproj", "{4A1A9799-EAB7-4381-A7EE-0FA360F9F560}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjection", "DependencyInjection\DependencyInjection.csproj", "{4A1A9799-EAB7-4381-A7EE-0FA360F9F560}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotConsole", "TangoBotConsole\TangoBotConsole.csproj", "{95FBAC1C-9011-46E5-87C6-C29900CE5C6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicEventBus", "BasicEventBus\BasicEventBus.csproj", "{87A1FF54-B618-4A46-AE50-4B6C8E66CDC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "Logger\Logger.csproj", "{91399D73-7A21-4184-8299-E7885CC897F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +33,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3DB420B4-200E-4558-AD6C-16A71E9AD591}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DB420B4-200E-4558-AD6C-16A71E9AD591}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DB420B4-200E-4558-AD6C-16A71E9AD591}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DB420B4-200E-4558-AD6C-16A71E9AD591}.Release|Any CPU.Build.0 = Release|Any CPU
 		{80EA0BE3-23E0-454B-88F3-B5FE0D606979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{80EA0BE3-23E0-454B-88F3-B5FE0D606979}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80EA0BE3-23E0-454B-88F3-B5FE0D606979}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,15 +45,29 @@ Global
 		{4A1A9799-EAB7-4381-A7EE-0FA360F9F560}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A1A9799-EAB7-4381-A7EE-0FA360F9F560}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A1A9799-EAB7-4381-A7EE-0FA360F9F560}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95FBAC1C-9011-46E5-87C6-C29900CE5C6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95FBAC1C-9011-46E5-87C6-C29900CE5C6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95FBAC1C-9011-46E5-87C6-C29900CE5C6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95FBAC1C-9011-46E5-87C6-C29900CE5C6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87A1FF54-B618-4A46-AE50-4B6C8E66CDC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87A1FF54-B618-4A46-AE50-4B6C8E66CDC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87A1FF54-B618-4A46-AE50-4B6C8E66CDC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87A1FF54-B618-4A46-AE50-4B6C8E66CDC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91399D73-7A21-4184-8299-E7885CC897F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91399D73-7A21-4184-8299-E7885CC897F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91399D73-7A21-4184-8299-E7885CC897F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91399D73-7A21-4184-8299-E7885CC897F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3DB420B4-200E-4558-AD6C-16A71E9AD591} = {5A2B27E7-E687-4884-93C0-BD55351459D3}
 		{80EA0BE3-23E0-454B-88F3-B5FE0D606979} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
 		{6C38E048-C322-4D15-B03A-A60610BA9F88} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
 		{4A1A9799-EAB7-4381-A7EE-0FA360F9F560} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
+		{95FBAC1C-9011-46E5-87C6-C29900CE5C6F} = {5A2B27E7-E687-4884-93C0-BD55351459D3}
+		{87A1FF54-B618-4A46-AE50-4B6C8E66CDC1} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
+		{91399D73-7A21-4184-8299-E7885CC897F3} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {56390FCD-32A0-4E90-A914-A41AC69A7112}

@@ -15,7 +15,7 @@ namespace TangoBotApi.Configuration
         /// Gets all configuration values.
         /// </summary>
         /// <returns>A dictionary containing all configuration values.</returns>
-         IDictionary<string, string> GetAllConfigurationValues()
+        IDictionary<string, string> GetAllConfigurationValues();
 
         /// <summary>
         /// Sets a configuration value by key.
