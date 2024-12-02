@@ -47,6 +47,11 @@ namespace TangoBot.Infrastructure.Logger
                 logger.SetLogOutputPreferences(preferences);
             }
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ConsoleLogger : ILogger
@@ -77,6 +82,11 @@ namespace TangoBot.Infrastructure.Logger
         public void SetLogOutputPreferences(LogOutputPreferences preferences)
         {
             _enabled = preferences.LogToConsole;
+        }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -110,6 +120,11 @@ namespace TangoBot.Infrastructure.Logger
         public void SetLogOutputPreferences(LogOutputPreferences preferences)
         {
             _enabled = preferences.LogToFile;
+        }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -150,6 +165,11 @@ namespace TangoBot.Infrastructure.Logger
         public void SetLogOutputPreferences(LogOutputPreferences preferences)
         {
             _enabled = preferences.LogToEventLog;
+        }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
         }
     }
 }

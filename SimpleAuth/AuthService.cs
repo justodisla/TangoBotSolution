@@ -37,6 +37,11 @@ namespace TangoBot.Infrastructure.AuthImpl
             await Task.Delay(100); // Simulate async operation
             return _tokens.ContainsValue(token);
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

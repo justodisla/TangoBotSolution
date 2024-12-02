@@ -37,5 +37,10 @@ namespace TangoBotApi.Http
             var request = new HttpRequestMessage(method, requestUri) { Content = content };
             return await _httpClient.SendAsync(request);
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

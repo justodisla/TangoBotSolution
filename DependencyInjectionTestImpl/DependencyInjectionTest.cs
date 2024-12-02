@@ -39,5 +39,10 @@ namespace TangoBot.Infrastructure.DependencyInjectionTestImpl
         {
             _values.Remove(key);
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

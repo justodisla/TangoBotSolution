@@ -9,26 +9,15 @@ using TangoBotApi.DI;
 
 namespace TangoBotApi.Infrastructure
 {
-    /// <summary>
-    /// Provides a service locator for resolving dependencies at runtime.
-    /// </summary>
     public static class ServiceLocator
     {
-        // The service provider that holds the registered services.
         private static IServiceProvider? _serviceProvider;
-
-        // A dictionary to keep track of service implementations.
         private static readonly Dictionary<Type, List<Type>> _serviceImplementations = new();
-
-        // A flag to indicate whether the service locator has been initialized.
+        private static readonly Dictionary<Type, List<Type>> _delayedServices = new();
         private static bool _initialized = false;
-
-        // An object to lock on for thread safety.
         private static readonly object _lock = new();
+        private static readonly HashSet<Type> _processedServices = new();
 
-        /// <summary>
-        /// Initializes the service locator by scanning for DLLs and registering services.
-        /// </summary>
         public static void Initialize()
         {
             if (_initialized)
@@ -44,57 +33,146 @@ namespace TangoBotApi.Infrastructure
                 }
 
                 var baseDirectory = ServiceLocatorHelper.GetSearchDirectory();
-
                 var serviceCollection = new ServiceCollection();
-
-                // Scan for DLLs and load types that implement IInfrService
-                // var dllFiles = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories)
-                //   .Where(dll => Path.GetFileName(dll).StartsWith("TangoBot.", StringComparison.OrdinalIgnoreCase));
 
                 var dllFiles = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories)
                                        .Where(dll => Path.GetFileName(dll).StartsWith("TangoBot.", StringComparison.OrdinalIgnoreCase) &&
                                        dll.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar));
-
 
                 foreach (var dll in dllFiles)
                 {
                     var assemblyName = AssemblyName.GetAssemblyName(dll);
                     var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName.FullName);
 
-                    Console.WriteLine($"Loading assembly {assemblyName.FullName} from {dll}");
-
                     if (assembly == null)
                     {
+                        Console.WriteLine($"Loading assembly {assemblyName.FullName} from {dll}");
                         assembly = Assembly.LoadFrom(dll);
                     }
+                }
 
-                    var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
-                    foreach (var type in types)
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    Console.WriteLine($"Checking assembly {assembly.GetName()}");
+
+                    try
                     {
-                        var interfaces = type.GetInterfaces().Where(i => typeof(IInfrService).IsAssignableFrom(i) && !i.Name.Equals(typeof(IInfrService).Name));
-                        foreach (var iface in interfaces)
+                        var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+                        foreach (var type in types)
                         {
-                            if (!_serviceImplementations.ContainsKey(iface))
+                            var interfaces = type.GetInterfaces().Where(i => typeof(IInfrService).IsAssignableFrom(i) && !i.Name.Equals(typeof(IInfrService).Name));
+                            foreach (var iface in interfaces)
                             {
-                                _serviceImplementations[iface] = new List<Type>();
+                                if (!_serviceImplementations.ContainsKey(iface))
+                                {
+                                    _serviceImplementations[iface] = new List<Type>();
+                                }
+                                _serviceImplementations[iface].Add(type);
+
+                                // Check if the type has any constructors that require parameters
+                                var constructors = type.GetConstructors();
+                                if (constructors.Any(c => c.GetParameters().Length > 0))
+                                {
+                                    continue;
+                                }
+
+                                if (_processedServices.Contains(type))
+                                {
+                                    continue;
+                                }
+
+                                var instance = (IInfrService)Activator.CreateInstance(type)!;
+                                string[] requiredServices;
+                                try
+                                {
+                                    requiredServices = instance.Requires();
+                                }
+                                catch (NotImplementedException)
+                                {
+                                    requiredServices = Array.Empty<string>();
+                                }
+
+                                if (requiredServices.All(rs =>
+                                {
+                                    var serviceType = Type.GetType(rs);
+                                    return serviceType != null && _serviceImplementations.ContainsKey(serviceType);
+                                }))
+                                {
+                                    serviceCollection.AddSingleton(iface, type);
+                                    _processedServices.Add(type);
+                                }
+                                else
+                                {
+                                    if (!_delayedServices.ContainsKey(iface))
+                                    {
+                                        _delayedServices[iface] = new List<Type>();
+                                    }
+                                    _delayedServices[iface].Add(type);
+                                }
                             }
-                            _serviceImplementations[iface].Add(type);
-                            serviceCollection.AddSingleton(iface, type); // Register as singleton by default
+                        }
+                    }
+                    catch (ReflectionTypeLoadException ex)
+                    {
+                        foreach (var loaderException in ex.LoaderExceptions)
+                        {
+                            Console.WriteLine($"Error loading type from assembly {assembly.GetName()}: {loaderException.Message}");
                         }
                     }
                 }
 
                 _serviceProvider = serviceCollection.BuildServiceProvider();
                 _initialized = true;
+
+                RegisterDelayedServices(serviceCollection);
             }
         }
 
-        /// <summary>
-        /// Gets a singleton service of the specified type.
-        /// </summary>
-        /// <typeparam name="T">The type of the service to retrieve.</typeparam>
-        /// <param name="qualifiedName">The qualified name of the implementation type (optional).</param>
-        /// <returns>The singleton service instance.</returns>
+
+        private static void RegisterDelayedServices(ServiceCollection serviceCollection)
+        {
+            foreach (var delayedService in _delayedServices)
+            {
+                foreach (var type in delayedService.Value)
+                {
+                    // Check if the type has any constructors that require parameters
+                    var constructors = type.GetConstructors();
+                    if (constructors.Any(c => c.GetParameters().Length > 0))
+                    {
+                        continue;
+                    }
+
+                    if (_processedServices.Contains(type))
+                    {
+                        continue;
+                    }
+
+                    var instance = (IInfrService)Activator.CreateInstance(type)!;
+                    string[] requiredServices;
+                    try
+                    {
+                        requiredServices = instance.Requires();
+                    }
+                    catch (NotImplementedException)
+                    {
+                        requiredServices = Array.Empty<string>();
+                    }
+
+                    if (requiredServices.All(rs =>
+                    {
+                        var serviceType = Type.GetType(rs);
+                        return serviceType != null && _serviceImplementations.ContainsKey(serviceType);
+                    }))
+                    {
+                        serviceCollection.AddSingleton(delayedService.Key, type);
+                        _processedServices.Add(type);
+                    }
+                }
+            }
+
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+        }
+
         public static T GetSingletonService<T>(string? qualifiedName = null) where T : class
         {
             Initialize();
@@ -108,12 +186,6 @@ namespace TangoBotApi.Infrastructure
             return (T)_serviceProvider!.GetRequiredService(implementationType);
         }
 
-        /// <summary>
-        /// Gets a transient service of the specified type.
-        /// </summary>
-        /// <typeparam name="T">The type of the service to retrieve.</typeparam>
-        /// <param name="qualifiedName">The qualified name of the implementation type (optional).</param>
-        /// <returns>The transient service instance.</returns>
         public static T GetTransientService<T>(string? qualifiedName = null) where T : class
         {
             Initialize();
@@ -127,13 +199,6 @@ namespace TangoBotApi.Infrastructure
             return (T)_serviceProvider!.GetService(implementationType)!;
         }
 
-        /// <summary>
-        /// Gets the implementation type for the specified interface and qualified name.
-        /// </summary>
-        /// <typeparam name="T">The type of the interface.</typeparam>
-        /// <param name="qualifiedName">The qualified name of the implementation type.</param>
-        /// <returns>The implementation type.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if no implementations are found for the interface or the qualified name does not match any implementation.</exception>
         private static Type GetImplementationType<T>(string qualifiedName) where T : class
         {
             var interfaceType = typeof(T);

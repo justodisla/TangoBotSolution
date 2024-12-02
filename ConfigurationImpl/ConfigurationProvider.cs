@@ -60,6 +60,11 @@ namespace TangoBot.Infrastructure.ConfigurationImpl
             _configuration.Clear();
             SaveConfigurationAsync().Wait();
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public static class ConfigurationHelper

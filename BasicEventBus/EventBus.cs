@@ -83,5 +83,10 @@ namespace TangoBot.Infrastructure.BasicEventBus
                 _lock.ExitReadLock();
             }
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

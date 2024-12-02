@@ -46,5 +46,10 @@ namespace TangoBot.Infrastructure.HttpImpl
             };
             return await _httpClient.SendAsync(request);
         }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

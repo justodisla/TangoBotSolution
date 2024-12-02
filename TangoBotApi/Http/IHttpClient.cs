@@ -4,43 +4,51 @@ namespace TangoBotApi.Http
 {
     public interface IHttpClient : IInfrService
     {
-        /// <summary>
-        /// Sends an asynchronous GET request to the specified URL.
-        /// </summary>
-        /// <param name="url">The URL to send the GET request to.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
         Task<HttpResponseMessage> GetAsync(string url);
-
-        /// <summary>
-        /// Sends an asynchronous POST request to the specified URL with the provided content.
-        /// </summary>
-        /// <param name="url">The URL to send the POST request to.</param>
-        /// <param name="content">The content to send in the POST request.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
         Task<HttpResponseMessage> PostAsync(string url, HttpContent content);
-
-        /// <summary>
-        /// Sends an asynchronous PUT request to the specified URL with the provided content.
-        /// </summary>
-        /// <param name="url">The URL to send the PUT request to.</param>
-        /// <param name="content">The content to send in the PUT request.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
         Task<HttpResponseMessage> PutAsync(string url, HttpContent content);
-
-        /// <summary>
-        /// Sends an asynchronous DELETE request to the specified URL.
-        /// </summary>
-        /// <param name="url">The URL to send the DELETE request to.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
         Task<HttpResponseMessage> DeleteAsync(string url);
-
-        /// <summary>
-        /// Sends an asynchronous request with the specified HTTP method, URL, and content.
-        /// </summary>
-        /// <param name="method">The HTTP method to use for the request.</param>
-        /// <param name="url">The URL to send the request to.</param>
-        /// <param name="content">The content to send in the request, if any.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
         Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent? content = null);
+    }
+
+    public class HttpClientWrapper : IHttpClient
+    {
+        private readonly HttpClient _httpClient;
+
+        public HttpClientWrapper()
+        {
+            _httpClient = new HttpClient();
+        }
+
+        public async Task<HttpResponseMessage> GetAsync(string url)
+        {
+            return await _httpClient.GetAsync(url);
+        }
+
+        public async Task<HttpResponseMessage> PostAsync(string url, HttpContent content)
+        {
+            return await _httpClient.PostAsync(url, content);
+        }
+
+        public async Task<HttpResponseMessage> PutAsync(string url, HttpContent content)
+        {
+            return await _httpClient.PutAsync(url, content);
+        }
+
+        public async Task<HttpResponseMessage> DeleteAsync(string url)
+        {
+            return await _httpClient.DeleteAsync(url);
+        }
+
+        public async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent? content = null)
+        {
+            var request = new HttpRequestMessage(method, url) { Content = content };
+            return await _httpClient.SendAsync(request);
+        }
+
+        public string[] Requires()
+        {
+            return Array.Empty<string>();
+        }
     }
 }
