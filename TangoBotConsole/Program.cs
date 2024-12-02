@@ -1,4 +1,5 @@
 ﻿using TangoBotApi.Logging;
+using TangoBot.Infrastructure.DependencyInjection;
 using TangoBotApi.Infrastructure;
 
 public class Program

@@ -1,11 +1,12 @@
 using System.Threading.Tasks;
+using TangoBotApi.DI;
 
 namespace TangoBotApi.Auth
 {
     /// <summary>
     /// Provides functionalities for authentication and authorization.
     /// </summary>
-    public interface IAuthService
+    public interface IAuthService : IInfrService
     {
         /// <summary>
         /// Authenticates a user with the provided username and password.

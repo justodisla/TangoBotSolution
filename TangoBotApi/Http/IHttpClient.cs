@@ -1,6 +1,8 @@
-﻿namespace TangoBotApi.Http
+﻿using TangoBotApi.DI;
+
+namespace TangoBotApi.Http
 {
-    internal interface IHttpClient
+    public interface IHttpClient : IInfrService
     {
         /// <summary>
         /// Sends an asynchronous GET request to the specified URL.

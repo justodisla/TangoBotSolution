@@ -1,4 +1,6 @@
 ﻿using TangoBotApi.DI;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TangoBotApi.Configuration
 {
@@ -29,5 +31,10 @@ namespace TangoBotApi.Configuration
         /// </summary>
         /// <returns>A task that represents the asynchronous save operation.</returns>
         Task SaveConfigurationAsync();
+
+        /// <summary>
+        /// Resets all configuration values.
+        /// </summary>
+        void ResetConfiguration();
     }
 }

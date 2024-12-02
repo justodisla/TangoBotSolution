@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using TangoBotApi.Logging;
 
-namespace TangoBotApi.Infrastructure
+namespace TangoBot.Infrastructure.Logger
 {
     public class CompositeLogger : ILogger
     {

@@ -10,7 +10,7 @@ namespace TangoBotApi.EventBus
         /// </summary>
         /// <param name="eventData">The data associated with the event.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        void HandleEventAsync(object eventData);
+        Task HandleEventAsync(object eventData);
     }
 }
 

@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBotApi.Configuration;
 
-namespace ConfigurationImpl
+namespace TangoBot.Infrastructure.ConfigurationImpl
 {
     /// <summary>
     /// Implements the <see cref="IConfigurationProvider"/> interface to provide configuration functionalities.
@@ -26,12 +26,12 @@ namespace ConfigurationImpl
             }
 
             var json = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
         }
 
         public string GetConfigurationValue(string key)
         {
-            return _configuration.TryGetValue(key, out var value) ? value : null;
+            return _configuration.TryGetValue(key, out var value) ? value : string.Empty;
         }
 
         public IDictionary<string, string> GetAllConfigurationValues()
@@ -43,6 +43,8 @@ namespace ConfigurationImpl
         {
             _configuration[key] = value;
             SaveConfigurationAsync().Wait();
+
+
         }
 
         public async Task SaveConfigurationAsync()
@@ -50,5 +52,36 @@ namespace ConfigurationImpl
             var json = JsonSerializer.Serialize(_configuration, new JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync("appsettings.json", json);
         }
+
+        public void ResetConfiguration()
+        {
+            ConfigurationHelper.PrintConfigurationFileContent("appsettings.json");
+
+            _configuration.Clear();
+            SaveConfigurationAsync().Wait();
+        }
     }
+
+    public static class ConfigurationHelper
+    {
+        /// <summary>
+        /// Prints the content of the configuration file to the console.
+        /// </summary>
+        /// <param name="filePath">The path to the configuration file.</param>
+        public static void PrintConfigurationFileContent(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine($"Configuration file '{filePath}' does not exist.");
+                return;
+            }
+
+            var json = File.ReadAllText(filePath);
+            var jsonDocument = JsonDocument.Parse(json);
+            var formattedJson = JsonSerializer.Serialize(jsonDocument, new JsonSerializerOptions { WriteIndented = true });
+
+            Console.WriteLine(formattedJson);
+        }
+    }
+
 }

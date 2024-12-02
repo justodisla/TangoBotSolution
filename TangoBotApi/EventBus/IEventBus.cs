@@ -1,4 +1,5 @@
 using TangoBotApi.DI;
+using System.Collections.Generic;
 
 namespace TangoBotApi.EventBus
 {
@@ -28,6 +29,12 @@ namespace TangoBotApi.EventBus
         /// <param name="eventData">The data associated with the event.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         Task PublishAsync(string eventName, object eventData);
+
+        /// <summary>
+        /// Retrieves all listeners subscribed to a specific named event.
+        /// </summary>
+        /// <param name="eventName">The name of the event.</param>
+        /// <returns>A list of event listeners subscribed to the event.</returns>
+        IList<IEventListener> GetListeners(string eventName);
     }
 }
-

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace TangoBotApi.Infrastructure
+namespace TangoBot.Infrastructure.DependencyInjection
 {
     internal class ServiceLocatorHelper
     {
