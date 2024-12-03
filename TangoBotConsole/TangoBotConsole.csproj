@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DependencyInjection\DependencyInjection.csproj" />
+    <ProjectReference Include="..\TangoBot.Core.Api2\TangoBot.Core.Api2.csproj" />
+    <ProjectReference Include="..\TangoBot.Core.Domain\TangoBot.Core.Domain.csproj" />
   </ItemGroup>
 
 </Project>

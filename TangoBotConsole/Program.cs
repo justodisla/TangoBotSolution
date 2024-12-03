@@ -2,6 +2,8 @@
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Logging;
 using TangoBotApi.Services.Configuration;
+using TangoBot.Core.Api2;
+using TangoBot.Core.Domain.Aggregates;
 
 public class Program
 {
@@ -36,5 +38,7 @@ public class Program
         configProvider.SetConfigurationValue("key", "value");
         logger.LogInformation("Program.RunApplication", "Configuration value set.");
         // Use configProvider as needed
+
+        IMarketData md = new MarketData("AAPL", DateTime.Now, DateTime.Now);
     }
 }

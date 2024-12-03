@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
     <Folder Include="Toolkit\" />
     <Folder Include="Services\Streaming\" />
     <Folder Include="Observable\" />

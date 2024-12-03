@@ -11,18 +11,24 @@ namespace TangoBot.Core.Api2
     /// IMarketData is an observable object. It notify observers of: DataChanged and CursorMoved
     /// In both cases it returns the affected DataPoint in the event.
     /// </summary>
-    public interface IMarketData : IObservable<DataPoint>
+    public interface IMarketData : IObservable<MarketDataEvent>
     {
         /// <summary>
         /// Symbol of the market data
         /// </summary>
         string Symbol { get; }
+
+        /// <summary>
+        /// List of dataPoints that represents the market data
+        /// </summary>
         List<DataPoint> DataPoints { get; }
+        
         /// <summary>
         /// The current dataPoint in the dataPoints list
         /// There is always a current DataPoint as if a cursor
         /// </summary>
         DataPoint Current { get; }
+        
         /// <summary>
         /// Start date of the dataPoints list
         /// </summary>
@@ -84,7 +90,7 @@ namespace TangoBot.Core.Api2
         /// </summary>
         /// <param name="indicatorName"></param>
         /// <param name="parameters"></param>
-        void AttachIndicator(string indicatorName, KeyValuePair<string, double>[] parameters = null );
+        void AttachIndicator(string indicatorName, KeyValuePair<string, double>[] parameters = null);
 
         /// <summary>
         /// Refreshes the indicators data based on the current dataPoints list
