@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using TangoBot.Core.Api2;
+using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.Streaming;
 
 namespace TangoBot.Core.Domain.Aggregates
 {
@@ -47,6 +49,9 @@ namespace TangoBot.Core.Domain.Aggregates
             _timeFrame = timeFrame;
 
             _observableManager = new ObservableManager<MarketDataEvent>();
+
+            var _thclient = ServiceLocator.GetSingletonService<IStreamingService>();
+
         }
 
         public string Symbol { get; private set; }
@@ -85,6 +90,8 @@ namespace TangoBot.Core.Domain.Aggregates
 
         public void Load()
         {
+            // Establish a connection to the data source
+            // 
             throw new NotImplementedException();
         }
 

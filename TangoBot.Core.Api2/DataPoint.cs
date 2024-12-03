@@ -52,12 +52,51 @@ namespace TangoBot.Core.Api2
         /// for instance if it has an indicator attachment like a moving average (SMA14)
         /// one of the key value pairs would be SMA14: 123.45. The key is SMA14 and the value is 123.45
         /// </summary>
-        public List<KeyValuePair<string, double>>? IndicatorEntries { get; set; }
+        private List<KeyValuePair<string, double>>? IndicatorEntries { get; set; }
+
+        public List<KeyValuePair<string, double>>? Point
+        {
+            get
+            {
+                return MergePointData();
+            }
+            private set { }
+        }
+
+        private List<KeyValuePair<string, double>>? MergePointData()
+        {
+            var lPoint = new List<KeyValuePair<string, double>>();
+
+            if (IndicatorEntries != null)
+            {
+                IndicatorEntries.ForEach(entry =>
+                {
+                    lPoint.Add(entry);
+                });
+            }
+            
+            lPoint.Add(new KeyValuePair<string, double>("O", O));
+            lPoint.Add(new KeyValuePair<string, double>("H", H));
+            lPoint.Add(new KeyValuePair<string, double>("L", L));
+            lPoint.Add(new KeyValuePair<string, double>("C", C));
+            lPoint.Add(new KeyValuePair<string, double>("V", V));
+            lPoint.Add(new KeyValuePair<string, double>("I", I));
+            lPoint.Add(new KeyValuePair<string, double>("T", T.Millisecond));
+
+            return lPoint;
+
+        }
+
 
         /// <summary>
         /// Returns 1 if up, -1 if down, 0 if flat
         /// </summary>
         public int Direction { get; set; }
+
+        public DataPoint(object )
+        {
+            
+        }
     }
 }
 
