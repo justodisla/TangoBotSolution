@@ -1,4 +1,4 @@
-﻿namespace TangoBotApi.DI
+﻿namespace TangoBotApi.Services.DI
 {
     public interface IInfrService
     {

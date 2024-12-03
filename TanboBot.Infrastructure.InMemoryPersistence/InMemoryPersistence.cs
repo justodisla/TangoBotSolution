@@ -1,73 +1,57 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TangoBotApi.Persistence;
+using TangoBotApi.Services.Persistence;
 
-namespace TangoBotApi.Infrastructure
+namespace TangoBot.Infrastructure.InMemoryPersistence
 {
+    
     public class InMemoryPersistence : IPersistence
     {
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<int, IEntity>> _store = new();
+        private readonly ConcurrentDictionary<string, object> _collections = new();
+        TangoBotApi.Services.Persistence.ICollection<IEntity> col;
 
-        public Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(string collectionName) where TEntity : class, IEntity, new()
+        public Task<TangoBotApi.Services.Persistence.ICollection<TEntity>> GetCollectionAsync<TEntity>(string collectionName) where TEntity : class, IEntity
         {
-            if (_store.TryGetValue(collectionName, out var collection))
+            if (_collections.TryGetValue(collectionName, out var collection))
             {
-                return Task.FromResult(collection.Values.OfType<TEntity>());
+                return Task.FromResult((TangoBotApi.Services.Persistence.ICollection<TEntity>)collection);
             }
-
-            return Task.FromResult(Enumerable.Empty<TEntity>());
+            throw new KeyNotFoundException($"Collection '{collectionName}' not found.");
         }
 
-        public Task<TEntity?> GetByIdAsync<TEntity>(string collectionName, int id) where TEntity : class, IEntity, new()
+        public Task CreateCollectionAsync<TEntity>(string collectionName) where TEntity : class, IEntity
         {
-            if (_store.TryGetValue(collectionName, out var collection) && collection.TryGetValue(id, out var entity))
+            var collection = new InMemoryCollection<TEntity>();
+            if (!_collections.TryAdd(collectionName, collection))
             {
-                return Task.FromResult(entity as TEntity);
-            }
-
-            return Task.FromResult<TEntity?>(null);
-        }
-
-        public Task AddAsync<TEntity>(string collectionName, TEntity entity) where TEntity : class, IEntity
-        {
-            var collection = _store.GetOrAdd(collectionName, new ConcurrentDictionary<int, IEntity>());
-            collection[entity.Id] = entity;
-            return Task.CompletedTask;
-        }
-
-        public Task UpdateAsync<TEntity>(string collectionName, TEntity entity) where TEntity : class, IEntity
-        {
-            if (_store.TryGetValue(collectionName, out var collection))
-            {
-                collection[entity.Id] = entity;
+                throw new InvalidOperationException($"Collection '{collectionName}' already exists.");
             }
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync<TEntity>(string collectionName, int id) where TEntity : class, IEntity
+        public Task RemoveCollectionAsync(string collectionName)
         {
-            if (_store.TryGetValue(collectionName, out var collection))
+            if (!_collections.TryRemove(collectionName, out _))
             {
-                collection.TryRemove(id, out _);
+                throw new KeyNotFoundException($"Collection '{collectionName}' not found.");
             }
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<TEntity>> GetAllEntitiesAsync<TEntity>(string collectionName) where TEntity : class, IEntity, new()
+        public Task ResetCollectionAsync<TEntity>(string collectionName) where TEntity : class, IEntity
         {
-            return GetAllAsync<TEntity>(collectionName);
+            if (_collections.TryGetValue(collectionName, out var collection))
+            {
+                ((InMemoryCollection<TEntity>)collection).Clear();
+                return Task.CompletedTask;
+            }
+            throw new KeyNotFoundException($"Collection '{collectionName}' not found.");
         }
 
-        public Task AddEntityAsync<TEntity>(string collectionName, TEntity entity) where TEntity : class, IEntity
+        public Task<IEnumerable<string>> GetAllCollectionsAsync()
         {
-            return AddAsync(collectionName, entity);
-        }
-
-        public Task RemoveEntityAsync<TEntity>(string collectionName, TEntity entity) where TEntity : class, IEntity
-        {
-            return DeleteAsync<TEntity>(collectionName, entity.Id);
+            return Task.FromResult(_collections.Keys.AsEnumerable());
         }
 
         public string[] Requires()
@@ -79,5 +63,55 @@ namespace TangoBotApi.Infrastructure
         {
             throw new NotImplementedException();
         }
+
+        private class InMemoryCollection<TEntity> : TangoBotApi.Services.Persistence.ICollection<TEntity> where TEntity : class, IEntity
+        {
+            private readonly ConcurrentDictionary<Guid, TEntity> _entities = new();
+
+            public Task<IEnumerable<TEntity>> GetAllAsync()
+            {
+                return Task.FromResult(_entities.Values.AsEnumerable());
+            }
+
+            public Task<TEntity?> GetAsync(Guid id)
+            {
+                _entities.TryGetValue(id, out var entity);
+                return Task.FromResult(entity);
+            }
+
+            public Task AddAsync(TEntity entity)
+            {
+                if (!_entities.TryAdd(entity.Id, entity))
+                {
+                    throw new InvalidOperationException($"Entity with ID '{entity.Id}' already exists.");
+                }
+                return Task.CompletedTask;
+            }
+
+            public Task UpdateAsync(TEntity entity)
+            {
+                if (!_entities.ContainsKey(entity.Id))
+                {
+                    throw new KeyNotFoundException($"Entity with ID '{entity.Id}' not found.");
+                }
+                _entities[entity.Id] = entity;
+                return Task.CompletedTask;
+            }
+
+            public Task RemoveAsync(TEntity entity)
+            {
+                if (!_entities.TryRemove(entity.Id, out _))
+                {
+                    throw new KeyNotFoundException($"Entity with ID '{entity.Id}' not found.");
+                }
+                return Task.CompletedTask;
+            }
+
+            public void Clear()
+            {
+                _entities.Clear();
+            }
+        }
     }
 }
+

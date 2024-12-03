@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TangoBotApi.Configuration;
 using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.Configuration;
 using Xunit;
 
 namespace TangoBotApi.Tests

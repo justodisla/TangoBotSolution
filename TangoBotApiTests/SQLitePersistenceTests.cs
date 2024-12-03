@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TangoBotApi.Infrastructure;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using TangoBotApi.Logging;
+using TangoBotApi.Services.Logging;
 
 namespace TangoBot.Infrastructure.Logger
 {

@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.ConfigurationImpl"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBotApi", "TangoBotApi\TangoBotApi.csproj", "{6C38E048-C322-4D15-B03A-A60610BA9F88}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{18B2F2DC-D445-4035-AC97-94741863ABAE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApi", "WebApi", "{A0DB861E-4C9A-4E24-A056-28E477138379}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjection", "DependencyInjection\DependencyInjection.csproj", "{4A1A9799-EAB7-4381-A7EE-0FA360F9F560}"
@@ -37,9 +35,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Infrastructure.Sim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Infrastructure.SimpleNotificationService", "TangoBot.Infrastructure.SimpleNotificationService\TangoBot.Infrastructure.SimpleNotificationService.csproj", "{4DC6F8B7-879F-4237-AA2D-EBA8D20ADB42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBot.Infrastructure.InMemoryPersistence", "TanboBot.Infrastructure.InMemoryPersistence\TangoBot.Infrastructure.InMemoryPersistence.csproj", "{8D19903F-0E21-47CD-983E-630635DB0886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Infrastructure.InMemoryPersistence", "TanboBot.Infrastructure.InMemoryPersistence\TangoBot.Infrastructure.InMemoryPersistence.csproj", "{8D19903F-0E21-47CD-983E-630635DB0886}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBot.Infrastructure.SQLitePersistence", "TangoBot.Infrastructure.SQLitePersistence\TangoBot.Infrastructure.SQLitePersistence.csproj", "{1772B35B-77D7-4DFA-86ED-6F2D7F4277DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Infrastructure.SQLitePersistence", "TangoBot.Infrastructure.SQLitePersistence\TangoBot.Infrastructure.SQLitePersistence.csproj", "{1772B35B-77D7-4DFA-86ED-6F2D7F4277DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.WorkFlowApi", "TangoBotWorkFlowApi\TangoBot.WorkFlowApi.csproj", "{D1FECC79-BDD2-423D-92D6-B51FB2AB67B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot.Core.Domain", "TangoBot.Core.Domain\TangoBot.Core.Domain.csproj", "{48952D75-1C14-4B67-BAA4-8DAFCC994958}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBot.Core.Api2", "TangoBot.Core.Api2\TangoBot.Core.Api2.csproj", "{B77794B5-271C-456E-9D13-0E68B93C9287}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +103,18 @@ Global
 		{1772B35B-77D7-4DFA-86ED-6F2D7F4277DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1772B35B-77D7-4DFA-86ED-6F2D7F4277DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1772B35B-77D7-4DFA-86ED-6F2D7F4277DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1FECC79-BDD2-423D-92D6-B51FB2AB67B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1FECC79-BDD2-423D-92D6-B51FB2AB67B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1FECC79-BDD2-423D-92D6-B51FB2AB67B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1FECC79-BDD2-423D-92D6-B51FB2AB67B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48952D75-1C14-4B67-BAA4-8DAFCC994958}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48952D75-1C14-4B67-BAA4-8DAFCC994958}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48952D75-1C14-4B67-BAA4-8DAFCC994958}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48952D75-1C14-4B67-BAA4-8DAFCC994958}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B77794B5-271C-456E-9D13-0E68B93C9287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B77794B5-271C-456E-9D13-0E68B93C9287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B77794B5-271C-456E-9D13-0E68B93C9287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B77794B5-271C-456E-9D13-0E68B93C9287}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,6 +133,9 @@ Global
 		{4DC6F8B7-879F-4237-AA2D-EBA8D20ADB42} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
 		{8D19903F-0E21-47CD-983E-630635DB0886} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
 		{1772B35B-77D7-4DFA-86ED-6F2D7F4277DD} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
+		{D1FECC79-BDD2-423D-92D6-B51FB2AB67B3} = {5E2334C1-2FB9-414A-80F1-6E326BC27911}
+		{48952D75-1C14-4B67-BAA4-8DAFCC994958} = {54A4B222-5281-4B0E-A89B-E5F96340E950}
+		{B77794B5-271C-456E-9D13-0E68B93C9287} = {54A4B222-5281-4B0E-A89B-E5F96340E950}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {56390FCD-32A0-4E90-A914-A41AC69A7112}

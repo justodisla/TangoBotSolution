@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Moq.Protected;
-using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.Notification;
 using Xunit;
 
 namespace TangoBotApi.Tests

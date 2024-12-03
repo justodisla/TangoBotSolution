@@ -1,6 +1,7 @@
-﻿using TangoBotApi.Logging;
-using TangoBot.Infrastructure.DependencyInjection;
+﻿using TangoBot.Infrastructure.DependencyInjection;
 using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.Logging;
+using TangoBotApi.Services.Configuration;
 
 public class Program
 {
@@ -30,7 +31,7 @@ public class Program
     private static void RunApplication(ILogger logger)
     {
         // Example usage of ServiceLocator
-        var configProvider = ServiceLocator.GetSingletonService<TangoBotApi.Configuration.IConfigurationProvider>();
+        var configProvider = ServiceLocator.GetSingletonService<IConfigurationProvider>();
 
         configProvider.SetConfigurationValue("key", "value");
         logger.LogInformation("Program.RunApplication", "Configuration value set.");

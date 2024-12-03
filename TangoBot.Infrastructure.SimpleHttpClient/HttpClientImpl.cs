@@ -1,6 +1,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
-using TangoBotApi.Http;
+using TangoBotApi.Services.Http;
 
 
 namespace TangoBot.Infrastructure.HttpImpl

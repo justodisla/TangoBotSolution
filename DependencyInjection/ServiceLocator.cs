@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using TangoBot.Infrastructure.DependencyInjection;
-using TangoBotApi.DI;
+using TangoBotApi.Services.DI;
 
 namespace TangoBotApi.Infrastructure
 {
@@ -52,14 +52,13 @@ namespace TangoBotApi.Infrastructure
                 }
 
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    Console.WriteLine($"Checking assembly {assembly.GetName()}");
-
+                {   
                     try
                     {
                         var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
                         foreach (var type in types)
                         {
+                            // Check if the type has any constructors that require parameters
                             var interfaces = type.GetInterfaces().Where(i => typeof(IInfrService).IsAssignableFrom(i) && !i.Name.Equals(typeof(IInfrService).Name));
                             foreach (var iface in interfaces)
                             {

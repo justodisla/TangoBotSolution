@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TangoBot.Infrastructure.DependencyInjection;
-using TangoBotApi.EventBus;
 using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.EventBus;
 using Xunit;
 
 namespace TangoBotApi.Tests

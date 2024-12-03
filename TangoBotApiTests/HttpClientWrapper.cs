@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
+using TangoBotApi.Services.Http;
 
 namespace TangoBotApi.Http
 {

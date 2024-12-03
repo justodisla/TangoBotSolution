@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TangoBotApi.DI;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Test;
 using Xunit;

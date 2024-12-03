@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using TangoBotApi.Auth;
 using Xunit;
 using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.Auth;
 
 namespace TangoBotApi.Tests
 {

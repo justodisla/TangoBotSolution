@@ -1,4 +1,4 @@
-namespace TangoBotApi.Common
+namespace TangoBotApi.Services.Common
 {
     /// <summary>
     /// Provides a centralized point to manage constants used solution-wide.

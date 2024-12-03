@@ -1,11 +1,11 @@
 using System.Text;
 using System.Threading.Tasks;
-using TangoBotApi.DI;
-using TangoBotApi.Http;
+using TangoBotApi.Services.Http;
+using TangoBotApi.Services.Notification;
 
 namespace TangoBotApi.Infrastructure
 {
-   
+
     public class NotificationService : INotificationService
     {
         private IHttpClient _httpClient;

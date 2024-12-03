@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TangoBotApi.Auth;
+using TangoBotApi.Services.Auth;
 
 namespace TangoBot.Infrastructure.AuthImpl
 {
