@@ -39,6 +39,8 @@ public class Program
         logger.LogInformation("Program.RunApplication", "Configuration value set.");
         // Use configProvider as needed
 
-        IMarketData md = new MarketData("AAPL", DateTime.Now, DateTime.Now);
+        IMarketData md = new MarketData("AAPL", DateTime.Now, DateTime.Now, TimeFrame.Day);
+
+        md.Throttle(0);
     }
 }

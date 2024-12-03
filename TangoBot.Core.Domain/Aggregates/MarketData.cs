@@ -50,8 +50,11 @@ namespace TangoBot.Core.Domain.Aggregates
 
             _observableManager = new ObservableManager<MarketDataEvent>();
 
-            var _thclient = ServiceLocator.GetSingletonService<IStreamingService>();
+            //var _thclient = ServiceLocator.GetSingletonService<IStreamingService>();
 
+            //Load the data
+            //Attach the indicators
+            //Merge the data
         }
 
         public string Symbol { get; private set; }

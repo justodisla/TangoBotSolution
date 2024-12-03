@@ -93,7 +93,7 @@ namespace TangoBot.Core.Api2
         /// </summary>
         public int Direction { get; set; }
 
-        public DataPoint(object )
+        public DataPoint()
         {
             
         }
