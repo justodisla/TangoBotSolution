@@ -9,5 +9,6 @@ namespace TangoBotApi.Common
     public interface IEvent
     {
         Guid Id { get; }
+        string Subject { get; }
     }
 }

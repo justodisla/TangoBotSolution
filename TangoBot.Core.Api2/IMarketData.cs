@@ -98,10 +98,29 @@ namespace TangoBot.Core.Api2
         void Compute();
 
         /// <summary>
-        /// Resets the market data by loading the data from the server
-        /// and reattaching the indicators
-        /// and recomputing the indicators data into datapoints.
+        /// Set the current element in the dataPoints list to the first element
         /// </summary>
         void Reset();
+
+        /// <summary>
+        /// Loads the data from the server
+        /// </summary>
+        void Load();
+        /// <summary>
+        /// Throttle the MarketData at a given rate
+        /// if reset is true it will reset the throttle to the first DataPoint.
+        /// </summary>
+        /// <param name="milliseconds"></param>
+        /// <param name="reset"></param>
+        public void Throttle(int milliseconds, bool reset = false, int offset = 1);
+        /// <summary>
+        /// Pauses the throttle
+        /// </summary>
+        void PauseResume();
+        /// <summary>
+        /// Stops the throttle and if reset is true it will reset the throttle to the first DataPoint.
+        /// </summary>
+        /// <param name="reset"></param>
+        void Stop(bool reset = true);
     }
 }

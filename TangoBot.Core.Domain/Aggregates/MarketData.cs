@@ -7,29 +7,57 @@ namespace TangoBot.Core.Domain.Aggregates
 {
     public class MarketData : IMarketData
     {
-        private List<DataPoint> _dataPoints;
-        private long _currentIndex;
+        private const string THROTTLE_PAUSED_RESUMED = "THROTTLE_PAUSED_RESUMED";
+        private const string POINTER_MOVED = "POINTER_MOVED";
+        private const string THROTTLE_STOPPED = "THROTTLE_STOPPED";
+
+        // Contains the data points for the market data
+        private readonly List<DataPoint> _dataPoints;
+
+        // Contains the current index of the market data
+        private long _currentIndex = 0;
+
+        // A property that wraps the _currentIndex field
+        public long CurrentIndex
+        {
+            get => _currentIndex; private set
+            {
+                if (_currentIndex != value)
+                {
+                    _currentIndex = value;
+                    _observableManager
+                                .Notify(new MarketDataEvent(POINTER_MOVED, Current));
+                }
+            }
+        }
+
+        private bool _paused = false;
+        private long _throttle = -1;
+        private bool _stopped = false;
+        private TimeFrame _timeFrame;
+
         private ObservableManager<MarketDataEvent> _observableManager;
 
-        public MarketData(string symbol, DateTime startDate, DateTime endDate)
+        public MarketData(string symbol, DateTime startDate, DateTime endDate, TimeFrame timeFrame = TimeFrame.Day)
         {
             Symbol = symbol;
             StartDate = startDate;
             EndDate = endDate;
             _currentIndex = 0;
+            _timeFrame = timeFrame;
+
+            _observableManager = new ObservableManager<MarketDataEvent>();
         }
 
         public string Symbol { get; private set; }
 
         public List<DataPoint> DataPoints => _dataPoints;
 
-        public DataPoint Current => _dataPoints[(int)_currentIndex];
+        public DataPoint Current => _dataPoints[(int)CurrentIndex];
 
         public DateTime StartDate { get; private set; }
 
         public DateTime EndDate { get; private set; }
-
-        public long CurrentIndex => _currentIndex;
 
         public void AttachIndicator(string indicatorName, KeyValuePair<string, double>[] parameters = null)
         {
@@ -55,26 +83,38 @@ namespace TangoBot.Core.Domain.Aggregates
             return _dataPoints.Count;
         }
 
+        public void Load()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Move(int offSet)
         {
-            long newIndex = _currentIndex + offSet;
+            long newIndex = CurrentIndex + offSet;
             if (newIndex >= 0 && newIndex < _dataPoints.Count)
             {
-                _currentIndex = newIndex;
+                CurrentIndex = newIndex;
             }
         }
 
         public void MoveNext()
         {
-            if (_currentIndex < _dataPoints.Count - 1)
+            if (CurrentIndex < _dataPoints.Count - 1)
             {
-                _currentIndex++;
+                CurrentIndex++;
             }
+        }
+
+        public void PauseResume()
+        {
+            _paused = !_paused;
+            _observableManager
+                            .Notify(new MarketDataEvent(THROTTLE_PAUSED_RESUMED, Current));
         }
 
         public void Reset()
         {
-            _currentIndex = 0;
+            CurrentIndex = 0;
         }
 
         public DataPoint Step(int offset = 1)
@@ -85,20 +125,50 @@ namespace TangoBot.Core.Domain.Aggregates
 
         public DataPoint StepToFirst(int offset = 0)
         {
-            _currentIndex = 0 + offset;
+            CurrentIndex = 0 + offset;
             return Current;
         }
 
         public DataPoint StepToLast(int offset = 0)
         {
-            _currentIndex = _dataPoints.Count - 1 + offset;
+            CurrentIndex = _dataPoints.Count - 1 + offset;
             return Current;
+        }
+
+        public void Stop(bool reset = true)
+        {
+            _stopped = true;
         }
 
         public IDisposable Subscribe(IObserver<MarketDataEvent> observer)
         {
             // Example implementation of a subscribe method
             return _observableManager.Subscribe(observer);
+        }
+
+
+        public async void Throttle(int milliseconds, bool reset = false, int offset = 1)
+        {
+            _throttle = milliseconds;
+
+            if (reset)
+            {
+                Reset();
+            }
+
+            if (_throttle != -1)
+            {
+                while (!_stopped)
+                {
+                    await Task.Delay(milliseconds);
+
+                    if (!_paused)
+                    {
+                        Step(offset);
+                    }
+                }
+                _observableManager.Notify(new MarketDataEvent(THROTTLE_STOPPED, Current));
+            }
         }
     }
 }
