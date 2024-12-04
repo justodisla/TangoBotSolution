@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using System.Reflection;
 
 namespace TangoBot.Infrastructure.DependencyInjection
@@ -31,6 +32,23 @@ namespace TangoBot.Infrastructure.DependencyInjection
             }
 
             return directory.FullName;
+        }
+
+        internal static void VerifyItIsLegalQualifiedName(string? qualifiedName)
+        {
+            if(string.IsNullOrEmpty(qualifiedName))
+            {
+                return;
+            }
+
+            var parts = qualifiedName.Split('.');
+            foreach (var part in parts)
+            {
+                if (string.IsNullOrWhiteSpace(part) || !char.IsLetter(part[0]) || part.Any(c => !char.IsLetterOrDigit(c) && c != '_'))
+                {
+                    throw new ArgumentException($"Invalid qualified name: {qualifiedName}", nameof(qualifiedName));
+                }
+            }
         }
     }
 }

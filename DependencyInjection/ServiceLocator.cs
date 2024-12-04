@@ -63,7 +63,6 @@ namespace TangoBotApi.Infrastructure
                         var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
                         foreach (var type in types)
                         {
-                            // Check if the type has any constructors that require parameters
                             var interfaces = type.GetInterfaces().Where(i => typeof(IInfrService).IsAssignableFrom(i) && !i.Name.Equals(typeof(IInfrService).Name));
                             foreach (var iface in interfaces)
                             {
@@ -75,10 +74,7 @@ namespace TangoBotApi.Infrastructure
                                 }
                                 _serviceImplementations[iface].Add(type);
 
-                                // Check if the type has any constructors that require parameters
                                 ServiceLocatorHelper.CheckForParameterizedConstructor(type);
-
-                                //ServiceLocatorHelper.CheckForCircularDependency(iface, type);
 
                                 if (_processedServices.Contains(type))
                                 {
@@ -90,11 +86,10 @@ namespace TangoBotApi.Infrastructure
                                 try
                                 {
                                     requiredServices = instance.Requires();
-                                    if(requiredServices != null)
+                                    if (requiredServices != null)
                                     {
                                         Console.WriteLine($"Service {type.FullName} requires: {string.Join(", ", requiredServices)}");
                                     }
-                                    
                                 }
                                 catch (NotImplementedException)
                                 {
@@ -108,6 +103,7 @@ namespace TangoBotApi.Infrastructure
                                 }))
                                 {
                                     serviceCollection.AddSingleton(iface, type);
+                                    serviceCollection.AddTransient(type);
                                     _processedServices.Add(type);
                                 }
                                 else
@@ -130,7 +126,6 @@ namespace TangoBotApi.Infrastructure
                     }
 
                     Console.WriteLine($"Done processing assembly\n {assembly.FullName}");
-
                 }
 
                 _serviceProvider = serviceCollection.BuildServiceProvider();
@@ -140,14 +135,12 @@ namespace TangoBotApi.Infrastructure
             }
         }
 
-
         private static void RegisterDelayedServices(ServiceCollection serviceCollection)
         {
             foreach (var delayedService in _delayedServices)
             {
                 foreach (var type in delayedService.Value)
                 {
-                    // Check if the type has any constructors that require parameters
                     ServiceLocatorHelper.CheckForParameterizedConstructor(type);
 
                     if (_processedServices.Contains(type))
@@ -173,6 +166,7 @@ namespace TangoBotApi.Infrastructure
                     }))
                     {
                         serviceCollection.AddSingleton(delayedService.Key, type);
+                        serviceCollection.AddTransient(type);
                         _processedServices.Add(type);
                     }
                 }
@@ -183,6 +177,8 @@ namespace TangoBotApi.Infrastructure
 
         public static T GetSingletonService<T>(string? qualifiedName = null) where T : class
         {
+            ServiceLocatorHelper.VerifyItIsLegalQualifiedName(qualifiedName);
+
             Initialize();
 
             if (qualifiedName == null)
@@ -196,15 +192,22 @@ namespace TangoBotApi.Infrastructure
 
         public static T GetTransientService<T>(string? qualifiedName = null) where T : class
         {
+            ServiceLocatorHelper.VerifyItIsLegalQualifiedName(qualifiedName);
+
             Initialize();
 
             if (qualifiedName == null)
             {
-                return _serviceProvider!.GetRequiredService<T>();
+                var interfaceType = typeof(T);
+                qualifiedName = _serviceImplementations[interfaceType].First().FullName;
+                //return ActivatorUtilities.CreateInstance<T>(_serviceProvider!);
             }
 
             var implementationType = GetImplementationType<T>(qualifiedName);
-            return (T)_serviceProvider!.GetService(implementationType)!;
+
+            //return (T) Activator.CreateInstance(implementationType);
+
+            return (T)ActivatorUtilities.CreateInstance(_serviceProvider!, implementationType);
         }
 
         private static Type GetImplementationType<T>(string qualifiedName) where T : class

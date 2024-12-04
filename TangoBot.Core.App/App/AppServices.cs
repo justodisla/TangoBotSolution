@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TangoBot.Core.App
+namespace TangoBot.App.App
 {
     public partial class Application
     {

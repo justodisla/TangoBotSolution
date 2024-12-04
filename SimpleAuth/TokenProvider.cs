@@ -122,9 +122,9 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
             //TODO: Add user agent as configuration
             var credentials = new Dictionary<string, object>
             {
-                { "login", _setup["LOGIN_USER"] as string },
-                { "password", _setup["LOGIN_PASSWORD"] as string },
-                { "remember-me", _setup["LOGIN_PASSWORD"] }
+                { "login", _setup["LOGIN_USER"] },
+                { "password", _setup["LOGIN_PASSWORD"] },
+                { "remember-me", _setup["REMEMBER_ME"] }
             };
 
             var content = new StringContent(JsonSerializer.Serialize(credentials), Encoding.UTF8, "application/json");
@@ -298,6 +298,8 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
         public void Setup(Dictionary<string, object> configuration)
         {
             Initialize();
+
+            _setup = configuration;
 
             _streamingTokenEndpoint = $"{configuration["STREAMING_TOKEN_URL"].ToString()}{configuration["STREAMING_AUTH_TOKEN_ENDPOINT"].ToString()}";
             _loginUrl = $"{configuration["LOGIN_URL"].ToString()}";

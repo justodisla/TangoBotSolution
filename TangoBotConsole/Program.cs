@@ -4,8 +4,8 @@ using TangoBotApi.Services.Logging;
 using TangoBotApi.Services.Configuration;
 using TangoBot.Core.Api2;
 using TangoBot.Core.Domain.Aggregates;
-using TangoBot.Core.App;
 using TangoBot.App.Services;
+using TangoBot.App.App;
 
 public class Program
 {
@@ -13,12 +13,15 @@ public class Program
     {
         Application app = new Application();
 
-        var abdto = app.GetService<AccountReportingService>().GetAccountBalance("1234");
+        var accountService = app.GetService<AccountReportingService>();
 
-        var newBalance = abdto.Balance;
+        accountService.GetAccount("5WU34986");
 
+        var abdto = accountService.GetAccountBalance("5WU34986");
 
+        var cb = abdto.CashBalance;
 
+        app.Terminate();
 
 
         // Initialize the logger through the ServiceLocator

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Net.Mail;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.API.Http;
 using TangoBot.Core.Api2.Commons;
@@ -20,28 +21,23 @@ namespace TangoBot.Core.Domain.Services
 
         protected BaseApiComponent()
         {
-            _httpClient = ServiceLocator.GetTransientService<IHttpClient>() ?? throw new Exception("HttpClient is null");
+           _httpClient = ServiceLocator.GetTransientService<IHttpClient>() ?? throw new Exception("HttpClient is null");
 
             //_httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
-            var _tokenProvider = ServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            _tokenProvider = ServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
             int hc1 = _tokenProvider.GetHashCode();
-            var _tokenProvider2 = ServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
-            int hc2 = _tokenProvider2.GetHashCode();
-            var _tokenProvider3 = ServiceLocator.GetTransientService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
-            int hc3 = _tokenProvider2.GetHashCode();
-            var _tokenProvider4 = ServiceLocator.GetTransientService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
-            int hc4 = _tokenProvider2.GetHashCode();
 
             _configurationProvider = ServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
 
             Dictionary<string, object> lconfig = new()
             {
                 { "ACTIVE_API_URL", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL) },
-                { "LOGIN_URL", "https://api.cert.tastyworks.com/sessions" },
-                { "LOGIN_USER", "tangobot" },
-                { "LOGIN_PASSWORD", "HyperBerserker?3000" },
+                { "LOGIN_URL", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL) + "/sessions" },
+                { "LOGIN_USER", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_USER) },
+                { "LOGIN_PASSWORD", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_PASSWORD) },
                 { "STREAMING_TOKEN_URL", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL) },
-                { "STREAMING_AUTH_TOKEN_ENDPOINT", _configurationProvider.GetConfigurationValue(AppConstants.STREAMING_AUTH_TOKEN_ENDPOINT) }
+                { "STREAMING_AUTH_TOKEN_ENDPOINT", _configurationProvider.GetConfigurationValue(AppConstants.STREAMING_AUTH_TOKEN_ENDPOINT) },
+                { "REMEMBER_ME", true }
             };
 
             _tokenProvider.Setup(lconfig);
@@ -52,11 +48,14 @@ namespace TangoBot.Core.Domain.Services
         /// <summary>
         /// Sends an authorized request to the specified URL with the provided content and HTTP method.
         /// </summary>
-        protected async Task<HttpResponseMessage?> SendRequestAsync(string url, HttpMethod method, HttpContent? content = null)
+        protected async Task<HttpResponseMessage?> SendRequestAsync(string endPoint, HttpMethod method, HttpContent? content = null)
         {
             HttpResponseEvent? httpResponseEvent;
             HttpRequestMessage? request = null;
             HttpResponseMessage? response = null;
+
+            string urlBase = _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL);
+            var uri = string.Concat(urlBase, "/", endPoint);
 
             string? token = await _tokenProvider.GetValidTokenAsync();
             if (string.IsNullOrEmpty(token))
@@ -72,7 +71,7 @@ namespace TangoBot.Core.Domain.Services
             {
                 try
                 {
-                    request = ResolveRequest(url, method, content, token);
+                    request = ResolveRequest(uri, method, content, token);
 
                     Console.WriteLine("[Info] Sending request...");
                     response = await _httpClient.SendAsync(request);
@@ -95,7 +94,7 @@ namespace TangoBot.Core.Domain.Services
                         token = await _tokenProvider.GetValidTokenAsync();
                         if (!string.IsNullOrEmpty(token))
                         {
-                            request = new HttpRequestMessage(method, url)
+                            request = new HttpRequestMessage(method, uri)
                             {
                                 Content = content
                             };
@@ -151,6 +150,17 @@ namespace TangoBot.Core.Domain.Services
         public IDisposable Subscribe(IObserver<HttpResponseEvent> observer)
         {
             return _observerManager.Subscribe(observer);
+        }
+
+        internal static JsonDocument? ParseHttpResponseMessage(HttpResponseMessage httpResponseMessage)
+        {
+            if (httpResponseMessage == null || !httpResponseMessage.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var contentStream = httpResponseMessage.Content.ReadAsStream();
+            return JsonDocument.Parse(contentStream);
         }
     }
 }

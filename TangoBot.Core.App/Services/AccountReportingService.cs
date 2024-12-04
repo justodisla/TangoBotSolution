@@ -10,12 +10,18 @@ namespace TangoBot.App.Services
 {
     public class AccountReportingService
     {
-        TTAccountComponent tTAccountComponent = new TTAccountComponent();
+        TastyTradeAccountComponent tTAccountComponent = new TastyTradeAccountComponent();
         public AccountBalanceDto GetAccountBalance(string account) {
+            var accountBalances = tTAccountComponent.GetAccountBalancesAsync(account).Result;
+            var accountBalanceDto = new AccountBalanceDto(accountBalances);
+            return accountBalanceDto;
+        }
 
-            var bal = tTAccountComponent.GetAccountBalancesAsync(account);
-
-            return new AccountBalanceDto(bal.Result);
+        public AccountDto GetAccount(string account)
+        {
+            var accountData = tTAccountComponent.GetAccountAsync(account).Result;
+            var accountDto = new AccountDto(accountData);
+            return accountDto;
         }
     }
 }
