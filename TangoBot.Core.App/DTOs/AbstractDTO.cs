@@ -10,33 +10,34 @@ namespace TangoBot.App.DTOs
         {
             if (jsonDocument.RootElement.TryGetProperty("data", out JsonElement dataElement))
             {
-                foreach (var property in dataElement.EnumerateObject())
+                if (dataElement.ValueKind == JsonValueKind.Array)
                 {
-                    var camelCaseName = ConvertToCamelCase(property.Name);
-                    var propertyInfo = GetType().GetProperty(camelCaseName, BindingFlags.Public | BindingFlags.Instance);
-                    if (propertyInfo != null && propertyInfo.CanWrite)
+                    foreach (var item in dataElement.EnumerateArray())
                     {
-                        try
-                        {
-                            var value = JsonSerializer.Deserialize(property.Value.GetRawText(), propertyInfo.PropertyType);
-                            propertyInfo.SetValue(this, value);
-                        }
-                        catch (JsonException)
-                        {
-                            if (propertyInfo.PropertyType == typeof(double) && double.TryParse(property.Value.GetString(), out double doubleValue))
-                            {
-                                propertyInfo.SetValue(this, doubleValue);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Failed to deserialize property {camelCaseName}.");
-                            }
-                        }
+                        PopulateProperties(item);
                     }
-                    else
-                    {
-                        Console.WriteLine($"Property {camelCaseName} not found or not writable.");
-                    }
+                }
+                else
+                {
+                    PopulateProperties(dataElement);
+                }
+            }
+        }
+
+        private void PopulateProperties(JsonElement element)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                var camelCaseName = ConvertToCamelCase(property.Name);
+                var propertyInfo = GetType().GetProperty(camelCaseName, BindingFlags.Public | BindingFlags.Instance);
+                if (propertyInfo != null && propertyInfo.CanWrite)
+                {
+                    var value = JsonSerializer.Deserialize(property.Value.GetRawText(), propertyInfo.PropertyType);
+                    propertyInfo.SetValue(this, value);
+                }
+                else
+                {
+                    Console.WriteLine($"Property {camelCaseName} not found or not writable.");
                 }
             }
         }
@@ -44,7 +45,7 @@ namespace TangoBot.App.DTOs
         private string ConvertToCamelCase(string hyphenSeparatedName)
         {
             var parts = hyphenSeparatedName.Split('-');
-            for (int i = 0; i < parts.Length; i++)
+            for (int i = 1; i < parts.Length; i++)
             {
                 parts[i] = char.ToUpper(parts[i][0]) + parts[i].Substring(1);
             }
