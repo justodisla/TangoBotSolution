@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace TangoBot.Core.Domain.Aggregates
+namespace TangoBotApi.Common
 {
-    public class ObservableManager<T> : IObservable<T>
+    public class ObservableHelper<T> : IObservable<T>
     {
         private readonly List<IObserver<T>> _observers;
 
-        public ObservableManager()
+        public ObservableHelper()
         {
             _observers = new List<IObserver<T>>();
         }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TangoBot.Infrastructure.SimpleAuth
+namespace TangoBot.Core.Domain.ValueObjects
 {
-    internal class Class1
+    public class AccountBalances
     {
     }
 }

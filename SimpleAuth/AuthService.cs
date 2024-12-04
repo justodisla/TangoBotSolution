@@ -12,7 +12,7 @@ namespace TangoBot.Infrastructure.AuthImpl
     {
         private readonly Dictionary<string, string> _users = new()
         {
-            { "user1", "password1" },
+            { "tangobotsandboxuser", "HyperBerserker?3000" },
             { "user2", "password2" }
         };
 

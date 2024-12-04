@@ -4,13 +4,15 @@ namespace TangoBotApi.Services.Http
 {
     public interface IHttpClient : IInfrService
     {
-        Task<HttpResponseMessage> GetAsync(string url);
-        Task<HttpResponseMessage> PostAsync(string url, HttpContent content);
-        Task<HttpResponseMessage> PutAsync(string url, HttpContent content);
-        Task<HttpResponseMessage> DeleteAsync(string url);
-        Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent? content = null);
+
+        Task<HttpResponseMessage> GetAsync(HttpRequestMessage request);
+        Task<HttpResponseMessage> PostAsync(HttpRequestMessage request);
+        Task<HttpResponseMessage> PutAsync(HttpRequestMessage request);
+        Task<HttpResponseMessage> DeleteAsync(HttpRequestMessage request);
+        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
     }
 
+    /*
     public class HttpClientWrapper : IHttpClient
     {
         private readonly HttpClient _httpClient;
@@ -56,4 +58,6 @@ namespace TangoBotApi.Services.Http
             throw new NotImplementedException();
         }
     }
+*/
+
 }

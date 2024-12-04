@@ -4,11 +4,16 @@ using TangoBotApi.Services.Logging;
 using TangoBotApi.Services.Configuration;
 using TangoBot.Core.Api2;
 using TangoBot.Core.Domain.Aggregates;
+using TangoBot.Core.Domain.Services;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+
+        TTAccountService ttAccountService = new TTAccountService();
+        ttAccountService.GetAccountBalancesAsync("1234");
+
         // Initialize the logger through the ServiceLocator
         ILogger logger = ServiceLocator.GetSingletonService<ILogger>();
 

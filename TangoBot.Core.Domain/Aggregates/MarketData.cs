@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TangoBot.Core.Api2;
+using TangoBotApi.Common;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Streaming;
 
@@ -38,7 +39,7 @@ namespace TangoBot.Core.Domain.Aggregates
         private bool _stopped = false;
         private TimeFrame _timeFrame;
 
-        private ObservableManager<MarketDataEvent> _observableManager;
+        private ObservableHelper<MarketDataEvent> _observableManager;
 
         public MarketData(string symbol, DateTime startDate, DateTime endDate, TimeFrame timeFrame = TimeFrame.Day)
         {
@@ -48,7 +49,7 @@ namespace TangoBot.Core.Domain.Aggregates
             _currentIndex = 0;
             _timeFrame = timeFrame;
 
-            _observableManager = new ObservableManager<MarketDataEvent>();
+            _observableManager = new ObservableHelper<MarketDataEvent>();
 
             //var _thclient = ServiceLocator.GetSingletonService<IStreamingService>();
 
