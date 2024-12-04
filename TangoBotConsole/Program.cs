@@ -4,18 +4,25 @@ using TangoBotApi.Services.Logging;
 using TangoBotApi.Services.Configuration;
 using TangoBot.Core.Api2;
 using TangoBot.Core.Domain.Aggregates;
-using TangoBot.Core.Domain.Services;
+using TangoBot.Core.App;
+using TangoBot.App.Services;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+        Application app = new Application();
 
-        TTAccountService ttAccountService = new TTAccountService();
-        ttAccountService.GetAccountBalancesAsync("1234");
+        var abdto = app.GetService<AccountReportingService>().GetAccountBalance("1234");
+
+        var newBalance = abdto.Balance;
+
+
+
+
 
         // Initialize the logger through the ServiceLocator
-        ILogger logger = ServiceLocator.GetSingletonService<ILogger>();
+        ITangoBotLogger logger = ServiceLocator.GetSingletonService<ITangoBotLogger>();
 
         // Configure log output preferences
         var logOutputPreferences = new LogOutputPreferences
@@ -35,7 +42,7 @@ public class Program
         RunApplication(logger);
     }
 
-    private static void RunApplication(ILogger logger)
+    private static void RunApplication(ITangoBotLogger logger)
     {
         // Example usage of ServiceLocator
         var configProvider = ServiceLocator.GetSingletonService<IConfigurationProvider>();

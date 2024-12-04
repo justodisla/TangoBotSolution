@@ -17,13 +17,17 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
     {
         //private const string SESSION_TOKEN = "api_session_token";
         private string _loginUrl = "https://api.cert.tastyworks.com/sessions"; //TODO: Build login url from configuration
-        private string _testApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; //TODO: Build test api url from configuration 
+        private string _activeApiUrl = "https://api.cert.tastyworks.com/accounts/5WU34986/trading-status"; //TODO: Build test api url from configuration 
 
         private readonly HttpClient _httpClient;
         //private readonly TokenParser _tokenParser;
         private string? _sessionToken;
         private string? _streamingTokenEndpoint;
-        private readonly IConfigurationProvider _configurationProvider;
+        private  IConfigurationProvider _configurationProvider;
+
+        private Dictionary<string, object> _setup;
+
+        private bool _isInitialized = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenProvider"/> class.
@@ -31,10 +35,18 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
         public TokenProvider()
         {
             _httpClient = new HttpClient();
+            _setup = new Dictionary<string, object>();
+
+        }
+
+        private void Initialize()
+        {
+            if(_isInitialized)
+            {
+                return;
+            }
 
             _configurationProvider = ServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
-
-            
 
         }
 
@@ -44,6 +56,8 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
         /// <returns>The valid session token if successful; otherwise, null.</returns>
         public async Task<string?> GetValidTokenAsync()
         {
+            Initialize();
+
             _sessionToken = _configurationProvider.GetConfigurationValue("VALID_AUTH_TOKEN");
 
             if (!string.IsNullOrEmpty(_sessionToken) && await IsTokenValidAsync())
@@ -73,7 +87,7 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
             try
             {
                 Console.WriteLine("[Debug] Validating the token by making a test API call.");
-                var request = new HttpRequestMessage(HttpMethod.Get, _testApiUrl);
+                var request = new HttpRequestMessage(HttpMethod.Get, _activeApiUrl);
                 request.Headers.Add("Authorization", _sessionToken);
 
                 var response = await _httpClient.SendAsync(request);
@@ -167,6 +181,8 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
         /// <returns>A task that represents the asynchronous operation. The task result contains the valid streaming token.</returns>
         public async Task<string> GetValidStreamingToken()
         {
+            Initialize();
+
             string? sessionToken = await GetValidTokenAsync();
 
             string? streamingToken = _configurationProvider.GetConfigurationValue("STREAMING_AUTH_TOKEN");
@@ -274,17 +290,18 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
 
         public string[] Requires()
         {
-            return new string[] { typeof(IHttpClient).FullName };
+            throw new NotImplementedException();
+            //return new string[] { typeof(IHttpClient).FullName };
         }
 
-        private Dictionary<string, object> _setup;
+        
         public void Setup(Dictionary<string, object> configuration)
         {
-            
+            Initialize();
 
-            _streamingTokenEndpoint = $"{_setup["STREAMING_TOKEN_URL"].ToString()}{ _setup["STREAMING_AUTH_TOKEN_ENDPOINT"].ToString()}";
-            _loginUrl = $"{_setup["LOGIN_URL"].ToString()}";
-            _testApiUrl = $"{_setup["TEST_API_URL"].ToString()}";
+            _streamingTokenEndpoint = $"{configuration["STREAMING_TOKEN_URL"].ToString()}{configuration["STREAMING_AUTH_TOKEN_ENDPOINT"].ToString()}";
+            _loginUrl = $"{configuration["LOGIN_URL"].ToString()}";
+            _activeApiUrl = $"{configuration["ACTIVE_API_URL"].ToString()}";
 
         }
     }

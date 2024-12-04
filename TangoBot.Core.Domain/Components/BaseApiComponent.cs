@@ -3,8 +3,10 @@ using System.Net.Http;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using TangoBot.API.Http;
+using TangoBot.Core.Api2.Commons;
 using TangoBotApi.Common;
 using TangoBotApi.Infrastructure;
+using TangoBotApi.Services.Configuration;
 using TangoBotApi.Services.Http;
 
 namespace TangoBot.Core.Domain.Services
@@ -14,22 +16,34 @@ namespace TangoBot.Core.Domain.Services
         private readonly IHttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;
         private readonly ObservableHelper<HttpResponseEvent> _observerManager;
+        private readonly IConfigurationProvider _configurationProvider;
 
         protected BaseApiComponent()
         {
             _httpClient = ServiceLocator.GetTransientService<IHttpClient>() ?? throw new Exception("HttpClient is null");
 
             //_httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
-            _tokenProvider = ServiceLocator.GetTransientService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            var _tokenProvider = ServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            int hc1 = _tokenProvider.GetHashCode();
+            var _tokenProvider2 = ServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            int hc2 = _tokenProvider2.GetHashCode();
+            var _tokenProvider3 = ServiceLocator.GetTransientService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            int hc3 = _tokenProvider2.GetHashCode();
+            var _tokenProvider4 = ServiceLocator.GetTransientService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
+            int hc4 = _tokenProvider2.GetHashCode();
+
+            _configurationProvider = ServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
 
             Dictionary<string, object> lconfig = new()
             {
-                { "ACTIVE_API_URL", "https://api.cert.tastyworks.com" },
+                { "ACTIVE_API_URL", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL) },
                 { "LOGIN_URL", "https://api.cert.tastyworks.com/sessions" },
                 { "LOGIN_USER", "tangobot" },
-                { "LOGIN_PASSWORD", "HyperBerserker?3000" }
+                { "LOGIN_PASSWORD", "HyperBerserker?3000" },
+                { "STREAMING_TOKEN_URL", _configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL) },
+                { "STREAMING_AUTH_TOKEN_ENDPOINT", _configurationProvider.GetConfigurationValue(AppConstants.STREAMING_AUTH_TOKEN_ENDPOINT) }
             };
-  
+
             _tokenProvider.Setup(lconfig);
 
             _observerManager = new ObservableHelper<HttpResponseEvent>();

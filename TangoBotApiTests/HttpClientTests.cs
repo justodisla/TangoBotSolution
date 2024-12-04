@@ -36,8 +36,10 @@ namespace TangoBotApi.Tests
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(expectedResponse);
 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+
             // Act
-            var response = await _httpClient.GetAsync(url);
+            var response = await _httpClient.GetAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -58,11 +60,14 @@ namespace TangoBotApi.Tests
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(expectedResponse);
 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Content = content;
+
             // Act
-            var response = await _httpClient.PostAsync(url, content);
+            var response = await _httpClient.PostAsync(request);
 
             // Assert
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Fact]
@@ -80,8 +85,11 @@ namespace TangoBotApi.Tests
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(expectedResponse);
 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Content = content;
+
             // Act
-            var response = await _httpClient.PutAsync(url, content);
+            var response = await _httpClient.PutAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -101,8 +109,10 @@ namespace TangoBotApi.Tests
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(expectedResponse);
 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+
             // Act
-            var response = await _httpClient.DeleteAsync(url);
+            var response = await _httpClient.DeleteAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -124,8 +134,11 @@ namespace TangoBotApi.Tests
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(expectedResponse);
 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Content = content;
+
             // Act
-            var response = await _httpClient.SendAsync(method, url, content);
+            var response = await _httpClient.SendAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

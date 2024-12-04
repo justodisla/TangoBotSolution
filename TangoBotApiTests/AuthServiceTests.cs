@@ -18,8 +18,8 @@ namespace TangoBotApi.Tests
         public async Task AuthenticateAsync_ShouldReturnTrueForValidCredentials()
         {
             // Arrange
-            var username = "user1";
-            var password = "password1";
+            var username = "tangobotsandboxuser";
+            var password = "HyperBerserker?3000";
 
             // Act
             var result = await _authService.AuthenticateAsync(username, password);

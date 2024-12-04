@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TangoBot.Core.Domain.ValueObjects
+namespace TangoBot.App.DTOs
 {
-    public class AccountBalances
+    public class OrderDto
     {
-        public float Balance { get; private set; }
     }
 }

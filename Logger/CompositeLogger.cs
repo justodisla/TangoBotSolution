@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using TangoBotApi.Services.Logging;
+using static TangoBot.Infrastructure.Logger.CompositeLogger;
 
 namespace TangoBot.Infrastructure.Logger
 {
-    public class CompositeLogger : ILogger
+    public class CompositeLogger : ITangoBotLogger
     {
-        private readonly List<ILogger> _loggers;
+        private readonly List<IInternalLogger> _loggers;
+
+        internal interface IInternalLogger
+        {
+            void Log(LogLevel logLevel, string source, string message);
+            void SetLogOutputPreferences(LogOutputPreferences preferences);
+        }
 
         public CompositeLogger()
         {
@@ -18,7 +25,7 @@ namespace TangoBot.Infrastructure.Logger
                 File.Create("log.txt").Close();
             }
 
-            _loggers = new List<ILogger>
+            _loggers = new List<IInternalLogger>
             {
                 new ConsoleLogger(LogLevel.Information),
                 new FileLogger("log.txt", LogLevel.Information),
@@ -59,14 +66,14 @@ namespace TangoBot.Infrastructure.Logger
         }
     }
 
-    public class ConsoleLogger : ILogger
+    public class ConsoleLogger : IInternalLogger
     {
         private readonly LogLevel _minLogLevel;
         private bool _enabled;
 
         public ConsoleLogger(LogLevel minLogLevel = LogLevel.Trace)
         {
-            _minLogLevel = minLogLevel;
+            _minLogLevel = LogLevel.Trace;
             _enabled = true;
         }
 
@@ -100,7 +107,7 @@ namespace TangoBot.Infrastructure.Logger
         }
     }
 
-    public class FileLogger : ILogger
+    public class FileLogger : IInternalLogger
     {
         private readonly LogLevel _minLogLevel;
         private readonly string _filePath;
@@ -143,7 +150,7 @@ namespace TangoBot.Infrastructure.Logger
         }
     }
 
-    public class EventLogger : ILogger
+    public class EventLogger : IInternalLogger
     {
         private readonly LogLevel _minLogLevel;
         private bool _enabled;

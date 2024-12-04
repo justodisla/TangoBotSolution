@@ -39,7 +39,10 @@ namespace TangoBotApi.Infrastructure
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync(emailApiUrl, emailContent);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, emailApiUrl);
+            request.Content = emailContent;
+
+            var response = await _httpClient.PostAsync(request);
             response.EnsureSuccessStatusCode();
         }
 
@@ -54,7 +57,10 @@ namespace TangoBotApi.Infrastructure
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync(smsApiUrl, smsContent);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, smsApiUrl);
+            request.Content = smsContent;
+
+            var response = await _httpClient.PostAsync(request);
             response.EnsureSuccessStatusCode();
         }
 

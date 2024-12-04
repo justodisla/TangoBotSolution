@@ -6,6 +6,15 @@ namespace TangoBot.Infrastructure.DependencyInjection
 {
     internal class ServiceLocatorHelper
     {
+        internal static void CheckForParameterizedConstructor(Type type)
+        {
+            var constructors = type.GetConstructors();
+            if (constructors.Any(c => c.GetParameters().Length > 0))
+            {
+                throw new Exception($"Type {type.Name} has a parameterized constructor.");
+            }
+        }
+
         internal static string GetSearchDirectory()
         {
             var currentAssembly = Assembly.GetExecutingAssembly();

@@ -1,11 +1,9 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TangoBotApi.Http;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Http;
 using Xunit;
-using HttpClientWrapper = TangoBotApi.Http.HttpClientWrapper;
 
 namespace TangoBotApi.Tests
 {

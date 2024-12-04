@@ -3,7 +3,7 @@ using TangoBotApi.Services.DI;
 
 namespace TangoBotApi.Services.Logging
 {
-    public interface ILogger : IInfrService
+    public interface ITangoBotLogger : IInfrService
     {
         void Log(LogLevel logLevel, string source, string message);
         void LogError(string source, string message);

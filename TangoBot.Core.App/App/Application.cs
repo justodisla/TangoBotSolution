@@ -2,20 +2,36 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using TangoBot.App.Services;
 using TangoBot.Core.Api2.Commons;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Configuration;
 
-namespace TangoBot.Core.Domain.StartUp
+namespace TangoBot.Core.App
 {
-    public class StartUp
+    public partial class Application
     {
+        public enum ServiceType
+        {
+            AccountService,
+            InstrumentService,
+            OrderService,
+            MarketDataService
+        }
+
+        public Application()
+        {
+            Initialize();
+        }
+
+
 
         private static bool _isInitialized = false;
 
-        public static void Initialize()
+        private void Initialize()
         {
 
             if (_isInitialized)
@@ -24,10 +40,9 @@ namespace TangoBot.Core.Domain.StartUp
             //Initialize configurations
 
             //Initialize services
+            RegisterService<AccountReportingService>(new AccountReportingService());
 
             //Initialize repositories
-
-
 
         }
 

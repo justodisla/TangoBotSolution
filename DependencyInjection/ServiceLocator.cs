@@ -42,6 +42,9 @@ namespace TangoBotApi.Infrastructure
                 foreach (var dll in dllFiles)
                 {
                     var assemblyName = AssemblyName.GetAssemblyName(dll);
+
+                    Console.WriteLine($"\nChecking assembly {assemblyName.FullName}");
+
                     var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName.FullName);
 
                     if (assembly == null)
@@ -52,7 +55,9 @@ namespace TangoBotApi.Infrastructure
                 }
 
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                {   
+                {
+                    Console.WriteLine($"\nProcessing assembly {assembly.FullName}");
+
                     try
                     {
                         var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
@@ -62,6 +67,8 @@ namespace TangoBotApi.Infrastructure
                             var interfaces = type.GetInterfaces().Where(i => typeof(IInfrService).IsAssignableFrom(i) && !i.Name.Equals(typeof(IInfrService).Name));
                             foreach (var iface in interfaces)
                             {
+                                Console.WriteLine($"Found service {type.FullName} implementing {iface.FullName}");
+
                                 if (!_serviceImplementations.ContainsKey(iface))
                                 {
                                     _serviceImplementations[iface] = new List<Type>();
@@ -69,11 +76,9 @@ namespace TangoBotApi.Infrastructure
                                 _serviceImplementations[iface].Add(type);
 
                                 // Check if the type has any constructors that require parameters
-                                var constructors = type.GetConstructors();
-                                if (constructors.Any(c => c.GetParameters().Length > 0))
-                                {
-                                    continue;
-                                }
+                                ServiceLocatorHelper.CheckForParameterizedConstructor(type);
+
+                                //ServiceLocatorHelper.CheckForCircularDependency(iface, type);
 
                                 if (_processedServices.Contains(type))
                                 {
@@ -85,6 +90,11 @@ namespace TangoBotApi.Infrastructure
                                 try
                                 {
                                     requiredServices = instance.Requires();
+                                    if(requiredServices != null)
+                                    {
+                                        Console.WriteLine($"Service {type.FullName} requires: {string.Join(", ", requiredServices)}");
+                                    }
+                                    
                                 }
                                 catch (NotImplementedException)
                                 {
@@ -118,6 +128,9 @@ namespace TangoBotApi.Infrastructure
                             Console.WriteLine($"Error loading type from assembly {assembly.GetName()}: {loaderException.Message}");
                         }
                     }
+
+                    Console.WriteLine($"Done processing assembly\n {assembly.FullName}");
+
                 }
 
                 _serviceProvider = serviceCollection.BuildServiceProvider();
@@ -135,11 +148,7 @@ namespace TangoBotApi.Infrastructure
                 foreach (var type in delayedService.Value)
                 {
                     // Check if the type has any constructors that require parameters
-                    var constructors = type.GetConstructors();
-                    if (constructors.Any(c => c.GetParameters().Length > 0))
-                    {
-                        continue;
-                    }
+                    ServiceLocatorHelper.CheckForParameterizedConstructor(type);
 
                     if (_processedServices.Contains(type))
                     {

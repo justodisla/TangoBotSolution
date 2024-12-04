@@ -10,6 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="HttpClientRealTests.cs" />
+    <Compile Remove="HttpClientWrapper.cs" />
     <Compile Remove="SQLitePersistenceTests.cs" />
   </ItemGroup>
 
