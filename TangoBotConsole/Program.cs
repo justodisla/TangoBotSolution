@@ -21,6 +21,16 @@ public class Program
 
         var cb = abdto.CashBalance;
 
+        var accSnapShot = accountService.GetAccountSnapShot("5WU34986");
+
+        var acnum = accSnapShot.Items[0].AccountNumber;
+
+        var numItems = accSnapShot.Items.Count();
+
+        var customer = accountService.GetCustomer();
+
+        var city = customer.Address.City;
+
         app.Terminate();
 
 

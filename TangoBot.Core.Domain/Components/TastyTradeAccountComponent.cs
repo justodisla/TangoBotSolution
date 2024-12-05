@@ -26,6 +26,19 @@ namespace TangoBot.Core.Domain.Services
             return ParseHttpResponseMessage(response);
         }
 
+        public async Task<JsonDocument> GetAccountSnapShotAsync(string account)
+        {
+            string endPoint = $"accounts/{account}/balance-snapshots";
+            var response = await SendRequestAsync(endPoint, HttpMethod.Get) ?? throw new Exception("Response is null");
 
+            return ParseHttpResponseMessage(response);
+        }
+
+        public async Task<JsonDocument> GetCustomerAsync()
+        {
+            string endPoint = "customers/me";
+            var response = await SendRequestAsync(endPoint, HttpMethod.Get) ?? throw new Exception("Response is null");
+            return ParseHttpResponseMessage(response);
+        }
     }
 }

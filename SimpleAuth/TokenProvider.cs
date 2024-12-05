@@ -87,7 +87,8 @@ namespace TangoBot.Infrastructure.TangoBot.SimpleAuth
             try
             {
                 Console.WriteLine("[Debug] Validating the token by making a test API call.");
-                var request = new HttpRequestMessage(HttpMethod.Get, _activeApiUrl);
+                var requestUrl = string.Concat(_activeApiUrl, "/customers/me");
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.Add("Authorization", _sessionToken);
 
                 var response = await _httpClient.SendAsync(request);
