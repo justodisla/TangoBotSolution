@@ -8,7 +8,7 @@ using TangoBot.Core.Domain.ValueObjects;
 
 namespace TangoBot.Core.Domain.Services
 {
-    public class TastyTradeAccountComponent : BaseApiComponent
+    public class TTAccountCustomerComponent : TTBaseApiComponent
     {
         public async Task<JsonDocument> GetAccountBalancesAsync(string accountNumber)
         {

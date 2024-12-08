@@ -39,7 +39,7 @@ namespace TangoBot.App.App
             SetupConfigurations();
 
             //Initialize services
-            RegisterService<AccountReportingService>(new AccountReportingService());
+            RegisterService<AccountCustomerReportingService>(new AccountCustomerReportingService());
 
             //Initialize repositories
 

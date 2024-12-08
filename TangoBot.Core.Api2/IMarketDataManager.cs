@@ -11,7 +11,7 @@ namespace TangoBot.Core.Api2
     /// IMarketData is an observable object. It notify observers of: DataChanged and CursorMoved
     /// In both cases it returns the affected DataPoint in the event.
     /// </summary>
-    public interface IMarketData : IObservable<MarketDataEvent>
+    public interface IMarketDataManager : IObservable<MarketDataEvent>
     {
         /// <summary>
         /// Symbol of the market data

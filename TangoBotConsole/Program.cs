@@ -13,23 +13,13 @@ public class Program
     {
         Application app = new Application();
 
-        var accountService = app.GetService<AccountReportingService>();
+        var accountService = app.GetService<AccountCustomerReportingService>();
 
         accountService.GetAccount("5WU34986");
 
         var abdto = accountService.GetAccountBalance("5WU34986");
 
         var cb = abdto.CashBalance;
-
-        var accSnapShot = accountService.GetAccountSnapShot("5WU34986");
-
-        var acnum = accSnapShot.Items[0].AccountNumber;
-
-        var numItems = accSnapShot.Items.Count();
-
-        var customer = accountService.GetCustomer();
-
-        var city = customer.Address.City;
 
         app.Terminate();
 
@@ -64,7 +54,7 @@ public class Program
         logger.LogInformation("Program.RunApplication", "Configuration value set.");
         // Use configProvider as needed
 
-        IMarketData md = new MarketData("AAPL", DateTime.Now, DateTime.Now, TimeFrame.Day);
+        IMarketDataManager md = new LiveMarketDataManager("AAPL", DateTime.Now, DateTime.Now, TimeFrame.Day);
 
         md.Throttle(0);
     }

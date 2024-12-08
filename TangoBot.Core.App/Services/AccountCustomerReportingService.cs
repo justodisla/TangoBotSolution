@@ -8,9 +8,9 @@ using TangoBot.Core.Domain.Services;
 
 namespace TangoBot.App.Services
 {
-    public class AccountReportingService
+    public class AccountCustomerReportingService
     {
-        private readonly TastyTradeAccountComponent _accountComponent = new TastyTradeAccountComponent();
+        private readonly TTAccountCustomerComponent _accountComponent = new TTAccountCustomerComponent();
         public AccountBalanceDto GetAccountBalance(string account) {
             var accountBalances = _accountComponent.GetAccountBalancesAsync(account).Result;
             var accountBalanceDto = new AccountBalanceDto(accountBalances);

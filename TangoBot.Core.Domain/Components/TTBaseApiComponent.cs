@@ -12,14 +12,14 @@ using TangoBotApi.Services.Http;
 
 namespace TangoBot.Core.Domain.Services
 {
-    public abstract class BaseApiComponent : IObservable<HttpResponseEvent>
+    public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>
     {
         private readonly IHttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;
         private readonly ObservableHelper<HttpResponseEvent> _observerManager;
         private readonly IConfigurationProvider _configurationProvider;
 
-        protected BaseApiComponent()
+        protected TTBaseApiComponent()
         {
            _httpClient = ServiceLocator.GetTransientService<IHttpClient>() ?? throw new Exception("HttpClient is null");
 
