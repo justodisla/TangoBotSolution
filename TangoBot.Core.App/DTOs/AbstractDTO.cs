@@ -28,6 +28,10 @@ namespace TangoBot.App.DTOs
                     var propertyInfo = GetType().GetProperty("Items", BindingFlags.Public | BindingFlags.Instance);
                     propertyInfo?.SetValue(this, items);
                 }
+                else
+                {
+                    PopulateProperties(dataElement, this);
+                }
             }
         }
 

@@ -15,7 +15,7 @@ public class Program
 
         var accountService = app.GetService<AccountCustomerReportingService>();
 
-        accountService.GetAccount("5WU34986");
+        var acct = accountService.GetAccount("5WU34986");
 
         var abdto = accountService.GetAccountBalance("5WU34986");
 

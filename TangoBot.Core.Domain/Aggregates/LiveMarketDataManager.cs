@@ -63,6 +63,8 @@ namespace TangoBot.Core.Domain.Aggregates
 
             _observableManager = new ObservableHelper<MarketDataEvent>();
 
+            _dataPoints = new();
+
             //var _thclient = ServiceLocator.GetSingletonService<IStreamingService>();
 
             //Load the data
