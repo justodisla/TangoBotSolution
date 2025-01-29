@@ -6,11 +6,15 @@ using TangoBot.Core.Api2;
 using TangoBot.Core.Domain.Aggregates;
 using TangoBot.App.Services;
 using TangoBot.App.App;
+using TangoBot.Core.Domain.Services;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+
+        var srvxc = ServiceLocator.GetSingletonService<TTAccountCustomerComponent>();
+
         Application app = new Application();
 
         var accountService = app.GetService<AccountCustomerReportingService>();

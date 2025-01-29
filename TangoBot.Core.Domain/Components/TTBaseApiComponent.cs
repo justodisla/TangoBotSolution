@@ -8,11 +8,13 @@ using TangoBot.Core.Api2.Commons;
 using TangoBotApi.Common;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Configuration;
+using TangoBotApi.Services.DI;
 using TangoBotApi.Services.Http;
 
 namespace TangoBot.Core.Domain.Services
 {
-    public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>
+
+    public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>, IInfrService
     {
         private readonly IHttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;
@@ -161,6 +163,16 @@ namespace TangoBot.Core.Domain.Services
 
             var contentStream = httpResponseMessage.Content.ReadAsStream();
             return JsonDocument.Parse(contentStream);
+        }
+
+        public string[] Requires()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Setup(Dictionary<string, object> configuration)
+        {
+            throw new NotImplementedException();
         }
     }
 }

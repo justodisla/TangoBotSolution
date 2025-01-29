@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TangoBot.Core.Domain.ValueObjects;
+using TangoBotApi.Services.DI;
 
 namespace TangoBot.Core.Domain.Services
 {

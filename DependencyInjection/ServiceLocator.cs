@@ -9,6 +9,13 @@ using TangoBotApi.Services.DI;
 
 namespace TangoBotApi.Infrastructure
 {
+    /// <summary>
+    /// Provides a mechanism to locate and manage services within the application.
+    /// </summary>
+    /// <remarks>
+    /// The ServiceLocator class is responsible for scanning assemblies, registering services, and providing access to these services.
+    /// It supports both singleton and transient service lifetimes.
+    /// </remarks>
     public static class ServiceLocator
     {
         private static IServiceProvider? _serviceProvider;
@@ -18,6 +25,12 @@ namespace TangoBotApi.Infrastructure
         private static readonly object _lock = new();
         private static readonly HashSet<Type> _processedServices = new();
 
+        /// <summary>
+        /// Initializes the service locator by scanning assemblies and registering services.
+        /// </summary>
+        /// <remarks>
+        /// This method should be called once at the start of the application to ensure all services are registered.
+        /// </remarks>
         public static void Initialize()
         {
             if (_initialized)
@@ -135,6 +148,10 @@ namespace TangoBotApi.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Registers services that were delayed due to missing dependencies.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection to add the services to.</param>
         private static void RegisterDelayedServices(ServiceCollection serviceCollection)
         {
             foreach (var delayedService in _delayedServices)
@@ -175,6 +192,17 @@ namespace TangoBotApi.Infrastructure
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
+        /// <summary>
+        /// Gets a singleton service of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type of the service to get.</typeparam>
+        /// <param name="qualifiedName">The qualified name of the implementation to get, or null to get the default implementation.</param>
+        /// <returns>The singleton service instance.</returns>
+        /// <example>
+        /// <code>
+        /// var myService = ServiceLocator.GetSingletonService<IMyService>();
+        /// </code>
+        /// </example>
         public static T GetSingletonService<T>(string? qualifiedName = null) where T : class
         {
             ServiceLocatorHelper.VerifyItIsLegalQualifiedName(qualifiedName);
@@ -190,6 +218,17 @@ namespace TangoBotApi.Infrastructure
             return (T)_serviceProvider!.GetRequiredService(implementationType);
         }
 
+        /// <summary>
+        /// Gets a transient service of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type of the service to get.</typeparam>
+        /// <param name="qualifiedName">The qualified name of the implementation to get, or null to get the default implementation.</param>
+        /// <returns>The transient service instance.</returns>
+        /// <example>
+        /// <code>
+        /// var myService = ServiceLocator.GetTransientService<IMyService>();
+        /// </code>
+        /// </example>
         public static T GetTransientService<T>(string? qualifiedName = null) where T : class
         {
             ServiceLocatorHelper.VerifyItIsLegalQualifiedName(qualifiedName);
@@ -200,16 +239,20 @@ namespace TangoBotApi.Infrastructure
             {
                 var interfaceType = typeof(T);
                 qualifiedName = _serviceImplementations[interfaceType].First().FullName;
-                //return ActivatorUtilities.CreateInstance<T>(_serviceProvider!);
             }
 
             var implementationType = GetImplementationType<T>(qualifiedName);
 
-            //return (T) Activator.CreateInstance(implementationType);
-
             return (T)ActivatorUtilities.CreateInstance(_serviceProvider!, implementationType);
         }
 
+        /// <summary>
+        /// Gets the implementation type for the specified interface type and qualified name.
+        /// </summary>
+        /// <typeparam name="T">The interface type.</typeparam>
+        /// <param name="qualifiedName">The qualified name of the implementation.</param>
+        /// <returns>The implementation type.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if no implementations are found for the interface type or the qualified name does not match any implementation.</exception>
         private static Type GetImplementationType<T>(string qualifiedName) where T : class
         {
             var interfaceType = typeof(T);
@@ -228,3 +271,4 @@ namespace TangoBotApi.Infrastructure
         }
     }
 }
+
