@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -12,6 +13,8 @@ namespace TangoBot.Infrastructure.ConfigurationImpl
     public class ConfigurationProvider : IConfigurationProvider
     {
         private readonly Dictionary<string, string> _configuration;
+        private const int MaxRetryCount = 3;
+        private const int DelayBetweenRetries = 1000; // in milliseconds
 
         public ConfigurationProvider()
         {
@@ -42,9 +45,29 @@ namespace TangoBot.Infrastructure.ConfigurationImpl
         public void SetConfigurationValue(string key, string value)
         {
             _configuration[key] = value;
-            SaveConfigurationAsync().Wait();
+            SaveConfigurationWithRetryAsync().Wait();
+        }
 
-
+        private async Task SaveConfigurationWithRetryAsync()
+        {
+            int retryCount = 0;
+            while (retryCount < MaxRetryCount)
+            {
+                try
+                {
+                    await SaveConfigurationAsync();
+                    return;
+                }
+                catch (IOException)
+                {
+                    retryCount++;
+                    if (retryCount >= MaxRetryCount)
+                    {
+                        throw;
+                    }
+                    await Task.Delay(DelayBetweenRetries);
+                }
+            }
         }
 
         public async Task SaveConfigurationAsync()
@@ -58,7 +81,7 @@ namespace TangoBot.Infrastructure.ConfigurationImpl
             ConfigurationHelper.PrintConfigurationFileContent("appsettings.json");
 
             _configuration.Clear();
-            SaveConfigurationAsync().Wait();
+            SaveConfigurationWithRetryAsync().Wait();
         }
 
         public string[] Requires()
@@ -93,5 +116,5 @@ namespace TangoBot.Infrastructure.ConfigurationImpl
             Console.WriteLine(formattedJson);
         }
     }
-
 }
+

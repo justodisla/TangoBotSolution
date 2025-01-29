@@ -14,7 +14,7 @@ using TangoBotApi.Services.Http;
 namespace TangoBot.Core.Domain.Services
 {
 
-    public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>, IInfrService
+    public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>
     {
         private readonly IHttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;

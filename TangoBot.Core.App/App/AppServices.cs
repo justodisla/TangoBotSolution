@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using TangoBot.App.Services;
 
 namespace TangoBot.App.App
 {
     public partial class Application
     {
-        private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+
+        private void RegisterServices()
+        {
+            //Initialize services
+            RegisterService<AccountCustomerReportingService>(new AccountCustomerReportingService());
+        }
 
         /// <summary>
         /// Registers a service instance with the application.

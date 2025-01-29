@@ -7,13 +7,14 @@ using TangoBot.Core.Domain.Aggregates;
 using TangoBot.App.Services;
 using TangoBot.App.App;
 using TangoBot.Core.Domain.Services;
+using TangoBotApi.Services.DI;
 
 public class Program
 {
     public static void Main(string[] args)
     {
 
-        var srvxc = ServiceLocator.GetSingletonService<TTAccountCustomerComponent>();
+        //var srvxc = ServiceLocator.GetSingletonService<IInfrService>(typeof(TTAccountCustomerComponent).FullName);
 
         Application app = new Application();
 

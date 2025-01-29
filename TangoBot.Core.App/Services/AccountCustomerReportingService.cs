@@ -35,7 +35,7 @@ namespace TangoBot.App.Services
         {
             var customerData = _accountComponent.GetCustomerAsync().Result;
 
-            customerData.RootElement.GetProperty("accounts");
+            //customerData.RootElement.GetProperty("accounts");
 
             var customerDto = new CustomerDto(customerData);
             return customerDto;

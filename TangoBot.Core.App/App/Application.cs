@@ -16,6 +16,8 @@ namespace TangoBot.App.App
     {
         private static bool _isInitialized = false;
         private static bool _isTerminated = false;
+        private static readonly object _lock = new object();
+
 
         public enum ServiceType
         {
@@ -32,19 +34,25 @@ namespace TangoBot.App.App
 
         private void Initialize()
         {
-            if (_isInitialized)
-                return;
+            lock (_lock)
+            {
 
-            //Initialize configurations
-            SetupConfigurations();
+                if (_isInitialized)
+                    return;
 
-            //Initialize services
-            RegisterService<AccountCustomerReportingService>(new AccountCustomerReportingService());
+                //Initialize configurations
+                SetupConfigurations();
 
-            //Initialize repositories
+                //Initialize services
+                RegisterServices();
 
-            _isInitialized = true;
+                //Initialize repositories
+
+                _isInitialized = true;
+            }
         }
+
+        
 
         public void Terminate()
         {
