@@ -1,19 +1,16 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Mail;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using TangoBot.API.Http;
 using TangoBot.Core.Api2.Commons;
 using TangoBotApi.Common;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Configuration;
-using TangoBotApi.Services.DI;
 using TangoBotApi.Services.Http;
 
 namespace TangoBot.Core.Domain.Services
 {
-
+    /// <summary>
+    /// Provides a base class for API components to interact with the TastyTrade API.
+    /// </summary>
     public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>
     {
         private readonly IHttpClient _httpClient;
@@ -21,14 +18,13 @@ namespace TangoBot.Core.Domain.Services
         private readonly ObservableHelper<HttpResponseEvent> _observerManager;
         private readonly IConfigurationProvider _configurationProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TTBaseApiComponent"/> class.
+        /// </summary>
         protected TTBaseApiComponent()
         {
-           _httpClient = ServiceLocator.GetTransientService<IHttpClient>() ?? throw new Exception("HttpClient is null");
-
-            //_httpClient = TangoBotServiceProviderExp.GetSingletonService<HttpClient>() ?? throw new Exception("HttpClient is null");
+            _httpClient = ServiceLocator.GetTransientService<IHttpClient>() ?? throw new Exception("HttpClient is null");
             _tokenProvider = ServiceLocator.GetSingletonService<ITokenProvider>() ?? throw new Exception("TokenProvider is null");
-            int hc1 = _tokenProvider.GetHashCode();
-
             _configurationProvider = ServiceLocator.GetSingletonService<IConfigurationProvider>() ?? throw new Exception("ConfigurationProvider is null");
 
             Dictionary<string, object> lconfig = new()
@@ -43,13 +39,16 @@ namespace TangoBot.Core.Domain.Services
             };
 
             _tokenProvider.Setup(lconfig);
-
             _observerManager = new ObservableHelper<HttpResponseEvent>();
         }
 
         /// <summary>
         /// Sends an authorized request to the specified URL with the provided content and HTTP method.
         /// </summary>
+        /// <param name="endPoint">The endpoint to send the request to.</param>
+        /// <param name="method">The HTTP method to use for the request.</param>
+        /// <param name="content">The content to include in the request, if any.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
         protected async Task<HttpResponseMessage?> SendRequestAsync(string endPoint, HttpMethod method, HttpContent? content = null)
         {
             HttpResponseEvent? httpResponseEvent;
@@ -79,15 +78,13 @@ namespace TangoBot.Core.Domain.Services
                     response = await _httpClient.SendAsync(request);
                     Console.WriteLine("[Info] Request sent. Awaiting response...");
 
-                    //Capture the response into the HttpResponseEvent
+                    // Capture the response into the HttpResponseEvent
                     httpResponseEvent = new HttpResponseEvent(request, response, null);
                     _observerManager.Notify(httpResponseEvent);
 
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         Console.WriteLine($"[Warning] Unsuccessful response. Status code: {response.StatusCode}");
-                        //var _diagnoseComponent = new DiagnoseComponent();
-                        //await DiagnoseComponent.DiagnoseAsync(response);
                     }
 
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -137,6 +134,14 @@ namespace TangoBot.Core.Domain.Services
             return null;
         }
 
+        /// <summary>
+        /// Resolves the HTTP request message with the specified URL, method, content, and token.
+        /// </summary>
+        /// <param name="url">The URL to send the request to.</param>
+        /// <param name="method">The HTTP method to use for the request.</param>
+        /// <param name="content">The content to include in the request, if any.</param>
+        /// <param name="token">The authorization token to include in the request headers.</param>
+        /// <returns>The resolved HTTP request message.</returns>
         private static HttpRequestMessage ResolveRequest(string url, HttpMethod method, HttpContent? content, string? token)
         {
             Console.WriteLine($"[Info] Sending {method} request to {url}");
@@ -149,11 +154,21 @@ namespace TangoBot.Core.Domain.Services
             return request;
         }
 
+        /// <summary>
+        /// Subscribes an observer to receive notifications of HTTP response events.
+        /// </summary>
+        /// <param name="observer">The observer to subscribe.</param>
+        /// <returns>A disposable object that can be used to unsubscribe the observer.</returns>
         public IDisposable Subscribe(IObserver<HttpResponseEvent> observer)
         {
             return _observerManager.Subscribe(observer);
         }
 
+        /// <summary>
+        /// Parses the HTTP response message into a JSON document.
+        /// </summary>
+        /// <param name="httpResponseMessage">The HTTP response message to parse.</param>
+        /// <returns>The parsed JSON document, or null if the response is not successful.</returns>
         internal static JsonDocument? ParseHttpResponseMessage(HttpResponseMessage httpResponseMessage)
         {
             if (httpResponseMessage == null || !httpResponseMessage.IsSuccessStatusCode)
@@ -165,11 +180,19 @@ namespace TangoBot.Core.Domain.Services
             return JsonDocument.Parse(contentStream);
         }
 
+        /// <summary>
+        /// Returns an array of strings with services required for this service to be loaded.
+        /// </summary>
+        /// <returns>An array of required service names.</returns>
         public string[] Requires()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Sets up the service with the provided configuration.
+        /// </summary>
+        /// <param name="configuration">A dictionary containing configuration settings.</param>
         public void Setup(Dictionary<string, object> configuration)
         {
             throw new NotImplementedException();
