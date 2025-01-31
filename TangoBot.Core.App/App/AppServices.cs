@@ -13,6 +13,7 @@ namespace TangoBot.App.App
             //Initialize services
             RegisterService<AccountCustomerReportingService>(new AccountCustomerReportingService());
             RegisterService<PositionService>(new PositionService());
+            RegisterService<InstrumentService>(new InstrumentService());
         }
 
         /// <summary>
