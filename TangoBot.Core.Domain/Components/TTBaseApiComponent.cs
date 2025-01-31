@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using TangoBot.API.Http;
 using TangoBot.Core.Api2.Commons;
+using TangoBot.Core.Domain.Components;
 using TangoBotApi.Common;
 using TangoBotApi.Infrastructure;
 using TangoBotApi.Services.Configuration;
@@ -11,7 +13,7 @@ namespace TangoBot.Core.Domain.Services
     /// <summary>
     /// Provides a base class for API components to interact with the TastyTrade API.
     /// </summary>
-    public abstract class TTBaseApiComponent : IObservable<HttpResponseEvent>
+    public abstract class TTBaseApiComponent : ITTApiComponent, IObservable<HttpResponseEvent>
     {
         private readonly IHttpClient _httpClient;
         private readonly ITokenProvider _tokenProvider;
@@ -49,7 +51,7 @@ namespace TangoBot.Core.Domain.Services
         /// <param name="method">The HTTP method to use for the request.</param>
         /// <param name="content">The content to include in the request, if any.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the HTTP response message.</returns>
-        protected async Task<HttpResponseMessage?> SendRequestAsync(string endPoint, HttpMethod method, HttpContent? content = null)
+        public async Task<HttpResponseMessage?> xSendRequestAsync(string endPoint, HttpMethod method, HttpContent? content = null)
         {
             HttpResponseEvent? httpResponseEvent;
             HttpRequestMessage? request = null;
@@ -134,6 +136,58 @@ namespace TangoBot.Core.Domain.Services
             return null;
         }
 
+        #region Testing
+
+        public async Task<HttpResponseMessage?> SendRequestAsync(string endPoint, HttpMethod method, HttpContent? content = null)
+        {
+            string uri = $"{_configurationProvider.GetConfigurationValue(AppConstants.ACTIVE_API_URL)}/{endPoint}";
+            string? token = await _tokenProvider.GetValidTokenAsync();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                Console.WriteLine("[Error] Failed to obtain a valid token for API request.");
+                return null;
+            }
+
+            return await ExecuteRequestWithRetries(uri, method, token, content);
+        }
+
+        private async Task<HttpResponseMessage?> ExecuteRequestWithRetries(string uri, HttpMethod method, string token, HttpContent? content)
+        {
+            int maxRetries = 3;
+            int delay = 2000; // Configurable
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    var request = ResolveRequest(uri, method, content, token);
+                    var response = await _httpClient.SendAsync(request);
+
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        Console.WriteLine("[Warning] Unauthorized request. Retrying with new token.");
+                        token = await _tokenProvider.GetValidTokenAsync();
+                        continue;
+                    }
+
+                    return response;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Exception in API request: {ex.Message}");
+                    if (i == maxRetries - 1) throw;
+                }
+
+                Console.WriteLine($"[Info] Waiting for {delay}ms before retrying...");
+                await Task.Delay(delay);
+            }
+
+            return null;
+        }
+
+        #endregion
+
         /// <summary>
         /// Resolves the HTTP request message with the specified URL, method, content, and token.
         /// </summary>
@@ -169,7 +223,7 @@ namespace TangoBot.Core.Domain.Services
         /// </summary>
         /// <param name="httpResponseMessage">The HTTP response message to parse.</param>
         /// <returns>The parsed JSON document, or null if the response is not successful.</returns>
-        internal static JsonDocument? ParseHttpResponseMessage(HttpResponseMessage httpResponseMessage)
+        internal static JsonDocument? xParseHttpResponseMessage(HttpResponseMessage httpResponseMessage)
         {
             if (httpResponseMessage == null || !httpResponseMessage.IsSuccessStatusCode)
             {
@@ -179,6 +233,38 @@ namespace TangoBot.Core.Domain.Services
             var contentStream = httpResponseMessage.Content.ReadAsStream();
             return JsonDocument.Parse(contentStream);
         }
+
+        protected async Task<T?> ParseHttpResponseMessage<T>(HttpResponseMessage response) where T : class
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[Error] API request failed. Status code: {response.StatusCode}");
+                return null;
+            }
+
+            string content = await response.Content.ReadAsStringAsync();
+
+            using JsonDocument jsonDoc = JsonDocument.Parse(content);
+
+            if (!jsonDoc.RootElement.TryGetProperty("data", out JsonElement dataElement2))
+            {
+                Console.WriteLine("[Error] Failed to extract 'data' property from response.");
+                return null;
+            }
+
+            if (jsonDoc.RootElement.TryGetProperty("data", out JsonElement dataElement))
+            {
+
+                return JsonSerializer.Deserialize<T>(dataElement.GetRawText(), new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+
+            Console.WriteLine("[Error] Failed to extract 'data' property from response.");
+            return null;
+        }
+
 
         /// <summary>
         /// Returns an array of strings with services required for this service to be loaded.

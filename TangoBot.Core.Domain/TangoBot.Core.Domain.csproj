@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ValueObjects\AbstractDTO.cs" />
+    <Compile Remove="ValueObjects\AccountBalanceDto.cs" />
+    <Compile Remove="ValueObjects\AccountBalances.cs" />
+    <Compile Remove="ValueObjects\AccountDto.cs" />
+    <Compile Remove="ValueObjects\AccountSnapShot.cs" />
+    <Compile Remove="ValueObjects\AccountSnapShotDto.cs" />
+    <Compile Remove="ValueObjects\AddressDto.cs" />
+    <Compile Remove="ValueObjects\CustomerDto.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DependencyInjection\DependencyInjection.csproj" />
     <ProjectReference Include="..\TangoBot.Core.Api2\TangoBot.Core.Api2.csproj" />
     <ProjectReference Include="..\TangoBotApi\TangoBotApi.csproj" />
@@ -14,6 +25,7 @@
 
   <ItemGroup>
     <Folder Include="Entities\" />
+    <Folder Include="ValueObjects\" />
   </ItemGroup>
 
 </Project>

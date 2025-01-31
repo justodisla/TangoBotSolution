@@ -5,7 +5,12 @@ namespace TangoBot.App.DTOs
 {
     public class AccountDto : AbstractDTO
     {
-        public AccountDto(JsonDocument jsonDocument) : base(jsonDocument) { }
+        //public AccountDto(JsonDocument jsonDocument) : base(jsonDocument) { }
+
+        public AccountDto()
+        {
+            
+        }
 
         [JsonPropertyName("account-number")]
         public string AccountNumber { get; set; }

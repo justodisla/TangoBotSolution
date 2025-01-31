@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TangoBot.App.DTOs;
+using TangoBot.Core.Domain.DTOs;
 using TangoBot.Core.Domain.Services;
 
 namespace TangoBot.App.Services
@@ -11,34 +12,49 @@ namespace TangoBot.App.Services
     public class AccountCustomerReportingService
     {
         private readonly TTAccountCustomerComponent _accountComponent = new TTAccountCustomerComponent();
-        public AccountBalanceDto GetAccountBalance(string account) {
+        public AccountBalanceDto GetAccountBalances(string account) {
             var accountBalances = _accountComponent.GetAccountBalancesAsync(account).Result;
-            var accountBalanceDto = new AccountBalanceDto(accountBalances);
-            return accountBalanceDto;
+            //var accountBalanceDto = new AccountBalanceDto(accountBalances);
+            return accountBalances;
         }
 
         public AccountDto GetAccount(string account)
         {
-            var accountData = _accountComponent.GetAccountAsync(account).Result;
-            var accountDto = new AccountDto(accountData);
-            return accountDto;
+            return _accountComponent.GetAccountAsync(account).Result;
+           // var accountDto = new AccountDto(accountData);
+           // return accountDto;
         }
 
-        public AccountSnapShotDto GetAccountSnapShot(string account)
+        public AccountSnapShotsDto GetAccountSnapShots(string account)
         {
-            var accountSnapShot = _accountComponent.GetAccountSnapShotAsync(account).Result;
-            var accountSnapShotDto = new AccountSnapShotDto(accountSnapShot);
-            return accountSnapShotDto;
+           return _accountComponent.GetAccountSnapShotsAsync(account).Result;
+           // var accountSnapShotDto = new AccountSnapShotDto(accountSnapShot);
+            //return accountSnapShotDto;
         }
 
-        public CustomerDto GetCustomer()
+        public CustomerDto? GetCustomer()
         {
-            var customerData = _accountComponent.GetCustomerAsync().Result;
+            return _accountComponent.GetCustomerAsync().Result;
 
             //customerData.RootElement.GetProperty("accounts");
 
-            var customerDto = new CustomerDto(customerData);
-            return customerDto;
+           // var customerDto = new CustomerDto(customerData);
+            //return customerDto;
+        }
+
+        public CustomerAccountsDto? GetCustomerAccounts()
+        {
+            return _accountComponent.GetCustomerAccountsAsync().Result;
+        }
+
+        public AccountStatusDto GetAccountStatus(string account)
+        {
+            return _accountComponent.GetAccountActivityAsync(account).Result;
+        }
+
+        public AccountTransactionsDto? GetAccountTransactions(string account)
+        {
+            return _accountComponent.GetAccountTransactionsAsync(account).Result;
         }
     }
 }

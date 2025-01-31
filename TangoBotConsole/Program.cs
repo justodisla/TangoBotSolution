@@ -22,7 +22,7 @@ public class Program
 
         var acct = accountService.GetAccount("5WU34986");
 
-        var abdto = accountService.GetAccountBalance("5WU34986");
+        var abdto = accountService.GetAccountBalances("5WU34986");
 
         var cb = abdto.CashBalance;
 

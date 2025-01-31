@@ -34,13 +34,13 @@ namespace TangoBot.Tests.Services
         }
 
         [Fact]
-        public void GetAccountBalance_ShouldReturnAccountBalanceDto()
+        public void GetAccountBalances_ShouldReturnAccountBalancesDto()
         {
             // Arrange
             double cashBalance = 1000000;
 
             // Act
-            var result = _service.GetAccountBalance(accountNumber);
+            var result = _service.GetAccountBalances(accountNumber);
 
             // Assert
             Assert.NotNull(result);
@@ -71,7 +71,7 @@ namespace TangoBot.Tests.Services
             double cashBalance = 1000000;
 
             // Act
-            var result = _service.GetAccountSnapShot(accountNumber);
+            var result = _service.GetAccountSnapShots(accountNumber);
 
             // Assert
             Assert.NotNull(result);
@@ -97,6 +97,45 @@ namespace TangoBot.Tests.Services
             Assert.Equal(firstName, result.FirstName);
 
             Assert.Equal(LastName, result.LastName);
+        }
+
+        [Fact]
+        public void GetCustomerAccounts_ShouldReturnCustomerAccountsDto()
+        {
+            // Arrange
+            const string accountTypeName = "Individual";
+            // Act
+            var result = _service.GetCustomerAccounts();
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Items);
+            Assert.Equal(accountTypeName, result.Items[0].Account.AccountTypeName);
+        }
+
+        [Fact]
+        public void GetAccountStatus_ShouldReturnAccountStatusDto()
+        {
+            // Arrange
+            const string accountStatus = "Active";
+            // Act
+            var result = _service.GetAccountStatus(accountNumber);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(accountNumber, result.AccountNumber);
+            Assert.True(result.IsRollTheDayForwardEnabled);
+        }
+
+        [Fact]
+        public void GetAccountTransactions_ShouldReturnAccountTransactionsDto()
+        {
+            // Arrange
+            const string transactionType = "Buy";
+            // Act
+            var result = _service.GetAccountTransactions(accountNumber);
+            // Assert
+            Assert.NotNull(result);
+            //Assert.Single(result.Items);
+            //Assert.Equal(transactionType, result.Items[0].TransactionType);
         }
     }
 }
