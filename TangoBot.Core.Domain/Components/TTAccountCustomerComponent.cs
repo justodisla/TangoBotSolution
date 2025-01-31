@@ -67,5 +67,19 @@ namespace TangoBot.Core.Domain.Services
             var response = await SendRequestAsync(endPoint, HttpMethod.Get) ?? throw new Exception("Response is null");
             return await ParseHttpResponseMessage<AccountTransactionsDto>(response);
         }
+
+        public async Task<AccountTransactionDto?> GetAccountTransactionAsync(string accountNumber, int transactionId)
+        {
+            string endPoint = $"accounts/{accountNumber}/transactions/{transactionId}";
+            var response = await SendRequestAsync(endPoint, HttpMethod.Get) ?? throw new Exception("Response is null");
+            return await ParseHttpResponseMessage<AccountTransactionDto>(response);
+        }
+
+        public async Task<TotalFeesDto?> GetTotalFeesAsync(string accountNumber)
+        {
+            string endPoint = $"accounts/{accountNumber}/transactions/total-fees";
+            var response = await SendRequestAsync(endPoint, HttpMethod.Get) ?? throw new Exception("Response is null");
+            return await ParseHttpResponseMessage<TotalFeesDto>(response);
+        }
     }
 }

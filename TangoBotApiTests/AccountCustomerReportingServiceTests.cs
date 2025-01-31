@@ -137,6 +137,46 @@ namespace TangoBot.Tests.Services
             //Assert.Single(result.Items);
             //Assert.Equal(transactionType, result.Items[0].TransactionType);
         }
+        [Fact]
+        public void GetAccountTransaction_ShouldReturnAccountTransactionDto()
+        {
+            // Arrange
+            var transactionsDto = _service.GetAccountTransactions(accountNumber);
+
+            Assert.NotNull(transactionsDto);
+
+            var trans = transactionsDto.Transactions;
+            int transactionId;
+            
+            if (trans.Count > 0)
+            {
+                transactionId = trans.First().Id;
+
+                const string transactionType = "Buy";
+                // Act
+                var result = _service.GetAccountTransaction(accountNumber, transactionId);
+                // Assert
+                Assert.NotNull(result);
+                Assert.Equal(transactionId, result.Id);
+
+            }
+            else
+            {
+                Assert.Fail("No transactions found");
+                //return;
+            }
+        }
+
+        [Fact]
+        public void GetTotalFees_ShouldReturnNull()
+        {
+            // Arrange
+            int transactionId = 0;
+            // Act
+            var result = _service.GetTotalFees(accountNumber);
+            // Assert
+            Assert.NotNull(result);
+        }
     }
 }
 

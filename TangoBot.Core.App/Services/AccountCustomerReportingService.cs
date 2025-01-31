@@ -56,5 +56,15 @@ namespace TangoBot.App.Services
         {
             return _accountComponent.GetAccountTransactionsAsync(account).Result;
         }
+
+        public AccountTransactionDto? GetAccountTransaction(string account, int transactionId)
+        {
+            return _accountComponent.GetAccountTransactionAsync(account, transactionId).Result;
+        }
+
+        public TotalFeesDto? GetTotalFees(string account)
+        {
+            return _accountComponent.GetTotalFeesAsync(account).Result;
+        }
     }
 }
