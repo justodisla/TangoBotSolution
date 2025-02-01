@@ -18,5 +18,15 @@ namespace TangoBot.App.Services
         {
             return await _instrumentComponent.GetEquitiesAsync();
         }
+
+        public async Task<InstrumentsDto?> GetActiveInstrumentAsync()
+        {
+            return await _instrumentComponent.GetEquitiesActiveAsync();
+        }
+
+        public async Task<InstrumentDto?> GetInstrumentAsync(string symbol)
+        {
+            return await _instrumentComponent.GetEquityAsync(symbol);
+        }
     }
 }

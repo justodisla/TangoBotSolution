@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Moq;
 using TangoBot.App.App;
+using TangoBot.App.DTOs;
 using TangoBot.App.Services;
 using TangoBot.Core.Api2.Commons;
 using TangoBot.Core.Domain.Components;
@@ -41,16 +42,60 @@ namespace TangoBot.Tests.Services
             try
             {
                 var result = _service.GetInstrumentAsync().Result;
+
+                Assert.NotNull(result);
+                Assert.NotEmpty(result.Items);
             }
             catch (Exception)
             {
-
+                Assert.Fail();
                 throw;
             }
             
 
             // Assert
            
+        }
+
+        [Fact]
+        public void GetEquity_ShouldReturnInstrumentDto()
+        {
+            // Arrange
+            string symbol = "AAPL";
+            // Act
+            try
+            {
+                var result = _service.GetInstrumentAsync(symbol).Result;
+
+                Assert.NotNull(result);
+                Assert.Equal(symbol, result.Symbol);
+
+            }
+            catch (Exception)
+            {
+                Assert.Fail();
+                throw;
+            }
+            // Assert
+        }
+
+        [Fact]
+        public void GetEquitiesActive_ShouldReturnInstrumentsDto()
+        {
+            // Arrange
+            // Act
+            try
+            {
+                var result = _service.GetActiveInstrumentAsync().Result;
+                Assert.NotNull(result);
+                Assert.NotEmpty(result.Items);
+            }
+            catch (Exception)
+            {
+                Assert.Fail();
+                throw;
+            }
+            // Assert
         }
     }
 }

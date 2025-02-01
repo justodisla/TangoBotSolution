@@ -252,8 +252,31 @@ namespace TangoBot.Core.Domain.Services
                 return null;
             }
 
+            string paginationJson = string.Empty;
+
+            if (jsonDoc.RootElement.TryGetProperty("pagination", out JsonElement paginationElement))
+            {
+                Console.WriteLine("[Info] 'pagination' property found in response.");
+                paginationJson = paginationElement.GetRawText();
+            }
+
             if (jsonDoc.RootElement.TryGetProperty("data", out JsonElement dataElement))
             {
+                if (!string.IsNullOrEmpty(paginationJson))
+                {
+                    using JsonDocument paginationDoc = JsonDocument.Parse(paginationJson);
+                    var dataObject = JsonSerializer.Deserialize<Dictionary<string, object>>(dataElement.GetRawText(), new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    dataObject["pagination"] = paginationDoc.RootElement.Clone();
+
+                    return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(dataObject), new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                }
 
                 return JsonSerializer.Deserialize<T>(dataElement.GetRawText(), new JsonSerializerOptions
                 {

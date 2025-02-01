@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TangoBot.App.DTOs;
+using TangoBot.Core.Domain.DTOs.Pagination;
 
 namespace TangoBot.Core.Domain.DTOs
 {
