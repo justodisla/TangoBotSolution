@@ -6,8 +6,8 @@ class Program
     {
         Agent agent = new Agent();
 
-        agent.Inputs.Add("LastPrice");
-        agent.Outputs.add("Buy");
+       // agent.Inputs.Add("LastPrice");
+        //agent.Outputs.add("Buy");
 
         // Initialize population
         var population = new Population(populationSize: 100, inputCount: 8, outputCount: 7);

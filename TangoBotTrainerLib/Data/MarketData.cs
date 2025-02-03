@@ -15,7 +15,7 @@ namespace TangoBotTrainerLib.Data
 
         public async Task<JObject> FetchHistoricalData(string symbol, string apiKey)
         {
-            string url = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={apiKey}&outputsize=compact";
+            string url = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={apiKey}&outputsize=full";
             string response = await client.GetStringAsync(url);
             return JObject.Parse(response);
         }
