@@ -39,6 +39,8 @@ namespace TangoBot.Infrastructure.HttpImpl
         public async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request)
         {
             return await _httpClient.SendAsync(request);
+
+            //return await SendAsyncWithRetries(request, 3, 1000);
         }
 
         /// <summary>
@@ -78,6 +80,37 @@ namespace TangoBot.Infrastructure.HttpImpl
         public string[] Requires()
         {
             return Array.Empty<string>();
+        }
+
+        /// <summary>
+        /// Sends an HTTP request to the specified URI with retries.
+        /// </summary>
+        /// <param name="request">The HTTP request message.</param>
+        /// <param name="maxRetries">The maximum number of retries.</param>
+        /// <param name="delayMilliseconds">The delay between retries in milliseconds.</param>
+        /// <returns>The HTTP response message.</returns>
+        public async Task<HttpResponseMessage> SendAsyncWithRetries(HttpRequestMessage request, int maxRetries, int delayMilliseconds)
+        {
+            HttpResponseMessage response = null;
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                response = await _httpClient.SendAsync(request);
+                if (response.IsSuccessStatusCode)
+                {
+                    return response;
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    await Task.Delay(delayMilliseconds);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return response;
         }
 
         /// <summary>

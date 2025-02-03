@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using TangoBot.Infrastructure.DependencyInjection;
 using TangoBotApi.Services.DI;
@@ -24,6 +25,8 @@ namespace TangoBotApi.Infrastructure
         private static bool _initialized = false;
         private static readonly object _lock = new();
         private static readonly HashSet<Type> _processedServices = new();
+
+        private static string[] _ignoredClasses = { "Castle.Proxies.INotificationServiceProxy" };
 
         /// <summary>
         /// Initializes the service locator by scanning assemblies and registering services.
@@ -67,6 +70,8 @@ namespace TangoBotApi.Infrastructure
                     }
                 }
 
+                 
+
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
                     Console.WriteLine($"\nProcessing assembly {assembly.FullName}");
@@ -76,6 +81,11 @@ namespace TangoBotApi.Infrastructure
                         var types = assembly.GetTypes().Where(t => typeof(IInfrService).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
                         foreach (var type in types)
                         {
+                            if (_ignoredClasses.Contains(type.FullName))
+                            {
+                                continue;
+                            }
+
                             var interfaces = type.GetInterfaces().Where(i => typeof(IInfrService).IsAssignableFrom(i) && !i.Name.Equals(typeof(IInfrService).Name));
                             foreach (var iface in interfaces)
                             {

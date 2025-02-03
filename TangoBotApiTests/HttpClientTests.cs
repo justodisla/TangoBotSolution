@@ -26,8 +26,10 @@ namespace TangoBotApi.Tests
         public async Task GetAsync_ShouldReturnResponse()
         {
             // Arrange
+            //var url = "https://jsonplaceholder.typicode.com/posts/1";
             var url = "https://jsonplaceholder.typicode.com/posts/1";
             var expectedResponse = new HttpResponseMessage(HttpStatusCode.OK);
+            /*
             _httpMessageHandlerMock
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>(
@@ -35,11 +37,12 @@ namespace TangoBotApi.Tests
                     ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Get && req.RequestUri.ToString() == url),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(expectedResponse);
+            */
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 
             // Act
-            var response = await _httpClient.GetAsync(request);
+            var response =  _httpClient.GetAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
