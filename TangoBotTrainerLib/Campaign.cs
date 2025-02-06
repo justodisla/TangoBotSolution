@@ -7,11 +7,12 @@ namespace TangoBotTrainerCoreLib
         private readonly IAgent _agent;
         private readonly ISupervisor _supervisor;
         private readonly ITrainingDataComponent _trainingData;
-        private IGenome[] seedGenomes;
-        private int startingCycle;
-        private ITrainingDataComponent trainingDataComponent;
+        
+        private int _startingCycle;
+        private ITrainingDataComponent _trainingDataComponent;
+        private IGenomePool _genomePool;
 
-        private List<IGenome> GenomePool { get; set; }
+        IGenomePool ICampaign.GenomePool => _genomePool;
 
         public Campaign()
         {
@@ -19,18 +20,34 @@ namespace TangoBotTrainerCoreLib
             _supervisor = DependencyInjection.Resolve<ISupervisor>();
             _trainingData = DependencyInjection.Resolve<ITrainingDataComponent>();
         }
-        public void Start()
+
+        public void Start(int startCycle = -1)
         {
+            if(startCycle != -1)
+            {
+                SetStartingCycle(startCycle);
+            }
+
             Console.WriteLine("Campaign started.");
             PrepareTrainingData();
             InitializeGenomePool();
-            Evolve();
+            Evolve(_startingCycle);
             Cleanup();
         }
 
+        public void StartSeeded(IGenome[] seedGenomes = null, int startCycle = -1)
+        {
+            _genomePool = new GenomePool(seedGenomes);
+            Start(startCycle);
+        }
         private void InitializeGenomePool()
         {
-            IGenome adamGenome = new Genome();
+            if(_genomePool == null || _genomePool.Pool.Count == 0)
+            {
+                IGenome adamGenome = new Genome();
+                _genomePool = new GenomePool();
+                this._genomePool.Pool = new List<IGenome>(adamGenome.Speciate(10, 10));
+            }
         }
 
         private void PrepareTrainingData()
@@ -38,7 +55,7 @@ namespace TangoBotTrainerCoreLib
             _trainingData.Initialize();
         }
 
-        private void Evolve()
+        private void Evolve(int startingCycle)
         {
             Console.WriteLine("Evolution completed.");
         }
@@ -57,5 +74,12 @@ namespace TangoBotTrainerCoreLib
         {
             throw new NotImplementedException();
         }
+
+        public void Start(IGenome[] seedGenomes = null, int startCycle = -1)
+        {
+            throw new NotImplementedException();
+        }
+
+        
     }
 }

@@ -8,9 +8,6 @@ namespace TangoBotTrainerApi
 {
     public interface IRuntime
     {
-        void StartCampaign();
-        ICampaign StartCampaign(IAgent agent, ISupervisor supervisor, ITrainingDataComponent data = null);
-        ICampaign ResumeCampaign(IGenome[] seedGenomes, IAgent agent, int startingCycle = -1);
-        void SetTrainingData(ITrainingDataComponent data);
+       
     }
 }

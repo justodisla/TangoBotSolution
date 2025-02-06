@@ -9,15 +9,14 @@ namespace TangoBotTrainerApi
     public interface ICampaign
     {
         /// <summary>
-        /// Get the genomes that have been or are being evolved in this campaign.
+        /// The Genome Pool that the Campaign is using.
         /// </summary>
-        /// <returns></returns>
-        IGenome[] GetGenomes();
+        IGenomePool GenomePool { get; }
 
         /// <summary>
         /// Start the Campaign from the beginning.
         /// </summary>
-        void Start();
+        void Start(int startCycle = -1);
 
         /// <summary>
         /// Instructs the Campaign to start evolving the supplied seed genomes from the specified cycle.
@@ -25,7 +24,7 @@ namespace TangoBotTrainerApi
         /// </summary>
         /// <param name="seedGenomes"></param>
         /// <param name="startCycle"></param>
-        void Start(IGenome[] seedGenomes = null, int startCycle = -1);
+        void StartSeeded(IGenome[] seedGenomes = null, int startCycle = -1);
 
         /// <summary>
         /// Returns the evolved Neural Network.

@@ -8,6 +8,5 @@ class Program
         // Resolve the Runtime
         IRuntime runtime = new Runtime();
 
-        runtime.StartCampaign();
     }
 }

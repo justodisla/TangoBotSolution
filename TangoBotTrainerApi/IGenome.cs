@@ -9,17 +9,43 @@ namespace TangoBotTrainerApi
 {
     public interface IGenome
     {
-        public interface IGene
-        {   
-            public int Id { get; }
+        public enum MutationLevels
+        {
+            CLOSE_SIBBLINGS,
+            DISTANT_SIBBLINGS,
+            INTERSPECIES,
+            EXTREME,
+            DEFAULT,
+            RANDOM
+        }
 
-            public int InnovationNumber { get; }
+        public interface IGene : ICloneable
+        {
+            /// <summary>
+            /// The id of the gene.
+            /// </summary>
+            int Id { get; }
 
-            public int ModuleId { get; }
+            /// <summary>
+            /// The innovation number of the gene.
+            /// </summary>
+            int InnovationNumber { get; }
+            
+            /// <summary>
+            /// The module id of the gene.
+            /// </summary>
+            int ModuleId { get; }
 
-            public bool Enabled { get; }
+            /// <summary>
+            /// Whether the gene is enabled or not.
+            /// </summary>
+            bool Enabled { get; set; }
 
-            void Mutate(int mutationLevel);
+            /// <summary>
+            /// Mutate the gene to create a new gene.
+            /// </summary>
+            /// <param name="mutationLevel"></param>
+            IGene Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true);
 
             public interface INodeGene : IGene
             {
@@ -58,36 +84,48 @@ namespace TangoBotTrainerApi
             {
                 public int FromNode { get; }
                 public int ToNode { get; }
-                public double Weight { get; }
+                public double Weight { get; set; }
 
                 /// <summary>
                 /// Connects an unconnected connection or
                 /// reconnects to another from node or to node or both.
                 /// </summary>
                 void Reconnect();
-                
+
             }
         }
+
+        public interface ISpecies { 
+            int Number { get; }
+            IGenome[] Members { get; }
+        }
+
+        int Species { get; set; }
 
         /// <summary>
         /// Mutate the genome to create a new genome.
         /// </summary>
         /// <param name="mutationLevel"></param>
         /// <returns></returns>
-        public IGenome Mutate(int mutationLevel);
+        public IGenome Mutate(MutationLevels mutationLevel);
 
         /// <summary>
         /// Crossover with another genome to create a new genome.
         /// </summary>
         /// <param name="partner"></param>
         /// <returns></returns>
-        public IGenome Crossover(IGenome partner);
+        public IGenome Crossover(IGenome partner, MutationLevels mutationLevel = 0);
 
         /// <summary>
         /// Set the fitness of the genome.
         /// </summary>
         /// <param name="fitness"></param>
         public void SetFitness(double fitness);
+
+        /// <summary>
+        /// Get the fitness of the genome.
+        /// </summary>
+        /// <returns></returns>
         public double GetFitness();
 
         /// <summary>
@@ -101,7 +139,7 @@ namespace TangoBotTrainerApi
         /// </summary>
         /// <param name="speciesCount"></param>
         /// <returns></returns>
-        public IGenome[] Speciate(int speciesCount);
+        public IGenome[] Speciate(int speciesCount, int sibblingsCount = 0);
 
         /// <summary>
         /// Create a number of sibblings from the current genome.
@@ -110,5 +148,7 @@ namespace TangoBotTrainerApi
         /// <param name="count"></param>
         /// <returns></returns>
         public IGenome[] SpawnSibblingGenome(int count);
+
+
     }
 }
