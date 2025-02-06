@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TangoBotTrainerApi;
+﻿using TangoBotTrainerApi;
 
 namespace TangoBotTrainerCoreLib
 {
@@ -12,73 +7,55 @@ namespace TangoBotTrainerCoreLib
         private readonly IAgent _agent;
         private readonly ISupervisor _supervisor;
         private readonly ITrainingDataComponent _trainingData;
-        private readonly List<IGenome> _seedGenomes;
-        private int _startingCycle;
+        private IGenome[] seedGenomes;
+        private int startingCycle;
+        private ITrainingDataComponent trainingDataComponent;
 
-        public Campaign(IAgent agent, ISupervisor supervisor, ITrainingDataComponent trainingData)
+        private List<IGenome> GenomePool { get; set; }
+
+        public Campaign()
         {
-            _agent = agent ?? throw new ArgumentNullException(nameof(agent));
-            _supervisor = supervisor ?? throw new ArgumentNullException(nameof(supervisor));
-            _trainingData = trainingData;
-            _seedGenomes = new List<IGenome>();
-            _startingCycle = 0;
+            _agent = DependencyInjection.Resolve<IAgent>();
+            _supervisor = DependencyInjection.Resolve<ISupervisor>();
+            _trainingData = DependencyInjection.Resolve<ITrainingDataComponent>();
         }
-
-        public Campaign(IAgent agent, IGenome[] seedGenomes, int startingCycle, ITrainingDataComponent trainingData)
-        {
-            _agent = agent ?? throw new ArgumentNullException(nameof(agent));
-            _supervisor = null; // Optional for resuming campaigns
-            _trainingData = trainingData;
-            _seedGenomes = new List<IGenome>(seedGenomes);
-            _startingCycle = startingCycle;
-        }
-
         public void Start()
         {
-            // Instantiate components
             Console.WriteLine("Campaign started.");
-
-            // Preparation
-            Console.WriteLine("Preparing training data...");
             PrepareTrainingData();
-
-            // Evolution
-            Console.WriteLine("Starting evolution...");
+            InitializeGenomePool();
             Evolve();
-
-            // Cleanup
-            Console.WriteLine("Cleaning up resources...");
             Cleanup();
         }
 
-        public void SetStartingCycle(int cycle)
+        private void InitializeGenomePool()
         {
-            _startingCycle = cycle;
-        }
-
-        public INeuralNetwork GetResult()
-        {
-            // Return the best-performing neural network
-            Console.WriteLine("Returning the best neural network.");
-            return new NeuralNetwork(); // Placeholder
+            IGenome adamGenome = new Genome();
         }
 
         private void PrepareTrainingData()
         {
-            // Cache training data for offline use
-            Console.WriteLine("Training data prepared.");
+            _trainingData.Initialize();
         }
 
         private void Evolve()
         {
-            // Implement evolution logic here
             Console.WriteLine("Evolution completed.");
         }
 
         private void Cleanup()
         {
-            // Free resources
             Console.WriteLine("Resources cleaned up.");
+        }
+
+        public void SetStartingCycle(int cycle)
+        {
+            throw new NotImplementedException();
+        }
+
+        public INeuralNetwork GetNeuralNetwork()
+        {
+            throw new NotImplementedException();
         }
     }
 }

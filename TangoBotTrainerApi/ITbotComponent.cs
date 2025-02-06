@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TangoBotTrainerApi
 {
-    public interface IEnvInterface : ITbotComponent
+    public interface ITbotComponent : ICloneable
     {
     }
 }

@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TangoBotTrainerApi
+namespace TangoSwingStrategy
 {
-    public interface IEnvInterface : ITbotComponent
+    internal interface ITastyTradeTradingPlatform
     {
+        void Connect();
     }
 }

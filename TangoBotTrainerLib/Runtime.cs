@@ -1,36 +1,43 @@
 ﻿using TangoBotTrainerApi;
-using TangoBotTrainerCoreLib;
 
-public class Runtime : IRuntime
+namespace TangoBotTrainerCoreLib
 {
-    private readonly DependencyContainer _container;
-
-    public Runtime(DependencyContainer container)
+    public class Runtime : IRuntime
     {
-        _container = container ?? throw new ArgumentNullException(nameof(container));
-    }
-
-    public ICampaign StartCampaign(IAgent agent, ISupervisor supervisor, ITrainingDataComponent data = null)
-    {
-        if (data != null)
+        public Runtime()
         {
-            SetTrainingData(data);
+            //ITrainingDataComponent tps = DependencyInjection.Resolve<ITrainingDataComponent>();
+            ISupervisor supervisor = DependencyInjection.Resolve<ISupervisor>();
         }
 
-        var campaign = new Campaign(agent, supervisor, _container.Resolve<ITrainingDataComponent>());
-        campaign.Start();
-        return campaign;
-    }
+        public void StartCampaign()
+        {
 
-    public ICampaign ResumeCampaign(IGenome[] seedGenomes, IAgent agent, int startingCycle = -1)
-    {
-        var campaign = new Campaign(agent, seedGenomes, startingCycle, _container.Resolve<ITrainingDataComponent>());
-        campaign.Start();
-        return campaign;
-    }
+            IAgent agent = DependencyInjection.Resolve<IAgent>();
+            ISupervisor supervisor = DependencyInjection.Resolve<ISupervisor>();
+            ITrainingDataComponent data = DependencyInjection.Resolve<ITrainingDataComponent>();
 
-    public void SetTrainingData(ITrainingDataComponent data)
-    {
-        _container.Register(data);
+            StartCampaign(agent, supervisor, data);
+
+        }
+
+        public ICampaign StartCampaign(IAgent agent, ISupervisor supervisor, ITrainingDataComponent data = null)
+        {
+            var campaign = new Campaign(agent, supervisor, DependencyInjection.Resolve<ITrainingDataComponent>());
+            campaign.Start();
+            return campaign;
+        }
+
+        public ICampaign ResumeCampaign(IGenome[] seedGenomes, IAgent agent, int startingCycle = -1)
+        {
+            var campaign = new Campaign(agent, seedGenomes, startingCycle, DependencyInjection.Resolve<ITrainingDataComponent>());
+            campaign.Start();
+            return campaign;
+        }
+
+        public void SetTrainingData(ITrainingDataComponent data)
+        {
+            //DependencyInjection.Register(data);
+        }
     }
 }

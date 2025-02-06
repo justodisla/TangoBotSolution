@@ -7,7 +7,7 @@ using TangoBotTrainerApi;
 
 namespace TangoBotTrainerCoreLib
 {
-    internal class NeuralNetwork : INeuralNetwork
+    public class NeuralNetwork : INeuralNetwork
     {
     }
 }

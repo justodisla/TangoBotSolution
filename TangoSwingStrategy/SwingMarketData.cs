@@ -7,7 +7,7 @@ using TangoBotTrainerApi;
 
 namespace TangoSwingStrategy
 {
-    public class SwingMarketData : ITrainingDataComponent
+    public class SwingMarketData : ITrainingDataComponent , ITbotComponent
     {
     }
 }

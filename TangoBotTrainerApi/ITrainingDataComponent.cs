@@ -8,5 +8,6 @@ namespace TangoBotTrainerApi
 {
     public interface ITrainingDataComponent
     {
+        void Initialize();
     }
 }

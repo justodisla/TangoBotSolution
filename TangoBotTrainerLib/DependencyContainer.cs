@@ -1,29 +1,106 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using TangoBotTrainerApi;
 
-public class DependencyContainer
+namespace TangoBotTrainerCoreLib
 {
-    private readonly Dictionary<Type, object> _registrations = new();
-
-    // Register a singleton instance of a service
-    public void Register<TInterface, TImplementation>() where TImplementation : class, TInterface, new()
+    public static class DependencyInjection
     {
-        _registrations[typeof(TInterface)] = new TImplementation();
-    }
+        private static readonly Dictionary<Type, object> _registeredComponents = new();
+        private static bool _isInitialized = false;
 
-    // Register an existing instance of a service
-    public void Register<TInterface>(TInterface instance)
-    {
-        _registrations[typeof(TInterface)] = instance;
-    }
-
-    // Resolve a service by its interface
-    public T Resolve<T>()
-    {
-        if (_registrations.TryGetValue(typeof(T), out var instance))
+        /// <summary>
+        /// Scans the given path for DLLs and registers all types implementing ITbotComponent.
+        /// </summary>
+        private static void Initialize()
         {
-            return (T)instance;
+            if (_isInitialized) return;
+
+            var dllFiles = Directory.GetFiles(GetSearchDirectory(), "*.dll", SearchOption.AllDirectories);
+
+            foreach (var dllPath in dllFiles)
+            {
+                try
+                {
+                    var assembly = Assembly.LoadFrom(dllPath);
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        if (typeof(ITbotComponent).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
+                        {
+                            var interfaces = type.GetInterfaces();
+                            var instance = Activator.CreateInstance(type);
+                            foreach (var i in interfaces)
+                            {
+                                if (i == typeof(ITbotComponent) || i == typeof(ICloneable))
+                                {
+                                    continue;
+                                }
+                                Register(i, instance);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error loading assembly from {dllPath}: {ex.Message}");
+                }
+            }
+
+            _isInitialized = true;
         }
-        throw new InvalidOperationException($"Service of type {typeof(T)} is not registered.");
+
+        /// <summary>
+        /// Registers a type and its instance for dependency injection.
+        /// </summary>
+        private static void Register(Type type, object instance)
+        {
+            if (!_registeredComponents.ContainsKey(type))
+            {
+                _registeredComponents[type] = instance;
+                Console.WriteLine($"Registered component: {type.FullName}");
+            }
+        }
+
+        /// <summary>
+        /// Resolves a component of the specified type.
+        /// </summary>
+        public static T? Resolve<T>() where T : class
+        {
+            if (!_isInitialized)
+            {
+                // Initialize with the default path or a configurable path
+                Initialize(); // Default to application directory
+            }
+
+            var type = typeof(T);
+
+            if (_registeredComponents.TryGetValue(type, out var instance))
+            {
+                return instance as T;
+            }
+
+            throw new InvalidOperationException($"No component registered for type {type.FullName}.");
+        }
+
+        internal static string GetSearchDirectory()
+        {
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var directory = Directory.GetParent(currentAssembly.Location);
+
+            while (directory != null && !Directory.GetFiles(directory.FullName, "*.sln").Any())
+            {
+                directory = directory.Parent;
+            }
+
+            if (directory == null)
+            {
+                throw new Exception("Solution directory not found.");
+            }
+
+            return directory.FullName;
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TangoBotTrainerApi
 {
-    public interface IAgent
+    public interface IAgent : ITbotComponent
     {
     }
 }
