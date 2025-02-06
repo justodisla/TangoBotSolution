@@ -25,6 +25,8 @@ namespace TangoBotTrainerCoreLib
 
             public bool Enabled { get; set; }
 
+            public IGenome ParentGenome { get; set; }
+
             public IGene Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true)
             {
                 return GeneticOperator.Mutate(this, mutationLevel);
@@ -35,12 +37,13 @@ namespace TangoBotTrainerCoreLib
                 return this.MemberwiseClone();
             }
 
-            public Gene(int id, int innovationNumber, int moduleId, bool enabled)
+            public Gene(int id, int innovationNumber, int moduleId, bool enabled, IGenome parentGenome)
             {
                 Id = id;
                 InnovationNumber = innovationNumber;
                 ModuleId = moduleId;
                 Enabled = enabled;
+                ParentGenome = parentGenome;
             }
         }
 
@@ -49,7 +52,7 @@ namespace TangoBotTrainerCoreLib
             public NodeType Type { get; }
             public int Layer { get; }
 
-            public NodeGene(int id, int innovationNumber, int moduleId, bool enabled, NodeType type, int layer) : base(id, innovationNumber,moduleId, enabled)
+            public NodeGene(int id, int innovationNumber, int moduleId, bool enabled, NodeType type, int layer, IGenome genome) : base(id, innovationNumber,moduleId, enabled, genome)
             {
                 Type = type;
                 Layer = layer;
@@ -57,7 +60,7 @@ namespace TangoBotTrainerCoreLib
 
             public IGene.IConnectionGene[] GetConnections()
             {
-                throw new NotImplementedException();
+               
             }
 
             public IGene.IConnectionGene[] GetOutGoingConnections()
@@ -79,7 +82,7 @@ namespace TangoBotTrainerCoreLib
             public double Weight { get; set; }
 
          
-            public ConnectionGene(int id, int innovationNumber, int moduleId, int fromNode, int toNode, double weight, bool enabled) : base(id, innovationNumber, moduleId, enabled)
+            public ConnectionGene(int id, int innovationNumber, int moduleId, int fromNode, int toNode, double weight, bool enabled, IGenome genome) : base(id, innovationNumber, moduleId, enabled, genome)
             {   
                 FromNode = fromNode;
                 ToNode = toNode;
