@@ -1,38 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TangoBotTrainerApi;
+﻿using TangoBotTrainerApi;
+using TangoBotTrainerCoreLib;
 
-namespace TangoBotTrainerLib
+public class Runtime : IRuntime
 {
-    public class Runtime : IRuntime
+    private readonly DependencyContainer _container;
+
+    public Runtime(DependencyContainer container)
     {
-        private ITrainingDataComponent _trainingData;
+        _container = container ?? throw new ArgumentNullException(nameof(container));
+    }
 
-        public ICampaign StartCampaign(IAgent agent, ISupervisor supervisor, ITrainingDataComponent data = null)
+    public ICampaign StartCampaign(IAgent agent, ISupervisor supervisor, ITrainingDataComponent data = null)
+    {
+        if (data != null)
         {
-            if (data != null)
-            {
-                SetTrainingData(data);
-            }
-
-            var campaign = new Campaign(agent, supervisor, _trainingData);
-            campaign.Start();
-            return campaign;
+            SetTrainingData(data);
         }
 
-        public ICampaign ResumeCampaign(IGenome[] seedGenomes, IAgent agent, int startingCycle = -1)
-        {
-            var campaign = new Campaign(agent, seedGenomes, startingCycle, _trainingData);
-            campaign.Start();
-            return campaign;
-        }
+        var campaign = new Campaign(agent, supervisor, _container.Resolve<ITrainingDataComponent>());
+        campaign.Start();
+        return campaign;
+    }
 
-        public void SetTrainingData(ITrainingDataComponent data)
-        {
-            _trainingData = data ?? throw new ArgumentNullException(nameof(data), "Training data cannot be null.");
-        }
+    public ICampaign ResumeCampaign(IGenome[] seedGenomes, IAgent agent, int startingCycle = -1)
+    {
+        var campaign = new Campaign(agent, seedGenomes, startingCycle, _container.Resolve<ITrainingDataComponent>());
+        campaign.Start();
+        return campaign;
+    }
+
+    public void SetTrainingData(ITrainingDataComponent data)
+    {
+        _container.Register(data);
     }
 }

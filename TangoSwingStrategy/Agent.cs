@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TangoBotTrainerApi;
 
 namespace TangoBotTrainerLib
 {
-    public class Agent
+    public class Agent : IAgent
     {
         public List<string> Inputs = new List<string>();
         public List<string> Outputs = new List<string>();
