@@ -49,9 +49,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBot.App", "TangoBot.Co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Trainer", "Trainer", "{0A2A568D-48A6-41B1-9A85-7E6E1D234815}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotTrainerLib", "TangoBotTrainerLib\TangoBotTrainerLib.csproj", "{E740831C-7172-4C2B-B9FA-FD5746D6FEEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotTrainerCoreLib", "TangoBotTrainerLib\TangoBotTrainerCoreLib.csproj", "{E740831C-7172-4C2B-B9FA-FD5746D6FEEB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotTrainerApp", "TangoBotTrainerApp\TangoBotTrainerApp.csproj", "{D473B7A2-0648-4141-B0FC-25AD226199EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBotTrainerApi", "TangoBotTrainerApi\TangoBotTrainerApi.csproj", "{1A4EDD4A-A69F-45F4-9BE3-C6D2857F7FD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoSwingStrategy", "TangoSwingStrategy\TangoSwingStrategy.csproj", "{3267D999-29C8-4A67-B82D-A99091284F63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,6 +139,14 @@ Global
 		{D473B7A2-0648-4141-B0FC-25AD226199EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D473B7A2-0648-4141-B0FC-25AD226199EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D473B7A2-0648-4141-B0FC-25AD226199EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A4EDD4A-A69F-45F4-9BE3-C6D2857F7FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A4EDD4A-A69F-45F4-9BE3-C6D2857F7FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A4EDD4A-A69F-45F4-9BE3-C6D2857F7FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A4EDD4A-A69F-45F4-9BE3-C6D2857F7FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3267D999-29C8-4A67-B82D-A99091284F63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3267D999-29C8-4A67-B82D-A99091284F63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3267D999-29C8-4A67-B82D-A99091284F63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3267D999-29C8-4A67-B82D-A99091284F63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,6 +170,8 @@ Global
 		{3AC74116-5E3C-4646-BE40-7336512339A0} = {5A2B27E7-E687-4884-93C0-BD55351459D3}
 		{E740831C-7172-4C2B-B9FA-FD5746D6FEEB} = {0A2A568D-48A6-41B1-9A85-7E6E1D234815}
 		{D473B7A2-0648-4141-B0FC-25AD226199EB} = {0A2A568D-48A6-41B1-9A85-7E6E1D234815}
+		{1A4EDD4A-A69F-45F4-9BE3-C6D2857F7FD0} = {0A2A568D-48A6-41B1-9A85-7E6E1D234815}
+		{3267D999-29C8-4A67-B82D-A99091284F63} = {0A2A568D-48A6-41B1-9A85-7E6E1D234815}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {56390FCD-32A0-4E90-A914-A41AC69A7112}
