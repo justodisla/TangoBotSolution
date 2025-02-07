@@ -59,6 +59,7 @@ namespace TangoBotTrainerCoreLib
 
         internal static IGenome.IGene MutateNodeGene(IGenome.IGene.INodeGene seedGene, MutationLevels mutationLevel)
         {
+            /*
             // Clone the current gene to avoid modifying the original
             IGenome.IGene.INodeGene mutatedGene = new NodeGene();
             // Change the type of the node with a small probability
@@ -67,10 +68,15 @@ namespace TangoBotTrainerCoreLib
                 mutatedGene.Type = (NodeType)_random.Next(0, Enum.GetValues(typeof(NodeType)).Length);
             }
             return mutatedGene;
+            */
+
+            return seedGene;
         }
 
         internal static IGenome.IGene MutateConnectionGene(IGenome.IGene.IConnectionGene seedGene, MutationLevels mutationLevel, bool canIgnore)
         {
+
+            /*
             // Clone the current gene to avoid modifying the original
             IGenome.IGene.IConnectionGene mutatedGene = new ConnectionGene();
 
@@ -90,6 +96,9 @@ namespace TangoBotTrainerCoreLib
             }
 
             return mutatedGene;
+            */
+
+            return seedGene;
         }
 
         /// <summary>

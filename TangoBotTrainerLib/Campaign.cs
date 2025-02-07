@@ -46,7 +46,7 @@ namespace TangoBotTrainerCoreLib
             {
                 IGenome adamGenome = new Genome();
                 _genomePool = new GenomePool();
-                this._genomePool.Pool = new List<IGenome>(adamGenome.Speciate(10, 10));
+                this._genomePool.Pool = new List<IGenome>(adamGenome.Speciate(5, 5));
             }
         }
 
@@ -75,11 +75,12 @@ namespace TangoBotTrainerCoreLib
             throw new NotImplementedException();
         }
 
+        /*
         public void Start(IGenome[] seedGenomes = null, int startCycle = -1)
         {
             throw new NotImplementedException();
         }
 
-        
+        */
     }
 }

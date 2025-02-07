@@ -144,14 +144,14 @@ namespace TangoBotTrainerCoreLib
 
             if (invalidMutationLevel)
             {
-                throw new NotSupportedException("The mutation level is not appropriate for sibblings.");
+                throw new NotSupportedException("The mutation level is not appropriate for siblings.");
             }
 
             for (int i = 0; i < count; i++)
             {
                 siblings.Add(this.Mutate(mutationLevel));
             }
-            return siblings.ToArray();
+            return [.. siblings];
         }
 
         public IGenome[] SpawnSiblingGenome(int count)
