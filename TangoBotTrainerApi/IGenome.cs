@@ -142,6 +142,10 @@ namespace TangoBotTrainerApi
         /// <returns></returns>
         public IGenome[] SpawnSiblingGenome(int count);
 
+        //Deal with genes
+
+        IGenome.IGene.INodeGene AddNode(int layer, int moduleId, IGene.INodeGene.NodeType type, double bias = 0);
+
 
     }
 }

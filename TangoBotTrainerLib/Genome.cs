@@ -101,6 +101,8 @@ namespace TangoBotTrainerCoreLib
 
         public IAgent Agent { get; set; }
 
+        public int CurrentInnovationNumber { get; set; }
+
         public Genome(IAgent agent)
         {
             Genes ??= [];
