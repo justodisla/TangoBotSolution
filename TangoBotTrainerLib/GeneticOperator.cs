@@ -27,7 +27,10 @@ namespace TangoBotTrainerCoreLib
 
         public static IGenome Mutate(IGenome genome, MutationLevels mutationLevel)
         {
-           return new Genome();
+
+            //IGene[] genes = genome.GetGenes();
+
+            return new Genome();
         }
 
         internal static IGenome.IGene Mutate(Gene gene, MutationLevels mutationLevel)

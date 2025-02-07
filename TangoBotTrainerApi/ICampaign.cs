@@ -16,7 +16,7 @@ namespace TangoBotTrainerApi
         /// <summary>
         /// Start the Campaign from the beginning.
         /// </summary>
-        void Start(int startCycle = -1);
+        void Start(int startCycle = 0);
 
         /// <summary>
         /// Instructs the Campaign to start evolving the supplied seed genomes from the specified cycle.

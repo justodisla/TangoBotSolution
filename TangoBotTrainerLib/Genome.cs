@@ -105,7 +105,8 @@ namespace TangoBotTrainerCoreLib
 
         public IGenome Mutate(MutationLevels mutationLevel)
         {
-            return new Genome();
+            return GeneticOperator.Mutate(this, mutationLevel);
+            //return new Genome();
         }
 
         public IGenome Crossover(IGenome partner, MutationLevels mutationLevel = MutationLevels.DEFAULT)
@@ -151,6 +152,7 @@ namespace TangoBotTrainerCoreLib
             {
                 siblings.Add(this.Mutate(mutationLevel));
             }
+
             return [.. siblings];
         }
 

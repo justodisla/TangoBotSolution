@@ -21,32 +21,39 @@ namespace TangoBotTrainerCoreLib
             _trainingData = DependencyInjection.Resolve<ITrainingDataComponent>();
         }
 
-        public void Start(int startCycle = -1)
-        {
-            if(startCycle != -1)
-            {
-                SetStartingCycle(startCycle);
-            }
-
-            Console.WriteLine("Campaign started.");
-            PrepareTrainingData();
-            InitializeGenomePool();
-            Evolve(_startingCycle);
-            Cleanup();
-        }
-
         public void StartSeeded(IGenome[] seedGenomes = null, int startCycle = -1)
         {
             _genomePool = new GenomePool(seedGenomes);
             Start(startCycle);
         }
+
+        public void Start(int startCycle = -1)
+        {
+            if(startCycle != 0)
+            {
+                SetStartingCycle(startCycle);
+            }
+
+            //Capture the needed data and caches it
+            PrepareTrainingData();
+
+            //The goal is to populate the Genome Pool with the initial population.
+            InitializeGenomePool();
+
+            //Evolve the population until a champion neural network is found.
+            Evolve(_startingCycle);
+
+            //Clean up resources and saves information for further optimization.
+            Cleanup();
+        }
+
         private void InitializeGenomePool()
         {
             if(_genomePool == null || _genomePool.Pool.Count == 0)
             {
-                IGenome adamGenome = new Genome();
+                Genome basicGenome = new Genome();
                 _genomePool = new GenomePool();
-                this._genomePool.Pool = new List<IGenome>(adamGenome.Speciate(5, 5));
+                this._genomePool.Pool = new List<IGenome>(basicGenome.Speciate(5, 5));
             }
         }
 
