@@ -51,7 +51,7 @@ namespace TangoBotTrainerCoreLib
         {
             if(_genomePool == null || _genomePool.Pool.Count == 0)
             {
-                Genome basicGenome = new Genome();
+                Genome basicGenome = new Genome(_agent);
                 _genomePool = new GenomePool();
                 this._genomePool.Pool = new List<IGenome>(basicGenome.Speciate(5, 5));
             }

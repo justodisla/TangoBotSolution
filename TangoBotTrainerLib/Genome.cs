@@ -99,7 +99,7 @@ namespace TangoBotTrainerCoreLib
         public double Fitness { get; set; }
         IGene[] IGenome.Genes { get; set; }
 
-        public Genome()
+        public Genome(IAgent agent)
         {
         }
 
