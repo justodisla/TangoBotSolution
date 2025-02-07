@@ -27,7 +27,7 @@ namespace TangoBotTrainerCoreLib
             Start(startCycle);
         }
 
-        public void Start(int startCycle = -1)
+        public void Start(int startCycle = 0)
         {
             if(startCycle != 0)
             {
@@ -74,7 +74,7 @@ namespace TangoBotTrainerCoreLib
 
         public void SetStartingCycle(int cycle)
         {
-            throw new NotImplementedException();
+            this._startingCycle = cycle;
         }
 
         public INeuralNetwork GetNeuralNetwork()

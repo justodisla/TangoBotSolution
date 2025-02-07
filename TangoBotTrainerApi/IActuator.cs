@@ -1,6 +1,6 @@
 ﻿namespace TangoBotTrainerApi
 {
-    public interface IActuator
+    public interface IActuator : IAgentInterface
     {
     }
 }

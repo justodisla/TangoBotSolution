@@ -8,7 +8,15 @@ namespace TangoBotTrainerApi
 {
     public interface IAgent : ITbotComponent
     {
-        IPerceptor[] Perceptors { get; }
-        IActuator[] Actuators { get; }
+        //List<IPerceptor> Perceptors { get; }
+        //List<IActuator> Actuators { get; }
+
+        IEnvInterface EnvInterface { get; set; }
+
+        ITestingBooth TestingBooth { get; set; }
+
+        List<IPerceptor> GetPercetors();
+
+        List<IActuator> GetActuators();
     }
 }

@@ -51,6 +51,7 @@ namespace TangoBotTrainerCoreLib
         {
             public NodeType Type { get; }
             public int Layer { get; }
+            public double Bias { get; set; }
 
             public NodeGene(int id, int innovationNumber, int moduleId, bool enabled, NodeType type, int layer, IGenome genome) : base(id, innovationNumber, moduleId, enabled, genome)
             {
@@ -97,7 +98,8 @@ namespace TangoBotTrainerCoreLib
 
         public List<IGenome.IGene> Genes { get; set; }
         public double Fitness { get; set; }
-        //IGene[] IGenome.Genes { get; set; }
+
+        public IAgent Agent { get; set; }
 
         public Genome(IAgent agent)
         {
@@ -109,19 +111,29 @@ namespace TangoBotTrainerCoreLib
                 throw new ArgumentNullException();
             }
 
-            List<object> sx = [agent.Perceptors, agent.Actuators];
+            Agent = agent;
 
-            foreach (IPerceptor p in sx)
+            //List<object> sx = [agent.GetPercetors(), agent.GetActuators()];
+
+            foreach (IPerceptor p in agent.GetPercetors())
             {
-                NodeType nt = p.GetType() == typeof(IPerceptor) ? NodeType.Input : NodeType.Output;
-                IGenome.IGene.INodeGene n = new NodeGene(1, -1, -1, true, nt, -1, this);
+                //NodeType nt = p.GetType() == typeof(IPerceptor) ? NodeType.Input : NodeType.Output;
+                IGenome.IGene.INodeGene n = new NodeGene(1, -1, -1, true, NodeType.Input, -1, this);
+                Genes.Add(n);
+            }
+
+            foreach (IActuator p in agent.GetActuators())
+            {
+                //NodeType nt = p.GetType() == typeof(IPerceptor) ? NodeType.Input : NodeType.Output;
+                IGenome.IGene.INodeGene n = new NodeGene(1, -1, -1, true, NodeType.Output, -1, this);
                 Genes.Add(n);
             }
         }
 
         public IGenome Mutate(MutationLevels mutationLevel)
         {
-            return GeneticOperator.Mutate(this, mutationLevel);
+            return GenomeMutator.Mutate(this, mutationLevel);
+            ///return GeneticOperator.Mutate(this, mutationLevel);
             //return new Genome();
         }
 
@@ -142,9 +154,12 @@ namespace TangoBotTrainerCoreLib
         {
             Dictionary<int, List<IGenome>> speciesCollection = [];
 
+            
+
             for (int i = 0; i < speciesCount; i++)
             {
-                speciesCollection.Add(i, new List<IGenome>(this.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBBLINGS)));
+                Genome speciatedGenome = (Genome)this.Mutate(MutationLevels.INTERSPECIES);
+                speciesCollection.Add(i, new List<IGenome>(speciatedGenome.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBBLINGS)));
             }
 
             return speciesCollection.SelectMany(x => x.Value).ToArray();
@@ -172,9 +187,11 @@ namespace TangoBotTrainerCoreLib
             return [.. siblings];
         }
 
-        public IGenome[] SpawnSiblingGenome(int count)
+        public object Clone()
         {
-            throw new NotImplementedException();
+            Genome clone = (Genome)this.MemberwiseClone();
+            clone.Genes = new List<IGenome.IGene>(this.Genes.Select(g => (IGenome.IGene)g.Clone()));
+            return clone;
         }
     }
 }

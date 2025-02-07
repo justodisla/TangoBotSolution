@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 
 namespace TangoBotTrainerApi
 {
-    public interface IGenome
+    public interface IGenome : ICloneable
     {
         public enum MutationLevels
         {
+            /// <summary>
+            /// Close sibblings are genomes that are close to the current genome thus will have similar genes 
+            /// </summary>
             CLOSE_SIBBLINGS,
             DISTANT_SIBBLINGS,
             INTERSPECIES,
@@ -60,6 +63,8 @@ namespace TangoBotTrainerApi
 
                 public int Layer { get; }
 
+                double Bias { get; set; }
+
                 /// <summary>
                 /// Returns the connections that are connected to this node.
                 /// </summary>
@@ -105,6 +110,8 @@ namespace TangoBotTrainerApi
         int Species { get; set; }
 
          List<IGene> Genes { get; set; }
+
+        IAgent Agent { get; }
 
         /// <summary>
         /// Mutate the genome to create a new genome.

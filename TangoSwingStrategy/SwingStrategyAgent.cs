@@ -1,31 +1,53 @@
 ﻿using TangoBotTrainerApi;
+using TangoBotTrainerCoreLib;
 
 namespace TangoSwingStrategy
 {
-    public class SwingStrategyAgent : IAgent, ITbotComponent
+    public class SwingStrategyAgent : AbstractAgent
     {
-        public List<IPerceptor> Perceptors { get; set; }
-        public List<IActuator> Actuators { get; set; }
-
-        public SwingStrategyAgent() : this("DefaultTradingPlatform", Array.Empty<IPerceptor>(), Array.Empty<IActuator>())
+        
+        private class SwingActuator : IActuator
         {
+            public string Name { get; set; }
+
+            public string Description { get; set; }
+
+            public Type Type { get; set; }
+
+            public SwingActuator(string name, string description, Type type)
+            {
+                Name = name;
+                Description = description;
+                Type = type;
+            }
+
+            public void Actuate()
+            {
+                throw new System.NotImplementedException();
+            }
         }
 
-        public SwingStrategyAgent(string tradingPlatformName, IPerceptor[] perceptors, IActuator[] actuators)
+        private class SwingPerceptor : IPerceptor
         {
-            Perceptors = new List<IPerceptor>(perceptors);
-            Actuators = new List<IActuator>(actuators);
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public Type Type { get; set; }
+            public SwingPerceptor(string name, string description, Type type)
+            {
+                Name = name;
+                Description = description;
+                Type = type;
+            }
         }
 
-        public void InjectInputData(object[] input)
+        public SwingStrategyAgent() : base()
         {
-            Console.WriteLine("MyAgent received input data.");
-        }
+            
+            Perceptors.Add(new SwingPerceptor("Close Price", "The asset's closing price", typeof(Double)));
+            Perceptors.Add(new SwingPerceptor("Volume", "The asset's period volume", typeof(Double)));
 
-        // Implementing the Clone method for shallow copy
-        public object Clone()
-        {
-            return this.MemberwiseClone();
+            Actuators.Add(new SwingActuator("Place Market Order", "Determines to place a market order at the Order Price", typeof(Double)));
+            Actuators.Add(new SwingActuator("Order Price", "Price at which the order is placed", typeof(Double)));
         }
     }
 }

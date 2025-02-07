@@ -11,7 +11,7 @@ namespace TangoBotTrainerCoreLib
             _campaign = new Campaign();
             _campaign.Start();
 
-            List<IGenome> seedGenomes = [new Genome()];
+            //List<IGenome> seedGenomes = [new Genome()];
             //_campaign.StartSeeded([.. seedGenomes]);
         }
     }
