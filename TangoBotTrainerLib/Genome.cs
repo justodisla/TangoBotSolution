@@ -95,12 +95,28 @@ namespace TangoBotTrainerCoreLib
             }
         }
 
-        IGene[] Genes { get; set; }
+        public List<IGenome.IGene> Genes { get; set; }
         public double Fitness { get; set; }
-        IGene[] IGenome.Genes { get; set; }
+        //IGene[] IGenome.Genes { get; set; }
 
         public Genome(IAgent agent)
         {
+            Genes ??= [];
+
+            //Create the input nodes
+            if (agent == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            List<object> sx = [agent.Perceptors, agent.Actuators];
+
+            foreach (IPerceptor p in sx)
+            {
+                NodeType nt = p.GetType() == typeof(IPerceptor) ? NodeType.Input : NodeType.Output;
+                IGenome.IGene.INodeGene n = new NodeGene(1, -1, -1, true, nt, -1, this);
+                Genes.Add(n);
+            }
         }
 
         public IGenome Mutate(MutationLevels mutationLevel)

@@ -104,7 +104,7 @@ namespace TangoBotTrainerApi
 
         int Species { get; set; }
 
-        IGene[] Genes { get; set; }
+         List<IGene> Genes { get; set; }
 
         /// <summary>
         /// Mutate the genome to create a new genome.
