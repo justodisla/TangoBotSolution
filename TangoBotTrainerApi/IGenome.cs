@@ -100,7 +100,11 @@ namespace TangoBotTrainerApi
             IGenome[] Members { get; }
         }
 
+        double Fitness { get; set; }
+
         int Species { get; set; }
+
+        IGene[] Genes { get; set; }
 
         /// <summary>
         /// Mutate the genome to create a new genome.
@@ -117,29 +121,11 @@ namespace TangoBotTrainerApi
         public IGenome Crossover(IGenome partner, MutationLevels mutationLevel = 0);
 
         /// <summary>
-        /// Set the fitness of the genome.
-        /// </summary>
-        /// <param name="fitness"></param>
-        public void SetFitness(double fitness);
-
-        /// <summary>
-        /// Get the fitness of the genome.
-        /// </summary>
-        /// <returns></returns>
-        public double GetFitness();
-
-        /// <summary>
-        /// Get all the genes in the genome.
-        /// </summary>
-        /// <returns></returns>
-        public IGene[] GetGenes();
-
-        /// <summary>
         /// Create a number of species from the current genome making sure that new Genomes are of different species.
         /// </summary>
         /// <param name="speciesCount"></param>
         /// <returns></returns>
-        public IGenome[] Speciate(int speciesCount, int sibblingsCount = 0);
+        public IGenome[] Speciate(int speciesCount, int siblingsCount = 0);
 
         /// <summary>
         /// Create a number of sibblings from the current genome.
@@ -147,7 +133,7 @@ namespace TangoBotTrainerApi
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public IGenome[] SpawnSibblingGenome(int count);
+        public IGenome[] SpawnSiblingGenome(int count);
 
 
     }

@@ -15,6 +15,11 @@ namespace TangoBotTrainerCoreLib
     {
         private static Random _random = new Random();
 
+        public static IGenome[] SortGenomesByFitness(IGenome[] genomes, bool highOnTop = true)
+        {
+            return genomes;
+        }
+
         public static IGenome Crossover(IGenome parent1, IGenome parent2)
         {
             throw new NotImplementedException();
@@ -41,6 +46,8 @@ namespace TangoBotTrainerCoreLib
             {
                 // Handle other types of genes (e.g., INodeGene)
                 Console.WriteLine("The gene is not an IConnectionGene.");
+
+                return MutateNodeGene(nodeGene, mutationLevel);
             }
             else 
             {
@@ -48,6 +55,18 @@ namespace TangoBotTrainerCoreLib
                 Console.WriteLine("The gene is any other thing.");
                 throw new NotSupportedException("Mutation for this gene type is not implemented.");
             }
+        }
+
+        internal static IGenome.IGene MutateNodeGene(IGenome.IGene.INodeGene seedGene, MutationLevels mutationLevel)
+        {
+            // Clone the current gene to avoid modifying the original
+            IGenome.IGene.INodeGene mutatedGene = new NodeGene();
+            // Change the type of the node with a small probability
+            if (_random.NextDouble() < 0.1) // 10% chance to change type
+            {
+                mutatedGene.Type = (NodeType)_random.Next(0, Enum.GetValues(typeof(NodeType)).Length);
+            }
+            return mutatedGene;
         }
 
         internal static IGenome.IGene MutateConnectionGene(IGenome.IGene.IConnectionGene seedGene, MutationLevels mutationLevel, bool canIgnore)

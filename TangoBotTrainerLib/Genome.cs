@@ -52,7 +52,7 @@ namespace TangoBotTrainerCoreLib
             public NodeType Type { get; }
             public int Layer { get; }
 
-            public NodeGene(int id, int innovationNumber, int moduleId, bool enabled, NodeType type, int layer, IGenome genome) : base(id, innovationNumber,moduleId, enabled, genome)
+            public NodeGene(int id, int innovationNumber, int moduleId, bool enabled, NodeType type, int layer, IGenome genome) : base(id, innovationNumber, moduleId, enabled, genome)
             {
                 Type = type;
                 Layer = layer;
@@ -60,7 +60,7 @@ namespace TangoBotTrainerCoreLib
 
             public IGene.IConnectionGene[] GetConnections()
             {
-               
+                return null;
             }
 
             public IGene.IConnectionGene[] GetOutGoingConnections()
@@ -81,9 +81,9 @@ namespace TangoBotTrainerCoreLib
             public int ToNode { get; set; }
             public double Weight { get; set; }
 
-         
+
             public ConnectionGene(int id, int innovationNumber, int moduleId, int fromNode, int toNode, double weight, bool enabled, IGenome genome) : base(id, innovationNumber, moduleId, enabled, genome)
-            {   
+            {
                 FromNode = fromNode;
                 ToNode = toNode;
                 Weight = weight;
@@ -95,13 +95,12 @@ namespace TangoBotTrainerCoreLib
             }
         }
 
+        IGene[] Genes { get; set; }
+        public double Fitness { get; set; }
+        IGene[] IGenome.Genes { get; set; }
+
         public Genome()
         {
-        }
-
-        public IGene[] GetGenes<T>()
-        {
-            throw new NotImplementedException();
         }
 
         public IGenome Mutate(MutationLevels mutationLevel)
@@ -114,20 +113,6 @@ namespace TangoBotTrainerCoreLib
             throw new NotImplementedException();
         }
 
-        public void SetFitness(double fitness)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double GetFitness()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IGene[] GetGenes()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Returns a complete set of species with their population already mutated.
@@ -138,23 +123,40 @@ namespace TangoBotTrainerCoreLib
         /// <exception cref="NotImplementedException"></exception>
         public IGenome[] Speciate(int speciesCount, int siblingsCount = 0)
         {
-            Dictionary<int, List<IGenome>> spcs = new();
+            Dictionary<int, List<IGenome>> speciesCollection = [];
+
             for (int i = 0; i < speciesCount; i++)
             {
-                spcs.Add(i, new List<IGenome>(this.SpawnSibblingGenome(siblingsCount)));
+                speciesCollection.Add(i, new List<IGenome>(this.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBBLINGS)));
             }
 
-            return spcs.SelectMany(x => x.Value).ToArray();
+            return speciesCollection.SelectMany(x => x.Value).ToArray();
         }
 
-        public IGenome[] SpawnSibblingGenome(int count)
+        public IGenome[] SpawnSiblingGenome(int count, MutationLevels mutationLevel)
         {
-           List<IGenome> sibblings = new();
+            List<IGenome> siblings = [];
+
+            bool invalidMutationLevel =
+                mutationLevel == MutationLevels.EXTREME ||
+                mutationLevel == MutationLevels.INTERSPECIES ||
+                mutationLevel == MutationLevels.RANDOM;
+
+            if (invalidMutationLevel)
+            {
+                throw new NotSupportedException("The mutation level is not appropriate for sibblings.");
+            }
+
             for (int i = 0; i < count; i++)
             {
-                sibblings.Add(this.Mutate(1));
+                siblings.Add(this.Mutate(mutationLevel));
             }
-            return sibblings.ToArray();
+            return siblings.ToArray();
+        }
+
+        public IGenome[] SpawnSiblingGenome(int count)
+        {
+            throw new NotImplementedException();
         }
     }
 }
