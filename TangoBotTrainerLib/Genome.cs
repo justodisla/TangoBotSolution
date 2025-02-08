@@ -11,90 +11,9 @@ using static TangoBotTrainerApi.IGenome.IGene.INodeGene;
 
 namespace TangoBotTrainerCoreLib
 {
-    internal class Genome : IGenome
+    internal partial class Genome : IGenome
     {
         public int Species { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        internal class Gene : IGenome.IGene
-        {
-            public int Id { get; set; }
-
-            public int InnovationNumber { get; set; }
-
-            public int ModuleId { get; set; }
-
-            public bool Enabled { get; set; }
-
-            public IGenome ParentGenome { get; set; }
-
-            public IGene Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true)
-            {
-                return GeneticOperator.Mutate(this, mutationLevel);
-            }
-
-            public object Clone()
-            {
-                return this.MemberwiseClone();
-            }
-
-            public Gene(int id, int innovationNumber, int moduleId, bool enabled, IGenome parentGenome)
-            {
-                Id = id;
-                InnovationNumber = innovationNumber;
-                ModuleId = moduleId;
-                Enabled = enabled;
-                ParentGenome = parentGenome;
-            }
-        }
-
-        internal class NodeGene : Gene, IGene.INodeGene
-        {
-            public NodeType Type { get; }
-            public int Layer { get; }
-            public double Bias { get; set; }
-
-            public NodeGene(int id, int innovationNumber, int moduleId, bool enabled, NodeType type, int layer, IGenome genome) : base(id, innovationNumber, moduleId, enabled, genome)
-            {
-                Type = type;
-                Layer = layer;
-            }
-
-            public IGene.IConnectionGene[] GetConnections()
-            {
-                return null;
-            }
-
-            public IGene.IConnectionGene[] GetOutGoingConnections()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IGene.IConnectionGene[] GetIncomingConnections()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        internal class ConnectionGene : Gene, IGene.IConnectionGene
-        {
-            public string Name { get; }
-            public int FromNode { get; set; }
-            public int ToNode { get; set; }
-            public double Weight { get; set; }
-
-
-            public ConnectionGene(int id, int innovationNumber, int moduleId, int fromNode, int toNode, double weight, bool enabled, IGenome genome) : base(id, innovationNumber, moduleId, enabled, genome)
-            {
-                FromNode = fromNode;
-                ToNode = toNode;
-                Weight = weight;
-            }
-
-            public void Reconnect()
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public List<IGenome.IGene> Genes { get; set; }
         public double Fitness { get; set; }
@@ -103,6 +22,12 @@ namespace TangoBotTrainerCoreLib
 
         public int CurrentInnovationNumber { get; set; }
 
+        private int GetNextInnovationNumber()
+        {
+            CurrentInnovationNumber++;
+            return CurrentInnovationNumber;
+        }
+        
         public Genome(IAgent agent)
         {
             Genes ??= [];
@@ -144,7 +69,6 @@ namespace TangoBotTrainerCoreLib
             throw new NotImplementedException();
         }
 
-
         /// <summary>
         /// Returns a complete set of species with their population already mutated.
         /// </summary>
@@ -161,7 +85,7 @@ namespace TangoBotTrainerCoreLib
             for (int i = 0; i < speciesCount; i++)
             {
                 Genome speciatedGenome = (Genome)this.Mutate(MutationLevels.INTERSPECIES);
-                speciesCollection.Add(i, new List<IGenome>(speciatedGenome.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBBLINGS)));
+                speciesCollection.Add(i, new List<IGenome>(speciatedGenome.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBLINGS)));
             }
 
             return speciesCollection.SelectMany(x => x.Value).ToArray();
@@ -195,5 +119,7 @@ namespace TangoBotTrainerCoreLib
             clone.Genes = new List<IGenome.IGene>(this.Genes.Select(g => (IGenome.IGene)g.Clone()));
             return clone;
         }
+
+        
     }
 }

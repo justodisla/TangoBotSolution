@@ -14,8 +14,8 @@ namespace TangoBotTrainerApi
             /// <summary>
             /// Close sibblings are genomes that are close to the current genome thus will have similar genes 
             /// </summary>
-            CLOSE_SIBBLINGS,
-            DISTANT_SIBBLINGS,
+            CLOSE_SIBLINGS,
+            DISTANT_SIBLINGS,
             INTERSPECIES,
             EXTREME,
             DEFAULT,
@@ -140,7 +140,7 @@ namespace TangoBotTrainerApi
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public IGenome[] SpawnSiblingGenome(int count);
+        public IGenome[] SpawnSiblingGenome(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT);
 
         //Deal with genes
 

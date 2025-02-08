@@ -56,12 +56,12 @@ namespace TangoBotTrainerApi
         {
             switch (ml)
             {
-                case IGenome.MutationLevels.CLOSE_SIBBLINGS:
+                case IGenome.MutationLevels.CLOSE_SIBLINGS:
                     // Tiny weight perturbation
                     connectionGene.Weight += (_random.NextDouble() * 0.05 - 0.025); // ±2.5% change
                     break;
 
-                case IGenome.MutationLevels.DISTANT_SIBBLINGS:
+                case IGenome.MutationLevels.DISTANT_SIBLINGS:
                     // Moderate weight perturbation, occasional structural changes
                     if (_random.NextDouble() < 0.1) // 10% chance for structural changes
                     {
@@ -114,12 +114,12 @@ namespace TangoBotTrainerApi
         {
             switch (ml)
             {
-                case IGenome.MutationLevels.CLOSE_SIBBLINGS:
+                case IGenome.MutationLevels.CLOSE_SIBLINGS:
                     // Tiny bias perturbation
                     nodeGene.Bias += (_random.NextDouble() * 0.05 - 0.025); // ±2.5% change
                     break;
 
-                case IGenome.MutationLevels.DISTANT_SIBBLINGS:
+                case IGenome.MutationLevels.DISTANT_SIBLINGS:
                     // Moderate bias perturbation, occasional structural changes
                     if (_random.NextDouble() < 0.1) // 10% chance for structural changes
                     {
@@ -166,7 +166,7 @@ namespace TangoBotTrainerApi
         {
             switch (ml)
             {
-                case IGenome.MutationLevels.CLOSE_SIBBLINGS:
+                case IGenome.MutationLevels.CLOSE_SIBLINGS:
                     // Rare structural changes
                     if (_random.NextDouble() < 0.05) // 5% chance
                     {
@@ -174,7 +174,7 @@ namespace TangoBotTrainerApi
                     }
                     break;
 
-                case IGenome.MutationLevels.DISTANT_SIBBLINGS:
+                case IGenome.MutationLevels.DISTANT_SIBLINGS:
                     // Occasional structural changes
                     if (_random.NextDouble() < 0.1) // 10% chance
                     {
@@ -386,8 +386,8 @@ namespace TangoBotTrainerApi
         {
             return ml switch
             {
-                IGenome.MutationLevels.CLOSE_SIBBLINGS => 0.005,
-                IGenome.MutationLevels.DISTANT_SIBBLINGS => 0.01,
+                IGenome.MutationLevels.CLOSE_SIBLINGS => 0.005,
+                IGenome.MutationLevels.DISTANT_SIBLINGS => 0.01,
                 IGenome.MutationLevels.INTERSPECIES => 0.05,
                 IGenome.MutationLevels.EXTREME => 0.1,
                 IGenome.MutationLevels.DEFAULT => 0.01,
@@ -403,8 +403,8 @@ namespace TangoBotTrainerApi
         {
             return ml switch
             {
-                IGenome.MutationLevels.CLOSE_SIBBLINGS => 0.001,
-                IGenome.MutationLevels.DISTANT_SIBBLINGS => 0.005,
+                IGenome.MutationLevels.CLOSE_SIBLINGS => 0.001,
+                IGenome.MutationLevels.DISTANT_SIBLINGS => 0.005,
                 IGenome.MutationLevels.INTERSPECIES => 0.02,
                 IGenome.MutationLevels.EXTREME => 0.05,
                 IGenome.MutationLevels.DEFAULT => 0.005,
