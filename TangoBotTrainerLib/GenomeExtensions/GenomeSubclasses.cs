@@ -63,12 +63,18 @@ namespace TangoBotTrainerCoreLib
 
             public IGene.IConnectionGene[] GetOutGoingConnections()
             {
-                throw new NotImplementedException();
+                return ParentGenome.Genes
+                    .OfType<ConnectionGene>()
+                    .Where(cg => cg.FromNode == this.Id)
+                    .ToArray();
             }
 
             public IGene.IConnectionGene[] GetIncomingConnections()
             {
-                throw new NotImplementedException();
+                return ParentGenome.Genes
+                    .OfType<ConnectionGene>()
+                    .Where(cg => cg.ToNode == this.Id)
+                    .ToArray();
             }
         }
 

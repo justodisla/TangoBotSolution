@@ -87,8 +87,8 @@ namespace TangoBotTrainerApi
 
             public interface IConnectionGene : IGene
             {
-                public int FromNode { get; }
-                public int ToNode { get; }
+                public int FromNode { get; set; }
+                public int ToNode { get; set; }
                 public double Weight { get; set; }
 
                 /// <summary>
@@ -109,6 +109,8 @@ namespace TangoBotTrainerApi
 
         int Species { get; set; }
 
+        int ModuleId { get; set; }
+
          List<IGene> Genes { get; set; }
 
         IAgent Agent { get; }
@@ -118,7 +120,7 @@ namespace TangoBotTrainerApi
         /// </summary>
         /// <param name="mutationLevel"></param>
         /// <returns></returns>
-        public IGenome Mutate(MutationLevels mutationLevel);
+        IGenome Mutate(MutationLevels mutationLevel);
 
         /// <summary>
         /// Crossover with another genome to create a new genome.
@@ -141,11 +143,6 @@ namespace TangoBotTrainerApi
         /// <param name="count"></param>
         /// <returns></returns>
         public IGenome[] SpawnSiblingGenome(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT);
-
-        //Deal with genes
-
-        IGenome.IGene.INodeGene AddNode(int layer, int moduleId, IGene.INodeGene.NodeType type, double bias = 0);
-
 
     }
 }

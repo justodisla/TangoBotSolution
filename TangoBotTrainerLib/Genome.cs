@@ -17,17 +17,10 @@ namespace TangoBotTrainerCoreLib
 
         public List<IGenome.IGene> Genes { get; set; }
         public double Fitness { get; set; }
-
         public IAgent Agent { get; set; }
 
-        public int CurrentInnovationNumber { get; set; }
+        public int ModuleId { get; set; }
 
-        private int GetNextInnovationNumber()
-        {
-            CurrentInnovationNumber++;
-            return CurrentInnovationNumber;
-        }
-        
         public Genome(IAgent agent)
         {
             Genes ??= [];
@@ -40,28 +33,17 @@ namespace TangoBotTrainerCoreLib
 
             Agent = agent;
 
-            //List<object> sx = [agent.GetPercetors(), agent.GetActuators()];
-
             foreach (IPerceptor p in agent.GetPercetors())
             {
-                //NodeType nt = p.GetType() == typeof(IPerceptor) ? NodeType.Input : NodeType.Output;
-                IGenome.IGene.INodeGene n = new NodeGene(1, -1, -1, true, NodeType.Input, -1, this);
+                IGenome.IGene.INodeGene n = new NodeGene(RandomizeHelper.GenerateUniqueId(), -1, -1, true, NodeType.Input, 0, this);
                 Genes.Add(n);
             }
 
             foreach (IActuator p in agent.GetActuators())
             {
-                //NodeType nt = p.GetType() == typeof(IPerceptor) ? NodeType.Input : NodeType.Output;
-                IGenome.IGene.INodeGene n = new NodeGene(1, -1, -1, true, NodeType.Output, -1, this);
+                IGenome.IGene.INodeGene n = new NodeGene(RandomizeHelper.GenerateUniqueId(), -1, -1, true, NodeType.Output, 99, this);
                 Genes.Add(n);
             }
-        }
-
-        public IGenome Mutate(MutationLevels mutationLevel)
-        {
-            return GenomeMutator.Mutate(this, mutationLevel);
-            ///return GeneticOperator.Mutate(this, mutationLevel);
-            //return new Genome();
         }
 
         public IGenome Crossover(IGenome partner, MutationLevels mutationLevel = MutationLevels.DEFAULT)
@@ -80,12 +62,17 @@ namespace TangoBotTrainerCoreLib
         {
             Dictionary<int, List<IGenome>> speciesCollection = [];
 
-            
-
             for (int i = 0; i < speciesCount; i++)
             {
                 Genome speciatedGenome = (Genome)this.Mutate(MutationLevels.INTERSPECIES);
                 speciesCollection.Add(i, new List<IGenome>(speciatedGenome.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBLINGS)));
+
+                foreach (IGenome g in speciesCollection[i])
+                {
+                   var hc =  g.GetHashCode();
+                    Console.WriteLine(hc);
+                }
+
             }
 
             return speciesCollection.SelectMany(x => x.Value).ToArray();

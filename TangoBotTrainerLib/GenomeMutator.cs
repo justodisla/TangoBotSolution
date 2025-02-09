@@ -31,6 +31,8 @@ namespace TangoBotTrainerApi
             // Apply structural mutations (e.g., add/remove nodes or connections)
             ApplyStructuralMutations(mutatedGenome, ml);
 
+
+
             return mutatedGenome;
         }
 
@@ -276,6 +278,18 @@ namespace TangoBotTrainerApi
             }
 
             // Create the new connection gene
+            var newConnection = new ConnectionGene(
+                GenerateUniqueId(genome), 
+                GenerateInnovationNumber(), 
+                currentModuleId, 
+                fromNode.Id, 
+                toNode.Id, 
+                _random.NextDouble() * 2 - 1,
+                true, 
+                genome
+                );
+
+            /*
             var newConnection = new ConnectionGene
             {
                 Id = GenerateUniqueId(genome), // Ensure unique ID for the new connection
@@ -284,8 +298,9 @@ namespace TangoBotTrainerApi
                 FromNode = fromNode.Id,
                 ToNode = toNode.Id,
                 Weight = _random.NextDouble() * 2 - 1, // Random weight in [-1, 1]
-                Enabled = true
+                Enabled = true, genome
             };
+            */
 
             // Add the new connection to the genome
             genome.Genes.Add(newConnection);

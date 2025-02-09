@@ -54,6 +54,9 @@ namespace TangoBotTrainerCoreLib
                 Genome basicGenome = new Genome(_agent);
                 _genomePool = new GenomePool();
                 this._genomePool.Pool = new List<IGenome>(basicGenome.Speciate(5, 5));
+                
+                //Dispose of the basic genome
+                basicGenome = null;
             }
         }
 
