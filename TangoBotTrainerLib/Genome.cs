@@ -65,7 +65,8 @@ namespace TangoBotTrainerCoreLib
             for (int i = 0; i < speciesCount; i++)
             {
                 Genome speciatedGenome = (Genome)this.Mutate(MutationLevels.INTERSPECIES);
-                speciesCollection.Add(i, new List<IGenome>(speciatedGenome.SpawnSiblingGenome(siblingsCount, MutationLevels.CLOSE_SIBLINGS)));
+                IGenome[] siblings = speciatedGenome.SpawnSiblingGenomes(siblingsCount, MutationLevels.CLOSE_SIBLINGS);
+                speciesCollection.Add(i, new List<IGenome>(siblings));
 
                 foreach (IGenome g in speciesCollection[i])
                 {
@@ -78,7 +79,7 @@ namespace TangoBotTrainerCoreLib
             return speciesCollection.SelectMany(x => x.Value).ToArray();
         }
 
-        public IGenome[] SpawnSiblingGenome(int count, MutationLevels mutationLevel)
+        public IGenome[] SpawnSiblingGenomes(int count, MutationLevels mutationLevel)
         {
             List<IGenome> siblings = [];
 
@@ -94,11 +95,18 @@ namespace TangoBotTrainerCoreLib
 
             for (int i = 0; i < count; i++)
             {
-                siblings.Add(this.Mutate(mutationLevel));
+                IGenome mutatedGenome = this.Mutate(mutationLevel);
+
+                bool cmp= CompareGenomes(mutatedGenome);
+
+                siblings.Add(mutatedGenome);
+
             }
 
             return [.. siblings];
         }
+
+
 
         public object Clone()
         {

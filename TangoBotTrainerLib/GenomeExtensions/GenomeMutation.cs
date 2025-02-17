@@ -22,89 +22,141 @@ namespace TangoBotTrainerCoreLib
 
         public IGenome Mutate(MutationLevels mutationLevel)
         {
-            double valueMutationChange;
-            double structuralMutationChange = 0;
+            //The genome that is going to be the mutated clone of the current genome
+            IGenome copiedGenome = (IGenome)this.Clone();
 
-            switch (mutationLevel)
+            // If there are no connections, the genome is basic and new connections have to be added
+            bool isBasicGenome = copiedGenome.Genes.All(g => g is IGene.INodeGene nodeGene && (nodeGene.Type == NodeType.Input || nodeGene.Type == NodeType.Output));
+
+            // Is a basic genome which means that basic structure has to be added
+            if (isBasicGenome)
             {
-                case MutationLevels.DEFAULT:
-                    valueMutationChange = 0.1;
-                    structuralMutationChange = 0.001;
-                    break;
-                case MutationLevels.CLOSE_SIBLINGS:
-                    valueMutationChange = 0.05;
-                    structuralMutationChange = 0.01;
-                    break;
-                case MutationLevels.DISTANT_SIBLINGS:
-                    valueMutationChange = 0.2;
-                    structuralMutationChange = 0.09;
-                    break;
-                case MutationLevels.EXTREME:
-                    valueMutationChange = 0.3;
-                    structuralMutationChange = 0.25;
-                    break;
-                case MutationLevels.INTERSPECIES:
-                    valueMutationChange = 0.8;
-                    structuralMutationChange = 0.5;
-                    break;
-                case MutationLevels.RANDOM:
-                    valueMutationChange = RandomizeHelper.GenerateRandomDouble(0, 1);
-                    structuralMutationChange = 0.001;
-                    break;
+                //Let's add some connections
+                int possibleConnections = copiedGenome.Genes.OfType<IGene.INodeGene>().Count(n => n.Type == NodeType.Input) *
+                                         copiedGenome.Genes.OfType<IGene.INodeGene>().Count(n => n.Type == NodeType.Output);
+
+                double randomPercentage = RandomizeHelper.GenerateRandomDouble(0, 1);
+
+                //Determines how many connections to add
+                int connectionsToAdd = Math.Max(1, (int)(possibleConnections * randomPercentage));
+
+                //Add the connections
+                for (int i = 0; i < connectionsToAdd; i++)
+                {
+                    copiedGenome.AddNewConnection();
+                }
+
+                //Let's add some nodes
+                //Determines if a new nodes are to be added
+                bool canAddNewNode = RandomizeHelper.GenerateRandomBool(0.5);
+
+                //Determines how many nodes to add
+                int nodesToAdd = canAddNewNode ? RandomizeHelper.GenerateRandomInt(1, 3) : 0;
+
+                //Add the nodes
+                for (int i = 0; i < nodesToAdd; i++)
+                {
+                    copiedGenome.AddNewNode();
+                }
+
+                return copiedGenome;
+
+                Console.WriteLine($"Adding {connectionsToAdd} connections to the genome.");
+            }
+            else //Is not a basic genome
+            {
+                //Prepare to do mutations
+                double valueMutationChange = GeneticOperator.ResolveMutationLevelValue(mutationLevel).Item1;
+                double structuralMutationChange = GeneticOperator.ResolveMutationLevelValue(mutationLevel).Item2;
+
+                List<IGene> shuffledGenes = copiedGenome.Genes
+                    .Where(g => !(g is IGene.INodeGene nodeGene && (nodeGene.Type == NodeType.Input || nodeGene.Type == NodeType.Output)))
+                    .OrderBy(x => RandomizeHelper.GenerateRandomDouble(0, 1))
+                    .ToList();
+
+                int numberOfGenesToMutate = (int)(RandomizeHelper.GenerateRandomDouble(0, 1) * shuffledGenes.Count * valueMutationChange);
+
+                for (int i = 0; i < numberOfGenesToMutate; i++)
+                {
+                    IGene gene = shuffledGenes[i];
+                    StructuralChange change = GeneticOperator.SelectStructuralChange();
+
+                    switch(change)
+                    {
+                        case StructuralChange.ADD://Adds a gene
+                            copiedGenome.AddNewConnection();
+                            break;
+                        case StructuralChange.REMOVE://Removes the current gene
+                            copiedGenome.AddGene();
+                            break;
+                        case StructuralChange.RECONNECT://Reconnects the gene
+
+                            copiedGenome.RemoveConnection();
+                            break;
+                        case StructuralChange.REMOVE_NODE:
+                            copiedGenome.RemoveNode();
+                            case StructuralChange.DO_NOTHING:
+
+                            break;
+                        default:
+                            break;
+                    }
+
+                    gene.Mutate(mutationLevel);
+                }
+
+
+                //Attempt to mutate the structure of the genome
+                List<IGene.IConnectionGene> selectedGenes = copiedGenome.Genes
+                    .Where(g => g is IGene.IConnectionGene)
+                    .OrderBy(x => RandomizeHelper.GenerateRandomDouble(0, 1))
+                    .Cast<IGene.IConnectionGene>()
+                    .ToList();
+
+                int numberOfConnectionGenesToMutate = (int)(RandomizeHelper.GenerateRandomDouble(0, 1) * selectedGenes.Count * structuralMutationChange);
+
+                for (int i = 0; i < numberOfConnectionGenesToMutate; i++)
+                {
+                    IGene gene = selectedGenes[i];
+                    gene.Mutate(mutationLevel);
+                }
+
+
+                // Shuffle the Genes collection
+                List<IGene> shuffledGenes = copiedGenome.Genes
+                    .Where(g => !(g is IGene.INodeGene nodeGene && (nodeGene.Type == NodeType.Input || nodeGene.Type == NodeType.Output)))
+                    .OrderBy(x => RandomizeHelper.GenerateRandomDouble(0, 1))
+                    .ToList();
+
+                
+
+                //copiedGenome.MutateStructure(mutationLevel);
+
+
             }
 
-            // Shuffle the Genes collection
-            List<IGene> shuffledGenes = Genes
-                .Where(g => !(g is IGene.INodeGene nodeGene && (nodeGene.Type == NodeType.Input || nodeGene.Type == NodeType.Output)))
-                .OrderBy(x => RandomizeHelper.GenerateRandomDouble(0, 1))
-                .ToList();
+
+            
 
             // Mutate the existing genes
             if (shuffledGenes.Count > 0)
             {
-                int randomIndex = (int)(RandomizeHelper.GenerateRandomDouble(0, 1) * shuffledGenes.Count * structuralMutationChange);
+                int numberOfGenesToMutate = (int)(RandomizeHelper.GenerateRandomDouble(0, 1) * shuffledGenes.Count * valueMutationChange);
 
-                for (int i = 0; i < randomIndex; i++)
+                for (int i = 0; i < numberOfGenesToMutate; i++)
                 {
                     IGene gene = shuffledGenes[i];
-                    // gene.Mutate(mutationLevel);
+                    gene.Mutate(mutationLevel);
                 }
             }
 
-            // If there are no connections, the genome is basic and new connections have to be added
-            bool isBasicGenome = Genes.All(g => g is IGene.INodeGene nodeGene && (nodeGene.Type == NodeType.Input || nodeGene.Type == NodeType.Output));
+            
 
-            // Mutate the structure of the genome
-            if (isBasicGenome)
-            {
+            
 
-                int possibleConnections = Genes.OfType<IGene.INodeGene>().Count(n => n.Type == NodeType.Input) *
-                                         Genes.OfType<IGene.INodeGene>().Count(n => n.Type == NodeType.Output);
+            copiedGenome.FixStructure();
 
-                double randomPercentage = RandomizeHelper.GenerateRandomDouble(0, 1);
-                int connectionsToAdd = Math.Max(1, (int)(possibleConnections * randomPercentage));
-
-                for (int i = 0; i < connectionsToAdd; i++)
-                {
-                    AddNewConnection();
-                }
-
-                //Let's add some nodes
-                bool canAddNewNode = RandomizeHelper.GenerateRandomBool(0.5);
-
-                int nodesToAdd = canAddNewNode ? RandomizeHelper.GenerateRandomInt(1, 3) : 0;
-
-                for (int i = 0; i < nodesToAdd; i++)
-                {
-                    AddNewNode();
-                }
-
-                Console.WriteLine($"Adding {connectionsToAdd} connections to the genome.");
-            }
-
-            FixStructure();
-
-            return (IGenome)this.Clone();
+            return copiedGenome;
         }
     }
 }

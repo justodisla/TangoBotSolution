@@ -24,9 +24,9 @@ namespace TangoBotTrainerCoreLib
 
             public IGenome ParentGenome { get; set; }
 
-            public IGene Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true)
+            public void Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true)
             {
-                return GeneticOperator.Mutate(this, mutationLevel);
+                GeneticOperator.Mutate(this, mutationLevel);
             }
 
             public object Clone()
@@ -54,6 +54,7 @@ namespace TangoBotTrainerCoreLib
             {
                 Type = type;
                 Layer = layer;
+                Bias = RandomizeHelper.GenerateRandomDouble(-1, 1);
             }
 
             public IGene.IConnectionGene[] GetConnections()

@@ -78,7 +78,7 @@ public static class RandomizeHelper
     /// </summary>
     /// <param name="probability">The probability that the response is true (0.0 to 1.0).</param>
     /// <returns>A random boolean value.</returns>
-    public static bool GenerateRandomBool(double probability)
+    public static bool GenerateRandomBool(double probability = 0.5)
     {
         if (probability < 0.0 || probability > 1.0)
             throw new ArgumentException("Probability must be between 0.0 and 1.0.");

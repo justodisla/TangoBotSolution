@@ -57,7 +57,7 @@ namespace TangoBotTrainerCoreLib
             return Genes[RandomizeHelper.GenerateRandomInt(0, Genes.Count - 1)] as IGene.IConnectionGene;
         }
 
-        void AddNewConnection()
+        public void AddNewConnection()
         {
             double weight = RandomizeHelper.GenerateRandomDouble(-1, 1);
 

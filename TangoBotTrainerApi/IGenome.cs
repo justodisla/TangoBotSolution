@@ -48,7 +48,7 @@ namespace TangoBotTrainerApi
             /// Mutate the gene to create a new gene.
             /// </summary>
             /// <param name="mutationLevel"></param>
-            IGene Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true);
+            void Mutate(MutationLevels mutationLevel = MutationLevels.DEFAULT, bool canIgnore = true);
 
             public interface INodeGene : IGene
             {
@@ -57,7 +57,8 @@ namespace TangoBotTrainerApi
                     Input,
                     Output,
                     Hidden,
-                    Bias
+                    Bias,
+                    Special
                 }
                 public NodeType Type { get; }
 
@@ -142,7 +143,11 @@ namespace TangoBotTrainerApi
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public IGenome[] SpawnSiblingGenome(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT);
-
+        public IGenome[] SpawnSiblingGenomes(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT);
+        IGene.IConnectionGene AddConnection(int fromNode, int toNode, double weight);
+        void AddNewConnection();
+        void AddNewNode();
+        void FixStructure();
+        bool CompareGenomes(IGenome otherGenome);
     }
 }
