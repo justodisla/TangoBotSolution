@@ -139,7 +139,7 @@ namespace TangoBotTrainerCoreLib
                     break;
             }
 
-            return StructuralChange.ADD_CONNECTION;
+            return StructuralChange.DO_NOTHING;
         }
 
         /// <summary>
