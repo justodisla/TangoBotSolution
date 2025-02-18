@@ -34,14 +34,14 @@ namespace TangoBotTrainerCoreLib
             return new Genome(genome.Agent);
         }
 
-        internal static IGenome.IGene Mutate(Gene gene, MutationLevels mutationLevel)
+        internal static void Mutate(Gene gene, MutationLevels mutationLevel)
         {
             if (gene is IGenome.IGene.IConnectionGene connectionGene)
             {
                 // The gene is an IConnectionGene, and you can now work with it as such
                 Console.WriteLine("The gene is an IConnectionGene.");
 
-                return MutateConnectionGene(connectionGene, mutationLevel, false);
+                MutateConnectionGene(connectionGene, mutationLevel, false);
 
                 // Perform mutation specific to IConnectionGene
                 //return MutateConnectionGene(connectionGene, mutationLevel);
@@ -51,7 +51,7 @@ namespace TangoBotTrainerCoreLib
                 // Handle other types of genes (e.g., INodeGene)
                 Console.WriteLine("The gene is not an IConnectionGene.");
 
-                return MutateNodeGene(nodeGene, mutationLevel);
+                MutateNodeGene(nodeGene, mutationLevel);
             }
             else
             {
@@ -61,15 +61,14 @@ namespace TangoBotTrainerCoreLib
             }
         }
 
-        internal static IGenome.IGene MutateNodeGene(IGenome.IGene.INodeGene seedGene, MutationLevels mutationLevel)
+        internal static void MutateNodeGene(IGenome.IGene.INodeGene gene, MutationLevels mutationLevel)
         {
             // Clone the current gene to avoid modifying the original
-            IGenome.IGene.INodeGene mutatedGene = (IGenome.IGene.INodeGene)seedGene.Clone();
+            IGenome.IGene.INodeGene mutatedGene = (IGenome.IGene.INodeGene)gene.Clone();
 
             // Apply bias mutation
-            mutatedGene.Bias = MutateBias(mutatedGene.Bias, ResolveMutationLevelValue(mutationLevel).Item1);
-
-            return mutatedGene;
+            double bias = gene.Bias;
+            gene.Bias = MutateBias(bias, ResolveMutationLevelValue(mutationLevel).Item1);
         }
 
         /// <summary>
@@ -79,7 +78,6 @@ namespace TangoBotTrainerCoreLib
         /// <returns></returns>
         public static (double, double) ResolveMutationLevelValue(MutationLevels mutationLevel)
         {
-            double mLevel = 0;
             double valueMutationLevel = 0;
             double structuralMutationLevel = 0;
 
@@ -90,8 +88,9 @@ namespace TangoBotTrainerCoreLib
                     structuralMutationLevel = 1;
                     break;
                 case MutationLevels.CLOSE_SIBLINGS:
-                    valueMutationLevel = 0.1;
-                    structuralMutationLevel = 0.01;
+                    valueMutationLevel = 0.2;
+                    //structuralMutationLevel = 0.005;
+                    structuralMutationLevel = 0.5;
                     break;
                 case MutationLevels.DISTANT_SIBLINGS:
                     valueMutationLevel = 0.3;
@@ -187,32 +186,23 @@ namespace TangoBotTrainerCoreLib
             return modifiedBias;
         }
 
-        internal static IGenome.IGene MutateConnectionGene(IGenome.IGene.IConnectionGene seedGene, MutationLevels mutationLevel, bool canIgnore)
+        internal static void MutateConnectionGene(IGenome.IGene.IConnectionGene gene, MutationLevels mutationLevel, bool canIgnore)
         {
-
-            /*
-            // Clone the current gene to avoid modifying the original
-            IGenome.IGene.IConnectionGene mutatedGene = new ConnectionGene();
-
             // Apply weight mutation
-            mutatedGene.Weight = MutateWeight(mutatedGene.Weight, mutationLevel);
+            double weight = gene.Weight;
+            gene.Weight = MutateWeight(weight, ResolveMutationLevelValue(mutationLevel).Item1);
 
             // Toggle enabled/disabled state with a small probability
             if (_random.NextDouble() < 0.1) // 10% chance to toggle
             {
-                mutatedGene.Enabled = !mutatedGene.Enabled;
+                gene.Enabled = !gene.Enabled;
             }
 
             // Reconnect the connection with a small probability
             if (!canIgnore && _random.NextDouble() < 0.05) // 5% chance to reconnect
             {
-                mutatedGene.Reconnect();
+                //mutatedGene.Reconnect();
             }
-
-            return mutatedGene;
-            */
-
-            return seedGene;
         }
 
         /// <summary>
@@ -221,7 +211,7 @@ namespace TangoBotTrainerCoreLib
         /// <param name="currentWeight">The current weight of the connection.</param>
         /// <param name="mutationLevel">Controls the intensity of the mutation.</param>
         /// <returns>The mutated weight.</returns>
-        private static double MutateWeight(double currentWeight, int mutationLevel)
+        private static double MutateWeight(double currentWeight, double mutationLevel)
         {
             double perturbationRange = mutationLevel > 0 ? 1.0 / mutationLevel : 0.1; // Smaller mutationLevel -> larger perturbation
 

@@ -149,5 +149,6 @@ namespace TangoBotTrainerApi
         void AddNewNode();
         void FixStructure();
         bool CompareGenomes(IGenome otherGenome);
+        void AddRandomGene(MutationLevels mutationLevel);
     }
 }
