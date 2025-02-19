@@ -197,5 +197,45 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
 
             return newNode;
         }
+
+        /// <summary>
+        /// Removes a gene from the genome.
+        /// Removing a gene of any type means setting the property enable to false.
+        /// in other words disabling the gene.
+        /// </summary>
+        /// <param name="genome">The genome</param>
+        /// <param name="gene">If a gene is not specified then a random gene is selected for disabling.
+        /// Disabled genes cannot be disabled.</param>
+        /// <returns></returns>
+        public static IGene RemoveGene(IGenome genome, IGene gene = null)
+        {
+            
+        }
+
+        /// <summary>
+        /// Removes a gene from the genome.
+        /// Removing a gene of any type means setting the property enable to false.
+        /// in other words disabling the gene.
+        /// If a node is removed, connections that use to go to or from that node should be randomly replaced for new
+        /// connections or removed.
+        /// </summary>
+        /// <param name="genome">The genome</param>
+        /// <param name="geneId">If a gene is not specified, that is set to -1, then a random gene is selected from the genes collection for disabling.
+        /// Disabled genes cannot be disabled.</param>
+        /// <returns></returns>
+        public static IGene RemoveGene(IGenome genome, int geneId = -1)
+        {
+
+        }
+
+        public static IGene.INodeGene? RemoveNode(IGenome genome, INodeGene node = null)
+        {
+            
+        }
+
+        public static IGene.IConnectionGene? RemoveConnection(IGenome genome, IConnectionGene connection = null)
+        {
+
+        }
     }
 }
