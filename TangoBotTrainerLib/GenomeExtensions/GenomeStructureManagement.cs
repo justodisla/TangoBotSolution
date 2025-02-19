@@ -42,7 +42,7 @@ namespace TangoBotTrainerCoreLib
         /// Get a random connection from the genome.
         /// </summary>
         /// <returns></returns>
-        public IGene.IConnectionGene GetRandomConnection()
+        public IGene.IConnectionGene? GetRandomConnection()
         {
             return Genes[RandomizeHelper.GenerateRandomInt(0, Genes.Count - 1)] as IGene.IConnectionGene;
         }
@@ -67,7 +67,6 @@ namespace TangoBotTrainerCoreLib
 
                 if (!connectionExists)
                     AddConnection(fromNode.Id, toNode.Id, weight);
-
             }
             */
         }
