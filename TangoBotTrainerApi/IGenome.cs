@@ -33,7 +33,7 @@ namespace TangoBotTrainerApi
             /// The innovation number of the gene.
             /// </summary>
             int InnovationNumber { get; }
-            
+
             /// <summary>
             /// The module id of the gene.
             /// </summary>
@@ -101,7 +101,8 @@ namespace TangoBotTrainerApi
             }
         }
 
-        public interface ISpecies { 
+        public interface ISpecies
+        {
             int Number { get; }
             IGenome[] Members { get; }
         }
@@ -112,7 +113,7 @@ namespace TangoBotTrainerApi
 
         int ModuleId { get; set; }
 
-         List<IGene> Genes { get; set; }
+        List<IGene> Genes { get; set; }
 
         IAgent Agent { get; }
 
@@ -146,9 +147,10 @@ namespace TangoBotTrainerApi
         public IGenome[] SpawnSiblingGenomes(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT);
         IGene.IConnectionGene AddConnection(int fromNode, int toNode, double weight);
         void AddNewConnection();
-        void AddNewNode();
+        IGene.INodeGene AddNewNode();
         void FixStructure();
         bool CompareGenomes(IGenome otherGenome);
         void AddRandomGene(MutationLevels mutationLevel);
+
     }
 }

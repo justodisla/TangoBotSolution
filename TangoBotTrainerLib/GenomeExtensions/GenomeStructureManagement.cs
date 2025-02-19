@@ -71,14 +71,14 @@ namespace TangoBotTrainerCoreLib
             }
             */
         }
-        public void AddNewNode()
+        public IGene.INodeGene AddNewNode()
         {
             int targetLayer = RandomizeHelper.GenerateRandomInt(1, 100);
             //int module = ModuleId;
             double bias = RandomizeHelper.GenerateRandomDouble(-1, 1);
             NodeType nType = NodeType.Hidden;
 
-            AddNode(nType, targetLayer, bias);
+            return AddNode(nType, targetLayer, bias);
 
         }
 
@@ -188,62 +188,76 @@ namespace TangoBotTrainerCoreLib
                 (cGene.FromNode == 0 || cGene.ToNode == 0);
             }).ToList();
 
-            foreach (IGene.IConnectionGene item in danglingConnections.Cast<IGene.IConnectionGene>())
+            foreach (IGene.IConnectionGene danglingConnection in danglingConnections.Cast<IGene.IConnectionGene>())
             {
-                int originNodeId = item.FromNode;
-                int destinationNodeId = item.ToNode;
+                int originNodeId = danglingConnection.FromNode;// Check if the connection is connected to origin node
+                int destinationNodeId = danglingConnection.ToNode;// Check if the connection is connected to destination node
 
                 bool doOriginNodeConnection = originNodeId == 0;
                 bool doDestinationNodeConnection = destinationNodeId == 0;
                 bool doBothConnections = doOriginNodeConnection && doDestinationNodeConnection;
 
+                bool connectionExists = true;
+
+                IGene.INodeGene? originNode = null;
+                IGene.INodeGene? destinationNode = null;
+
                 if (doBothConnections)
                 {
-                    IGene.INodeGene originNode = GetRandomNode(true, true, false);
-                    int layer = originNode.Layer;
-                    IGene.INodeGene destinationNode = GetRandomNodeToTheRight(layer, false, true, true);
-
-                    List<IGene.IConnectionGene> existingConnections = Genes.Where(c => c is IGene.IConnectionGene cGene
-                    && cGene.Enabled == true
-                    && cGene.FromNode == originNode.Id
-                    && cGene.ToNode == destinationNode.Id).Cast<IGene.IConnectionGene>().ToList();
-
-                    if (existingConnections.Count > 0)
+                    int counter = 0;
+                    do
                     {
-                        adsfas
-                    }
+                        
+                        originNode = GetRandomNode(true, true, false);
 
+                        if (counter > 100)
+                        {
+                            destinationNode = AddNewNode();
+                        }
+                        else
+                        {
+                            destinationNode = GetRandomNodeToTheRight(originNode.Layer, false, true, true);
+                        }
 
-                        item.FromNode = originNode.Id;
-                    item.ToNode = destinationNode.Id;
+                        connectionExists = ConnectionExists(originNode, destinationNode);
+
+                        counter++;
+
+                    } while (connectionExists);
+
+                    danglingConnection.FromNode = originNode.Id;
+                    danglingConnection.ToNode = destinationNode.Id;
                 }
                 else
                 {
                     if (doDestinationNodeConnection)
                     {
-                        IGene.INodeGene? originNode = GetAllNodes().Find(n => n.Id == item.FromNode);
-                        if (originNode == null)
+                        originNode = GetAllNodes().Find(n => n.Id == danglingConnection.FromNode) ?? throw new InvalidOperationException("Origin node not found");
+
+                        do
                         {
-                            originNode = GetRandomNode(true, true, false);
-                            item.FromNode = originNode.Id;
-                        }
-                        IGene.INodeGene destinationNode = GetRandomNodeToTheRight(originNode.Layer, false, true, true);
-                        item.ToNode = destinationNode.Id;
+                            destinationNode = GetRandomNodeToTheRight(originNode.Layer, false, true, true);
+                            connectionExists = ConnectionExists(originNode, destinationNode);
+
+                        } while (connectionExists);
+
+                        danglingConnection.ToNode = destinationNode.Id;
                     }
 
                     if (doOriginNodeConnection)
                     {
-                        IGene.INodeGene? destinationNode = GetAllNodes().Find(n => n.Id == item.ToNode);
-                        if (destinationNode == null)
+
+                        destinationNode = GetAllNodes().Find(n => n.Id == danglingConnection.ToNode) ?? throw new InvalidOperationException("Destination node not found");
+
+                        do
                         {
-                            destinationNode = GetRandomNode(true, true, false);
-                            item.ToNode = destinationNode.Id;
-                        }
-                        IGene.INodeGene originNode = GetRandomNodeToTheLeft(destinationNode.Layer, true, true, false);
-                        item.FromNode = originNode.Id;
+                            originNode = GetRandomNodeToTheLeft(destinationNode.Layer, true, true, false);
+                            connectionExists = ConnectionExists(originNode, destinationNode);
+                        } while (connectionExists);
+
+                        danglingConnection.FromNode = originNode.Id;
                     }
                 }
-
             }
 
             //Fix orphan and leaf nodes
@@ -280,8 +294,8 @@ namespace TangoBotTrainerCoreLib
             //Connect orphan nodes
             foreach (IGene.INodeGene leafNode in leafNodes)
             {
-                List<IGene.INodeGene> nodesToTheRight = 
-                    Genes.Where(n => n is IGene.INodeGene nGene 
+                List<IGene.INodeGene> nodesToTheRight =
+                    Genes.Where(n => n is IGene.INodeGene nGene
                     && nGene.Layer > leafNode.Layer
                     && nGene.Type != NodeType.Input
                     && nGene.Enabled == true)
@@ -289,15 +303,15 @@ namespace TangoBotTrainerCoreLib
 
                 foreach (var nodeToRight in nodesToTheRight)
                 {
-                    List<IGene.IConnectionGene> matchingConnections = 
-                        Genes.Where(c => c is IGene.IConnectionGene cGene 
-                        && cGene.Enabled == true 
-                        && cGene.FromNode == leafNode.Id 
+                    List<IGene.IConnectionGene> matchingConnections =
+                        Genes.Where(c => c is IGene.IConnectionGene cGene
+                        && cGene.Enabled == true
+                        && cGene.FromNode == leafNode.Id
                         && cGene.ToNode == nodeToRight.Id
                         && ModuleId != nodeToRight.ModuleId)
                         .Cast<IGene.IConnectionGene>().ToList();
 
-                    if(matchingConnections.Count == 0)
+                    if (matchingConnections.Count == 0)
                     {
                         AddConnection(leafNode.Id, nodeToRight.Id, RandomizeHelper.GenerateRandomDouble(-1, 1));
                         break;
@@ -385,6 +399,10 @@ namespace TangoBotTrainerCoreLib
             */
         }
 
+        private bool ConnectionExists(object fromNode, object toNode)
+        {
+            throw new NotImplementedException();
+        }
 
         public void AddRandomGene(MutationLevels mutationLevel)
         {
