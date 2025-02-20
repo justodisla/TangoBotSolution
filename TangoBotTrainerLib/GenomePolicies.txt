@@ -1,0 +1,134 @@
+﻿# Genome Policies
+
+This document establishes the policies for dealing with genome structures in the TangoBotTrainer project. These policies serve as guidelines for creating and modifying genome structure elements.
+
+## Connection Policies
+
+### About Cycles
+- A cycle is a training routine where a discrete set of skills are developed by the genome's neural network.
+- During a cycle, all genes created into the genome are marked with a ModuleId that indicates the cycle to which the gene belongs.
+- During the cycle, many iterations of training are run to develop, by genome evolution (evaluating, segregating, crossover and mutation), the skills or set of skills designated to be developed during the cycle.
+- After the cycle is completed, the genome's neural network should be proficient in executing the skills intended to be developed during such cycle.
+- While during a cycle, a genome's property called ModuleId is assigned a new value to mark each gene created within the cycle, with such ModuleId. When the cycle is done, all genes created during it will have been marked with the corresponding ModuleId. This will prevent that on future cycles, older modules that comprise genes well fit for their tasks, to be altered causing them to forget their skills. It also helps the genome structure methods to implement rules that prevent new modules from contaminating old well-established modules.
+
+### About Modules
+- Modules consist of a group of genes developed during a specific cycle. During such cycle, the genome's neural network was being developed to perform a specific task or series of tasks.
+- Modules are used to separate the genome's neural network into different sections, each with its own set of genes.
+- Each gene has a property ModuleId which indicates the module to which the gene belongs.
+- New modules cannot influence older modules by creating connections from recent modules' nodes to older modules' nodes.
+- New modules can use information from older modules (only read) by creating connections FROM older modules' nodes TO recent modules' nodes. This ensures that skills learned in older modules cannot be overwritten by new modules and ensures that new modules can benefit from the learned skills of older modules.
+- Original nodes like input, output, and bias nodes are not part of any module. So any node of any module during any cycle can be connected from and to these nodes.
+
+### Connection Rules
+1. **Connection Direction**:
+   - Connections within the same module must go from left to right, from a node in a layer with a lower layer number to a node on a layer with a higher layer number.
+   - Connections can go from one node to another node on the same layer.
+   - Input nodes are on layer 0, hidden nodes are on layers 1 to 99, and output nodes are on layer 100.
+
+2. **Node Restrictions**:
+   - The origin node cannot be an output node.
+   - The origin node cannot be disabled.
+   - Connections can have the same node as input and output.
+
+3. **Existing Connections**:
+   - Connections cannot be created if another connection already exists between the same nodes unless the previous connection gene is disabled.
+   - A connection is considered as existing if the FromNode and ToNode properties are the same as the new connection.
+   - Connections from and to the same node cannot be repeated unless the previous connection is disabled.
+
+4. **Connection Weight**:
+   - If the weight is -99, a random weight (double) between -1 and 1 is assigned at the time of creation.
+
+5. **Connection State**:
+   - Connections cannot be created in a disabled state. They can only be disabled by gene mutation.
+
+6. **Connection Mutation**:
+   - A connection can be mutated by changing its weight, enabling or disabling it, or changing the FromNode or ToNode properties.
+   - The connection weight mutation consists of adding or subtracting a percentage value of the current weight. The percentage value is a random value between .0001 to a random value between 0.001 to a value that depends on the mutationLevel. A CLOSE_SIBLING mutationLevel will have a lower value than an INTERSPECIES mutationLevel, which might have a high value. This ensures that mutations are slight at low mutationLevels and more drastic at higher mutationLevels.
+
+## Node Policies
+
+1. **Node Types**:
+   - Special nodes (input, output, bias) cannot be added.
+   - New nodes can be connected from and to nodes in the same layer.
+   - New nodes can have one recursive connection to itself.
+
+2. **Layer Assignment**:
+   - The layer where the node is added is random from 1 to 99. Layer 0 is reserved for input nodes, and layer 100 is reserved for output nodes.
+
+3. **Connections for New Nodes**:
+   - New nodes should be connected from a node to the left that can be an input node or a hidden node.
+   - New nodes can have connections from another node in another older module but cannot be connected to a node in another older module except output node.
+   - New nodes can fall amid an existing connection. In this case, the existing connection changes the ToNode for the new node, and a new connection is created to connect the new node to the node formerly connected to the severed connection. The weight of the new connection is the same as the severed connection.
+
+## Removal Policies
+
+1. **Removing Genes**:
+   - Removing a gene of any type means setting the property enabled to false, effectively disabling the gene.
+   - Disabled genes cannot be disabled again.
+   - The removed genes keep their innovation number and are not removed from the genome.
+   - Removed (disabled) genes can be later re-enabled by mutation.
+   - When a gene is removed, the FixGenome method should be called to fix the genome structure.
+
+2. **Removing Nodes**:
+   - Only hidden nodes can be removed.
+   - When a node is removed:
+     - Connections that are connected to the node are also removed.
+     - Connections that are connected from the node are also removed.
+     - If the node is connected to itself, the connection is also removed.
+     - If removing the node leaves other nodes orphaned (no incoming connections), new connections are created to connect the orphaned node to the node that the removed node was connected to, ensuring no duplicate connections.
+     - If removing the node leaves other nodes leaf (no outgoing connections), new connections are created to connect the leaf node to the node to which the removed node was connected to, ensuring no duplicate connections.
+   - After removing a node, the FixGenome method should be called to fix the genome structure.
+
+3. **Removing Connections**:
+   - Connections can only be removed if they are enabled.
+
+## Fixing Genome Structure
+
+1. **Fixing Dangling Genes**:
+   - The FixGenome method should be called to amend any dangling genes after any structural change in the genome.
+   - For dangling connections (connections missing one or both nodes), the method should:
+     - Reconnect the connection if it is missing the from node.
+     - Reconnect the connection if it is missing the to node.
+   - Remove nodes with no connections.
+   - Reconnect orphaned or leaf nodes to ensure they have incoming and outgoing connections.
+
+## General Policies
+
+1. **Random Selection**:
+   - When selecting random nodes or connections, ensure the selection adheres to the specified restrictions (e.g., module, layer, side).
+
+2. **Validation**:
+   - Always validate the nodes and connections before creating or modifying them to ensure they adhere to the established policies.
+
+This document serves as a reference for developers working on the TangoBotTrainer project to ensure consistency and adherence to the established genome structure policies.
+
+***********************************************/
+
+Creating the basic genome structure:
+
+The first time a genome is created from scratch, its basic form consists on some input nodes and output nodes 
+as defined by the passed agent. The Agent passed defines the perceptors and actuators.
+Perceptors are like senses of a biological organism, and actuators are like the muscles of a biological organism.
+When the Agent runtime receives a perceptor value, it sends it to the genome's neural network input nodes.
+When the genome's neural network sends an output value, the Agent runtime receives it and sends it to the actuators.
+
+The basic genome structure is created as follows:
+- The input nodes are created based on the perceptors of the agent.
+- The output nodes are created based on the actuators of the agent.
+- The bias node is created.
+- No connection is created at this point. subsequent mutations will create connections eventually
+
+The innovation number is sequencial and unique in the genome.
+Each time a gene is created, it is assigned a new unique innovation number.
+This number is to keep track of the gene's history and to identify the gene when comparing genomes.
+
+The gene id is a unique identifier for the gene.
+By now, the gene is a random number between 0 and 1000000.
+Every time a gene is created, a new unique gene id is assigned to it.
+Once the id and the innovation numbers are assigned, they are never changed.
+
+
+
+
+
+

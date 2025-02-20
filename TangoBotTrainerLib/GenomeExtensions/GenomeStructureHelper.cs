@@ -216,11 +216,13 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
         /// Removes a gene from the genome.
         /// Removing a gene of any type means setting the property enable to false.
         /// in other words disabling the gene.
-        /// If a node is removed, connections that use to go to or from that node should be randomly replaced for new
-        /// connections or removed.
+        /// Since this method's invoker does not specifies which gene to remove, a random gene of type INodeGene or IConnectionGene is selected for disabling.
+        /// If an Id is given, the gene with that Id is selected for disabling.
+        /// If which type of gene to remove is selected randomly, this method should call the RemoveNode or RemoveConnection method.
+        /// It returns a reference to the removed gene.
         /// </summary>
-        /// <param name="genome">The genome</param>
-        /// <param name="geneId">If a gene is not specified, that is set to -1, then a random gene is selected from the genes collection for disabling.
+        /// <param name="genome">The genome from which the gene is going to be removed</param>
+        /// <param name="geneId">If a gene is not specified, that is set to -1, then a random gene type is selected and the appropriate method is called.
         /// Disabled genes cannot be disabled.</param>
         /// <returns></returns>
         public static IGene RemoveGene(IGenome genome, int geneId = -1)
@@ -228,7 +230,24 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
 
         }
 
-        public static IGene.INodeGene? RemoveNode(IGenome genome, INodeGene node = null)
+        /// <summary>
+        /// Removes a node from the genome.
+        /// This means disabling the node's gene in the genome.
+        /// When a node is removed:
+        /// - Connections that are connected to the node are also removed.
+        /// - Connections that are connected from the node are also removed.
+        /// - If the node is connected to itself, the connection is also removed.
+        /// - If removing the node leaves other nodes orphaned (no incoming connections), New connection are created to connect the orphaned node to the node that
+        /// the removed node was connected to. Have to take into account that connections cannot be duplicated.
+        /// - If removing the node leaves other nodes leaf (no outgoing connections), New connection are created to connect the leaf node to the node to which the removed node
+        /// was connected to. Have to take into account that connections cannot be duplicated.
+        /// - Only hidden nodes can be removed by this method.
+        /// - After removing a node the FixGenome method should be called to fix the genome structure.
+        /// </summary>
+        /// <param name="genome"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static INodeGene? RemoveNode(IGenome genome, INodeGene? node = null, bool onlyCurrentModule = true)
         {
             
         }
@@ -236,6 +255,65 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
         public static IGene.IConnectionGene? RemoveConnection(IGenome genome, IConnectionGene connection = null)
         {
 
+        }
+        /// <summary>
+        /// Fixes the genome structure after any change.
+        /// This method's mission is to ammend any dangling gene.
+        /// It fixes connections that are left dangling because of a structural change in the genome
+        /// For dangling connections (connections missing one or both nodes) the method should: 
+        /// if the connection is missing the from node, it must be reconnected 
+        /// </summary>
+        /// <param name="genome">The genome on which to perform the fixing</param>
+        public static void FixGenome(IGenome genome)
+        {
+            var nodes = genome.Genes.OfType<IGene.INodeGene>().ToList();
+            var connections = genome.Genes.OfType<IGene.IConnectionGene>().ToList();
+
+            // Remove connections with non-existent nodes
+            foreach (var connection in connections)
+            {
+                if (!nodes.Any(n => n.Id == connection.FromNode) || !nodes.Any(n => n.Id == connection.ToNode))
+                {
+                    connection.Enabled = false;
+                }
+            }
+
+            // Remove nodes with no connections
+            foreach (var node in nodes)
+            {
+                var incomingConnections = connections.Where(c => c.ToNode == node.Id && c.Enabled).ToList();
+                var outgoingConnections = connections.Where(c => c.FromNode == node.Id && c.Enabled).ToList();
+
+                if (!incomingConnections.Any() && !outgoingConnections.Any())
+                {
+                    node.Enabled = false;
+                }
+            }
+
+            // Reconnect orphaned nodes
+            foreach (var node in nodes.Where(n => n.Enabled))
+            {
+                var incomingConnections = connections.Where(c => c.ToNode == node.Id && c.Enabled).ToList();
+                var outgoingConnections = connections.Where(c => c.FromNode == node.Id && c.Enabled).ToList();
+
+                if (!incomingConnections.Any())
+                {
+                    var fromNode = GetRandomNode(genome, new NodeType[] { NodeType.Input, NodeType.Hidden }, refLayer: node.Layer, restrictToModule: false, side: "L");
+                    if (fromNode != null)
+                    {
+                        genome.AddConnection(fromNode.Id, node.Id, new Random().NextDouble() * 2 - 1);
+                    }
+                }
+
+                if (!outgoingConnections.Any())
+                {
+                    var toNode = GetRandomNode(genome, new NodeType[] { NodeType.Hidden, NodeType.Output }, refLayer: node.Layer, restrictToModule: true, side: "R");
+                    if (toNode != null)
+                    {
+                        genome.AddConnection(node.Id, toNode.Id, new Random().NextDouble() * 2 - 1);
+                    }
+                }
+            }
         }
     }
 }
