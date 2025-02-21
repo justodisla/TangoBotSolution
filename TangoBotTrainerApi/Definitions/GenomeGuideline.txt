@@ -1,0 +1,81 @@
+﻿# Genome Definition Guideline
+
+This document defines the structure and properties of the Genome object in the TangoBotTrainer project.
+
+## Properties of the Genome
+
+1. **CurrentModuleId**:
+   - This value is set by the Campaign object when a new cycle starts.
+   - Genes created during the current cycle will hold this number permanently.
+   - This value is an integer because at each cycle a new value (1, 2, 3, ...) is given.
+   - The cycle is a part of the evolutive stage where a skill or set of skills is developed by the genome.
+   - The value is called a module because it refers to the genes structure developed during a specific cycle.
+   - In the neural network, the genes structure developed during, for instance, Cycle 1, will carry the ModuleId 1.
+   - This helps during evolution mutations by preventing old modules that are already trained and well developed from being modified by later mutations, thus avoiding the issue of "forgetting."
+
+2. **TimeCreated**:
+   - The time at which the Genome was created. This helps determine the age of the genome.
+   - This value is entered at instantiation.
+
+3. **List<IGene> Genes**:
+   - The collection of genes in this genome.
+
+4. **string Species**:
+   - A random animal name given to the species this node belongs to.
+   - This name is entered at the moment the genome's species is determined.
+   - This value is set by an external component.
+
+5. **double Fitness**:
+   - The score given to this genome by the Inspector component when its performance is evaluated.
+
+6. **IAgent Agent**:
+   - The agent is set by the factory in charge of creating genomes.
+   - The agent is important because in the Agent the perceptors and actuators are defined and that is how the minimal genome genes are determined (input and output nodes).
+
+## Methods of the Genome
+
+1. **Mutate(MutationLevels mutationLevel)**:
+   - Mutate the genome to create a new genome.
+
+2. **Crossover(IGenome partner, MutationLevels mutationLevel = 0)**:
+   - Crossover with another genome to create a new genome.
+
+3. **Speciate(int speciesCount, int siblingsCount = 0)**:
+   - Create a number of species from the current genome making sure that new Genomes are of different species.
+
+4. **SpawnSiblingGenomes(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT)**:
+   - Create a number of siblings from the current genome.
+   - Siblings are mutated versions of the current genome but remain in the same species.
+
+5. **AddConnection(int fromNode, int toNode, double weight)**:
+   - Add a new connection gene to the genome.
+
+6. **AddNewConnection()**:
+   - Add a new connection gene to the genome.
+
+7. **AddNewNode()**:
+   - Add a new node gene to the genome.
+
+8. **FixStructure()**:
+   - Fix the structure of the genome to ensure it adheres to the established policies.
+
+9. **CompareGenomes(IGenome otherGenome)**:
+   - Compare the current genome with another genome.
+
+10. **AddRandomGene(MutationLevels mutationLevel)**:
+    - Add a random gene to the genome based on the mutation level.
+
+## Using Partial Classes
+
+To manage the complexity of the `Genome` class, we use partial classes to divide groups of functionalities by categories. This approach keeps related methods together while maintaining a clean and organized codebase.
+
+### Example Structure with Partial Classes
+
+1. **Genome.cs**: Core properties and methods.
+2. **Genome.Mutation.cs**: Methods related to mutations.
+3. **Genome.Structure.cs**: Methods related to structure management.
+
+### Example Code
+
+#### Genome.cs
+

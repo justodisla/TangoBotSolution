@@ -1,0 +1,127 @@
+﻿# Mutation Policies
+
+This document establishes the policies for mutating genome structures in the TangoBotTrainer project. These policies serve as guidelines for creating and modifying genome structure elements through mutation.
+
+## General Mutation Policies
+
+1. **Mutation Levels**:
+   - Mutations are categorized into different levels based on their impact: CLOSE_SIBLINGS, FAR_SIBLINGS, SPECIATION, EXTREME, and RANDOM.
+   - CLOSE_SIBLINGS mutations are slight and have a lower impact, allowing the genome to mutate very gradually. This kind of mutation most likely will not render the mutated genome as another species.
+   - FAR_SIBLINGS mutations introduce serious changes that might render the mutated genome as one of the same species but very different. It might end up being a different species but with similarities.
+   - SPECIATION mutations have severe effects, rendering the mutated genome most likely into another species.
+   - EXTREME mutations will do the most radical changes to the mutated genome, introduced to search for an out-of-the-box solution.
+   - RANDOM mutations can be any of the previous mutation levels randomly.
+
+2. **Random Selection**:
+   - When selecting random nodes or connections for mutation, ensure the selection adheres to the specified restrictions (e.g., module, layer, side).
+
+3. **Validation**:
+   - Always validate the nodes and connections before and after mutation to ensure they adhere to the established policies.
+
+## Connection Mutation Policies
+
+1. **Connection Weight Mutation**:
+   - A connection's weight can be mutated by adding or subtracting a random N% of the current weight.
+   - N% is established by selecting a random number between 1% to X%, where X% depends on the mutation level.
+   - CLOSE_SIBLINGS mutations have a lower percentage value.
+   - FAR_SIBLINGS mutations have a moderate percentage value.
+   - SPECIATION mutations have a higher percentage value.
+   - EXTREME mutations have the highest percentage value.
+
+2. **Connection State Mutation**:
+   - Connections can be enabled or disabled through mutation.
+   - Connections cannot be created in a disabled state. They can only be disabled by gene mutation.
+
+3. **Connection Node Mutation**:
+   - A connection can be mutated by changing its FromNode or ToNode properties.
+   - Ensure that the new nodes adhere to the connection rules specified in the Genome Policies.
+
+## Node Mutation Policies
+
+1. **Node Addition**:
+   - New nodes can be added through mutation.
+   - The layer where the node is added is random from 1 to 99. Layer 0 is reserved for input nodes, and layer 100 is reserved for output nodes.
+   - New nodes can be connected from and to nodes in the same layer.
+   - New nodes can have one recursive connection to itself.
+
+2. **Node Removal**:
+   - Only hidden nodes can be removed through mutation.
+   - When a node is removed:
+     - Connections that are connected to the node are also removed.
+     - Connections that are connected from the node are also removed.
+     - If the node is connected to itself, the connection is also removed.
+     - If removing the node leaves other nodes orphaned (no incoming connections), new connections are created to connect the orphaned node to the node that the removed node was connected to, ensuring no duplicate connections.
+     - If removing the node leaves other nodes leaf (no outgoing connections), new connections are created to connect the leaf node to the node to which the removed node was connected to, ensuring no duplicate connections.
+   - After removing a node, the FixGenome method should be called to fix the genome structure.
+
+3. **Node Bias Mutation**:
+   - A node's bias can be mutated by adding or subtracting a random N% of the current bias.
+   - N% is established by selecting a random number between 1% to X%, where X% depends on the mutation level.
+   - CLOSE_SIBLINGS mutations have a lower percentage value.
+   - FAR_SIBLINGS mutations have a moderate percentage value.
+   - SPECIATION mutations have a higher percentage value.
+   - EXTREME mutations have the highest percentage value.
+
+4. **Node Layer Mutation**:
+   - Nodes can mutate by changing their layer number.
+   - The node can be "moved" one layer or more to the right or to the left depending on the level of mutation.
+   - This mutation should be rare and more rare to straddle over layers.
+   - After this mutation, the structure must be fixed.
+
+## Gene Selection for Mutation
+
+1. **Selection Percentage**:
+   - The number of genes selected for mutation is determined by a percentage of the available genes.
+   - The percentage is calculated by selecting a number from 1% to N%, where N% is determined from a random range influenced by the MutationLevel.
+
+2. **MutationLevel Ranges**:
+   - CLOSE_SIBLINGS: 1% to 5%
+   - FAR_SIBLINGS: 1% to 10%
+   - SPECIATION: 1% to 20%
+   - EXTREME: 1% to 30%
+
+3. **Selection Process**:
+   - Determine the range for N% based on the MutationLevel.
+   - Select a random percentage within the range.
+   - Shuffle the Genes collection, excluding genes from other modules.
+   - Calculate the number of genes to be selected based on the percentage.
+   - Randomly select the calculated number of genes from the top of the shuffled list for mutation.
+   - Mutate each selected gene.
+
+## Mutation Coefficients
+
+1. **ValueMutation Coefficients**:
+   - CLOSE_SIBLINGS: 0.1 to 0.2
+   - FAR_SIBLINGS: 0.2 to 0.5
+   - SPECIATION: 0.5 to 1.0
+   - EXTREME: 1.0 to 2.0
+
+2. **StructuralMutation Coefficients**:
+   - CLOSE_SIBLINGS: 0.05 to 0.1
+   - FAR_SIBLINGS: 0.1 to 0.3
+   - SPECIATION: 0.3 to 0.6
+   - EXTREME: 0.6 to 1.0
+
+## Selecting Elements for Mutation
+
+1. **Selection Percentage**:
+   - A N% of the items of the shuffled eligible genes collection is selected for mutation.
+   - The N% is determined by randomly selecting a value from 1 to X, where X is determined by the structural mutation level.
+
+## Mutating Gene Value (bias, weight)
+
+1. **Value Mutation**:
+   - A N% of the original value is added (or subtracted).
+   - The N% is determined by randomly selecting a value from 1 to X, where X is determined by the value mutation level.
+
+## Fixing Genome Structure
+
+1. **Fixing Dangling Genes**:
+   - The FixGenome method should be called to amend any dangling genes after any structural change in the genome.
+   - For dangling connections (connections missing one or both nodes), the method should:
+     - Reconnect the connection if it is missing the from node.
+     - Reconnect the connection if it is missing the to node.
+   - Remove nodes with no connections.
+   - Reconnect orphaned or leaf nodes to ensure they have incoming and outgoing connections.
+
+This document serves as a reference for developers working on the TangoBotTrainer project to ensure consistency and adherence to the established mutation policies.

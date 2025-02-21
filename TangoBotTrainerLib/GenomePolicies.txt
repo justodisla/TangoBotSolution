@@ -5,19 +5,19 @@ This document establishes the policies for dealing with genome structures in the
 ## Connection Policies
 
 ### About Cycles
-- A cycle is a training routine where a discrete set of skills are developed by the genome's neural network.
-- During a cycle, all genes created into the genome are marked with a ModuleId that indicates the cycle to which the gene belongs.
-- During the cycle, many iterations of training are run to develop, by genome evolution (evaluating, segregating, crossover and mutation), the skills or set of skills designated to be developed during the cycle.
-- After the cycle is completed, the genome's neural network should be proficient in executing the skills intended to be developed during such cycle.
-- While during a cycle, a genome's property called ModuleId is assigned a new value to mark each gene created within the cycle, with such ModuleId. When the cycle is done, all genes created during it will have been marked with the corresponding ModuleId. This will prevent that on future cycles, older modules that comprise genes well fit for their tasks, to be altered causing them to forget their skills. It also helps the genome structure methods to implement rules that prevent new modules from contaminating old well-established modules.
+1. A cycle is a training routine where a discrete set of skills are developed by the genome's neural network.
+2. During a cycle, all genes created into the genome are marked with a ModuleId that indicates the cycle to which the gene belongs.
+3. During the cycle, many iterations of training are run to develop, by genome evolution (evaluating, segregating, crossover and mutation), the skills or set of skills designated to be developed during the cycle.
+4. After the cycle is completed, the genome's neural network should be proficient in executing the skills intended to be developed during such cycle.
+5. While during a cycle, a genome's property called ModuleId is assigned a new value to mark each gene created within the cycle, with such ModuleId. When the cycle is done, all genes created during it will have been marked with the corresponding ModuleId. This will prevent that on future cycles, older modules that comprise genes well fit for their tasks, to be altered causing them to forget their skills. It also helps the genome structure methods to implement rules that prevent new modules from contaminating old well-established modules.
 
 ### About Modules
-- Modules consist of a group of genes developed during a specific cycle. During such cycle, the genome's neural network was being developed to perform a specific task or series of tasks.
-- Modules are used to separate the genome's neural network into different sections, each with its own set of genes.
-- Each gene has a property ModuleId which indicates the module to which the gene belongs.
-- New modules cannot influence older modules by creating connections from recent modules' nodes to older modules' nodes.
-- New modules can use information from older modules (only read) by creating connections FROM older modules' nodes TO recent modules' nodes. This ensures that skills learned in older modules cannot be overwritten by new modules and ensures that new modules can benefit from the learned skills of older modules.
-- Original nodes like input, output, and bias nodes are not part of any module. So any node of any module during any cycle can be connected from and to these nodes.
+1. Modules consist of a group of genes developed during a specific cycle. During such cycle, the genome's neural network was being developed to perform a specific task or series of tasks.
+2. Modules are used to separate the genome's neural network into different sections, each with its own set of genes.
+3. Each gene has a property ModuleId which indicates the module to which the gene belongs.
+4. New modules cannot influence older modules by creating connections from recent modules' nodes to older modules' nodes.
+5. New modules can use information from older modules (only read) by creating connections FROM older modules' nodes TO recent modules' nodes. This ensures that skills learned in older modules cannot be overwritten by new modules and ensures that new modules can benefit from the learned skills of older modules.
+6. Original nodes like input, output, and bias nodes are not part of any module. So any node of any module during any cycle can be connected from and to these nodes.
 
 ### Connection Rules
 1. **Connection Direction**:
@@ -113,12 +113,12 @@ When the Agent runtime receives a perceptor value, it sends it to the genome's n
 When the genome's neural network sends an output value, the Agent runtime receives it and sends it to the actuators.
 
 The basic genome structure is created as follows:
-- The input nodes are created based on the perceptors of the agent.
-- The output nodes are created based on the actuators of the agent.
-- The bias node is created.
-- No connection is created at this point. subsequent mutations will create connections eventually
+1. The input nodes are created based on the perceptors of the agent.
+2. The output nodes are created based on the actuators of the agent.
+3. The bias node is created.
+4. No connection is created at this point. Subsequent mutations will create connections eventually.
 
-The innovation number is sequencial and unique in the genome.
+The innovation number is sequential and unique in the genome.
 Each time a gene is created, it is assigned a new unique innovation number.
 This number is to keep track of the gene's history and to identify the gene when comparing genomes.
 
@@ -126,9 +126,3 @@ The gene id is a unique identifier for the gene.
 By now, the gene is a random number between 0 and 1000000.
 Every time a gene is created, a new unique gene id is assigned to it.
 Once the id and the innovation numbers are assigned, they are never changed.
-
-
-
-
-
-
