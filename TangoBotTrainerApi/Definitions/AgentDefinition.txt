@@ -1,0 +1,87 @@
+﻿# Agent Definition Guideline
+
+This document defines the structure and properties of the Agent object in the TangoBotTrainer project. The agent is a metadata definition created by the user through a GUI.
+
+## Properties of the Agent
+
+1. **string Name**:
+   - The name of the agent.
+   - This value is assigned at the time of agent creation and remains constant.
+
+2. **string Description**:
+   - A description of the agent.
+   - This value provides information about the agent's purpose and functionality.
+
+3. **List<IPerceptor> Perceptors**:
+   - A collection of perceptors associated with the agent.
+   - Perceptors are sensors that receive input from the environment.
+   - Each perceptor specifies:
+     - **string Name**: The name of the perceptor for reporting purposes.
+     - **string Description**: A description of the perceptor.
+     - **Type DataType**: The data type that is going to be received (e.g., double, int, array, image, etc.).
+
+4. **List<IActuator> Actuators**:
+   - A collection of actuators associated with the agent.
+   - Actuators are like limbs of the agent. They perform actions on the environment based on the data received by the agent from the neural network's output nodes.
+   - Each actuator specifies:
+     - **string Name**: The name of the actuator for reporting purposes.
+     - **string Description**: A description of the actuator.
+     - The output is a double value from -1 to 1. The agent runtime component must implement an interpreter that converts the output value into an action that it will exercise on the Environment interface (e.g., a Trading Platform).
+
+5. **IEnvInterface EnvInterface**:
+   - The environment interface that the agent interacts with.
+   - This interface defines how the agent communicates with the environment.
+
+6. **ITestingBooth TestingBooth**:
+   - The testing booth used to evaluate the agent's performance.
+   - This component is responsible for running tests and collecting performance metrics.
+
+## Methods of the Agent
+
+1. **void Initialize()**:
+   - Initializes the agent and its components.
+   - Sets up the perceptors, actuators, and environment interface.
+
+2. **void UpdatePerceptors(Dictionary<string, object> data)**:
+   - Updates the agent's perceptors with new input data from the environment.
+   - Processes the input data, normalizes it, and stores it in the perceptors.
+   - The normalization of all the values received through the perceptors is the responsibility of the Agent's runtime component.
+   - The agent waits passively for the data to come from the TestingBooth. The update frequency of the agent's perceptors is determined by the TestingBooth.
+   - The agent preprocesses and normalizes the data and distributes these values to the NN input nodes by passing them to the Neural Network Runtime exposed method `Input(Dictionary<string, double> processedData)`.
+
+## Runtime Component
+
+- At runtime, a `RuntimeAgentComponent` is instantiated using the metadata as input for the instantiated agent class.
+- On each project, only one agent should be defined, although many agents will be instantiated at runtime, each one with its respective Neural Network as a brain.
+- The agent represents the physical body of a specimen, while the Neural Network represents the brain.
+- The perceptors represent the senses, while the actuators represent the arms, hands, legs, or any other means by which the specimen can interact with the environment.
+- Inside the agent lives a Neural Network. The NN is a metadata that describes nodes and connections created after the genome. To execute the NN, it is wrapped in a Neural Network Runtime that processes the received information through the input and updates a property to which the Agent listens.
+- The agent constantly listens to the `Output` property of the Neural Network Runtime. This property is an observable object (Dictionary<outputNode, double>).
+- When the `Output` property is updated within the Neural Network Runtime, the agent interprets the data contained and turns it into actions.
+- For each item in the `Output` object (Dictionary<outputNode, double>), the designer must include a script that will interpret the value and turn it into action performed on the Environment Object, which is passed as context to the script.
+
+## Using Partial Classes
+
+To manage the complexity of the `Agent` class, we use partial classes to divide groups of functionalities by categories. This approach keeps related methods together while maintaining a clean and organized codebase.
+
+### Example Structure with Partial Classes
+
+1. **Agent.cs**: Core properties and methods.
+2. **Agent.Initialization.cs**: Methods related to initialization.
+3. **Agent.Perceptors.cs**: Methods related to perceptors.
+4. **Agent.Actuators.cs**: Methods related to actuators.
+
+### Example Code
+
+#### Agent.cs
+
+
+
+
+
+
+
+
+
+
+

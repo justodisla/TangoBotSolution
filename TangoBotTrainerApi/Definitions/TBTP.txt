@@ -1,0 +1,86 @@
+﻿# TangoBot Training Project (TBTP) Definition
+
+A TangoBot Training Project (TBTP) is a set of artifacts that encompasses the necessary objects, metadata, scripts, DLL libraries, configurations, etc., needed to produce a neural network (NN) capable of production deployment.
+
+## Project Structure
+
+The project contains both static and non-static elements organized in a directory structure.
+
+### Static Elements
+
+1. **Agent Definition Metadata**:
+   - Metadata files that define the agent's properties, perceptors, and actuators.
+   - These files are used to initialize the agent and its interactions with the environment.
+
+2. **Scripts and/or DLL Libraries**:
+   - Scripts and DLL libraries that implement the evaluators.
+   - These evaluators are responsible for assessing the performance of the neural network during training.
+
+3. **Training Environment**:
+   - The environment in which the training takes place.
+   - For example, in a trading training project, this would be the Trading Platform.
+
+4. **Data Provider Definition Metadata**:
+   - Metadata files that define the data providers.
+   - These files specify the sources of data used for training the neural network.
+
+### Non-Static Elements
+
+These elements will appear during and after the training process.
+
+1. **Genome Definitions**:
+   - Definitions of the genomes used in the training process.
+   - These files contain the genetic information of the neural networks being evolved.
+
+2. **Neural Network Definitions**:
+   - Definitions of the neural networks produced during training.
+   - These files contain the architecture and weights of the trained neural networks.
+
+3. **Logs**:
+   - Log files generated during the training process.
+   - These logs provide detailed information about the training progress, performance metrics, and any issues encountered.
+
+4. **Other Artifacts**:
+   - Additional files and artifacts generated during the training process.
+   - These may include intermediate results, checkpoints, and other relevant data.
+
+## Directory Structure
+
+A typical TBTP directory structure may look like this:
+
+
+## Key Components
+
+1. **Agent**:
+   - The agent is the entity being trained. It interacts with the environment through its perceptors and actuators.
+   - The agent definition metadata specifies the agent's properties and configuration.
+
+2. **Evaluator**:
+   - The evaluator assesses the performance of the neural network during training.
+   - It can be implemented as scripts or DLL libraries.
+
+3. **Training Environment**:
+   - The environment in which the agent operates and learns.
+   - It provides the context and data necessary for training the neural network.
+
+4. **Data Provider**:
+   - The source of data used for training the neural network.
+   - The data provider definition metadata specifies the data sources and their configuration.
+
+5. **Genomes**:
+   - The genetic representations of the neural networks being evolved.
+   - These definitions are used to create and modify neural networks during training.
+
+6. **Neural Networks**:
+   - The trained neural networks produced during the training process.
+   - These definitions contain the architecture and weights of the neural networks.
+
+7. **Logs**:
+   - Detailed records of the training process, including performance metrics and any issues encountered.
+
+8. **Other Artifacts**:
+   - Additional files and artifacts generated during the training process, such as intermediate results and checkpoints.
+
+This document serves as a reference for developers working on the TangoBotTrainer project to ensure consistency and adherence to the established structure and components of a TangoBot Training Project (TBTP).
+
+
