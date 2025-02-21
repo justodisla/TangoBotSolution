@@ -21,7 +21,7 @@ This document defines the structure and properties of the Genome object in the T
    - The collection of genes in this genome.
 
 4. **string Species**:
-   - A random animal name given to the species this node belongs to.
+   - A random animal name given to the species this genome belongs to.
    - This name is entered at the moment the genome's species is determined.
    - This value is set by an external component.
 
@@ -34,36 +34,70 @@ This document defines the structure and properties of the Genome object in the T
 
 ## Methods of the Genome
 
-1. **Mutate(MutationLevels mutationLevel)**:
-   - Mutate the genome to create a new genome.
+1. **IGenome CreateBasicGenome(IAgent agent)**:
+   - Creates the basic genome based on the Agent's perceptors and actuators.
+   - Initializes input nodes based on the agent's perceptors.
+   - Initializes output nodes based on the agent's actuators.
+   - Initializes a bias node.
+   - No connections are created at this point; subsequent mutations will create connections.
+   - **Returns**: The created basic genome.
 
-2. **Crossover(IGenome partner, MutationLevels mutationLevel = 0)**:
-   - Crossover with another genome to create a new genome.
+2. **void Mutate(MutationLevels mutationLevel)**:
+   - Mutates the current genome instance.
+   - Applies mutations to genes based on the specified mutation level.
+   - Mutations can include changes to gene properties, enabling/disabling genes, and adding/removing genes.
+   - This method modifies the current instance and does not return any value.
 
-3. **Speciate(int speciesCount, int siblingsCount = 0)**:
-   - Create a number of species from the current genome making sure that new Genomes are of different species.
+3. **IGenome Crossover(IGenome partner, MutationLevels mutationLevel = 0)**:
+   - Performs crossover with another genome to create a new genome.
+   - Combines genes from both parent genomes based on the specified mutation level.
+   - Ensures the resulting genome inherits traits from both parents.
+   - **Returns**: The new genome created from the crossover.
 
-4. **SpawnSiblingGenomes(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT)**:
-   - Create a number of siblings from the current genome.
+4. **IGenome[] Speciate(int speciesCount, int siblingsCount = 0)**:
+   - Creates a number of species from the current genome, ensuring that new genomes are of different species.
+   - Divides the current genome into multiple species based on genetic diversity.
+   - Optionally creates siblings within each species.
+   - **Returns**: An array of new genomes representing different species.
+
+5. **IGenome[] SpawnSiblingGenomes(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT)**:
+   - Creates a number of siblings from the current genome.
    - Siblings are mutated versions of the current genome but remain in the same species.
+   - Applies mutations to create genetic diversity among siblings.
+   - **Returns**: An array of sibling genomes.
 
-5. **AddConnection(int fromNode, int toNode, double weight)**:
-   - Add a new connection gene to the genome.
+6. **IGene.IConnectionGene AddConnection(int fromNode, int toNode, double weight)**:
+   - Adds a new connection gene to the genome.
+   - Creates a connection between the specified nodes with the given weight.
+   - Ensures the connection adheres to the established genome policies.
+   - **Returns**: The added connection gene.
 
-6. **AddNewConnection()**:
-   - Add a new connection gene to the genome.
+7. **void AddNewConnection()**:
+   - Adds a new connection gene to the genome.
+   - Randomly selects nodes to create a new connection.
+   - Ensures the connection adheres to the established genome policies.
 
-7. **AddNewNode()**:
-   - Add a new node gene to the genome.
+8. **IGene.INodeGene AddNewNode()**:
+   - Adds a new node gene to the genome.
+   - Creates a new node and integrates it into the genome's structure.
+   - Ensures the new node adheres to the established genome policies.
+   - **Returns**: The added node gene.
 
-8. **FixStructure()**:
-   - Fix the structure of the genome to ensure it adheres to the established policies.
+9. **void FixStructure()**:
+   - Fixes the structure of the genome to ensure it adheres to the established policies.
+   - Resolves any structural issues, such as dangling genes or invalid connections.
+   - Ensures the genome remains functional and consistent.
 
-9. **CompareGenomes(IGenome otherGenome)**:
-   - Compare the current genome with another genome.
+10. **double CalculateGeneticDifference(IGenome otherGenome)**:
+    - Calculates the genetic difference between the current genome and another genome.
+    - Evaluates genetic similarity and differences between the two genomes.
+    - Returns a number between 0 and 1, where 0 means no difference and 1 means completely different.
+    - **Returns**: A double indicating the genetic difference between the genomes.
 
-10. **AddRandomGene(MutationLevels mutationLevel)**:
-    - Add a random gene to the genome based on the mutation level.
+11. **void AddRandomGene(MutationLevels mutationLevel)**:
+    - Adds a random gene to the genome based on the mutation level.
+    - Randomly selects a gene type and integrates it into the genome.
+    - Ensures the new gene adheres to the established genome policies.
 
 ## Using Partial Classes
 
@@ -78,4 +112,3 @@ To manage the complexity of the `Genome` class, we use partial classes to divide
 ### Example Code
 
 #### Genome.cs
-

@@ -1,0 +1,126 @@
+﻿# Gene Definition Guideline
+
+This document defines the structure and properties of the Gene object and its subclasses in the TangoBotTrainer project.
+
+## Properties of the Gene
+
+1. **int Id**:
+   - A unique identifier for the gene.
+   - This value is assigned at the time of gene creation and remains constant.
+
+2. **int InnovationNumber**:
+   - A sequential number assigned to the gene to track its history and identify it during genome comparisons.
+   - This value is generated, maintained, and assigned by the genome.
+   - Once assigned, the gene cannot be deleted ever through the lifetime of the genome and its descendants.
+
+3. **int ModuleId**:
+   - The module to which the gene belongs.
+   - This value is set by the Campaign object when a new cycle starts and remains constant for the gene's lifetime.
+
+4. **bool Enabled**:
+   - Indicates whether the gene is active or disabled.
+   - This value can be modified during mutations.
+
+## Methods of the Gene
+
+1. **void Mutate(MutationLevels mutationLevel)**:
+   - Mutates the current gene instance.
+   - Applies mutations based on the specified mutation level.
+   - Mutations can include changes to gene properties, enabling/disabling the gene, and modifying connections.
+
+2. **object Clone()**:
+   - Creates a deep copy of the current gene instance.
+   - **Returns**: A new gene instance that is a copy of the current gene.
+
+## Subclasses of Gene
+
+### INodeGene
+
+#### Properties of INodeGene
+
+1. **NodeType Type**:
+   - The type of the node (Input, Output, Hidden, Bias, Special).
+   - This value is set at the time of node creation and remains constant.
+
+2. **int Layer**:
+   - The layer to which the node belongs in the neural network.
+   - This value is set at the time of node creation and remains constant.
+
+3. **double Bias**:
+   - The bias value associated with the node.
+   - This value can be modified during mutations.
+
+4. **string Name** (for Input and Output nodes):
+   - The name of the node for reporting and diagnostic purposes.
+   - This value is set at the time of node creation and remains constant.
+
+5. **string Description** (for Input and Output nodes):
+   - A description of the node for reporting and diagnostic purposes.
+   - This value is set at the time of node creation and remains constant.
+
+#### Special Input Nodes
+
+- These are input nodes that have special functions and do not define an Agent's perceptor.
+- They will not receive input from the test data but from other components in the test environment.
+- These special input nodes may be dropped after training when the neural network passes to production because their purpose is for helping the neural network development through evolution cycles.
+
+#### Methods of INodeGene
+
+1. **IGene.IConnectionGene[] GetConnections()**:
+   - Returns the connections that are connected to this node.
+   - **Returns**: An array of connection genes.
+
+2. **IGene.IConnectionGene[] GetOutGoingConnections()**:
+   - Returns the outgoing connections that are connected to this node.
+   - **Returns**: An array of outgoing connection genes.
+
+3. **IGene.IConnectionGene[] GetIncomingConnections()**:
+   - Returns the incoming connections that are connected to this node.
+   - **Returns**: An array of incoming connection genes.
+
+4. **string ToString()** (for Hidden nodes):
+   - Returns a self-description of the hidden node for reporting and debug purposes.
+   - The description includes details about the incoming connections, bias, and layer.
+   - **Returns**: A string representing the hidden node's details.
+
+### IConnectionGene
+
+#### Properties of IConnectionGene
+
+1. **int FromNode**:
+   - The identifier of the origin node for the connection.
+   - This value is set at the time of connection creation and remains constant.
+
+2. **int ToNode**:
+   - The identifier of the destination node for the connection.
+   - This value is set at the time of connection creation and remains constant.
+
+3. **double Weight**:
+   - The weight of the connection.
+   - This value can be modified during mutations.
+
+#### Methods of IConnectionGene
+
+1. **void Reconnect()**:
+   - Connects an unconnected connection or reconnects to another from node or to node or both.
+   - This method modifies the current instance and does not return any value.
+
+## Using Partial Classes
+
+To manage the complexity of the `Gene` class and its subclasses, we use partial classes to divide groups of functionalities by categories. This approach keeps related methods together while maintaining a clean and organized codebase.
+
+### Example Structure with Partial Classes
+
+1. **Gene.cs**: Core properties and methods.
+2. **Gene.Mutation.cs**: Methods related to mutations.
+3. **NodeGene.cs**: Properties and methods specific to node genes.
+4. **ConnectionGene.cs**: Properties and methods specific to connection genes.
+
+### Example Code
+
+#### Gene.cs
+
+
+
+
+
