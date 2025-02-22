@@ -1,0 +1,111 @@
+﻿# Neural Network Runtime (NNRT) Definition
+
+The Neural Network Runtime (NNRT) component brings the static Neural Network (NN) metadata to life. The NN metadata, which is built after the corresponding genome, defines nodes and connections. The NN is effectively the phenotype, or the result of the genotype, which is the genome.
+
+## Properties of the NNRT
+
+1. **Dictionary<string, double> Input**:
+   - A collection of input values received from the agent's perceptors.
+   - Each input node maintains a **buffer** of past values for historical context.
+   - The buffer size is **genetically determined** and varies per node.
+   - When new data arrives, the oldest value is purged, maintaining a rolling set of entries.
+
+2. **Dictionary<string, double> Output**:
+   - A collection of output values processed by the output nodes.
+   - The result of the activation function is passed to all outgoing connections until the output nodes are reached.
+   - The change in the output property is notified so that the agent can listen to the property change and pass the values contained in the output to the respective Actuator.
+   - Outputs from earlier modules are **retained in Pre-Activation Buffers** until all dependent computations are complete.
+
+3. **List<Node> Nodes**:
+   - A collection of nodes in the neural network.
+   - Each node has a unique identifier, a bias, and a list of outgoing connections.
+   - Each node has a **genetic property determining how it consumes buffered input data**:
+     - **Scalar Mode**: Uses only the latest value.
+     - **Vector Mode**: Processes the entire buffer as an input array.
+   - The consumption mode is **determined by genetic mutation and evolves over time**.
+
+4. **List<Connection> Connections**:
+   - A collection of connections between nodes in the neural network.
+   - Each connection has a source node, a destination node, and a weight.
+
+5. **Modules**:
+   - The network is developed in **modules**, each assigned a unique **ModuleId**.
+   - Modules are trained **sequentially** and cannot be altered by later modules.
+   - **Nodes from newer modules cannot modify nodes in older modules**.
+   - Some modules are **truncated**, meaning they do not reach an output node but serve as intermediary computation layers.
+   - Each module is developed within a cycle that defines **evaluation metrics, output criteria, and learning objectives**.
+
+## Methods of the NNRT
+
+1. **void Initialize(Dictionary<string, double> inputData)**:
+   - Initializes the NNRT with the input data from the agent's perceptors.
+   - Sets up the nodes and connections based on the NN metadata.
+   - Initializes **rolling buffers** for input nodes.
+
+2. **void ProcessInput()**:
+   - Processes the input data through the neural network.
+   - Each input node updates its buffer, **retaining historical values**.
+   - Nodes process input based on their **genetic buffer consumption mode**.
+   - Each module is executed **sequentially** to prevent contamination of prior results.
+   - Computation proceeds **layer-wise in parallel**, ensuring efficiency while maintaining module constraints.
+
+3. **void UpdateOutput()**:
+   - Updates the output property with the results processed by the output nodes.
+   - Ensures that **Pre-Activation Buffers** retain earlier module results until all required computations are complete.
+   - Notifies the change in the output property so that the agent can listen to the property change and pass the values contained in the output to the respective Actuator.
+
+## Node Definition
+
+A Node represents a neuron in the neural network. Each Node has the following properties:
+
+1. **string Id**:
+   - The unique identifier of the node.
+
+2. **double Bias**:
+   - The bias value of the node.
+
+3. **List<Connection> OutgoingConnections**:
+   - A list of outgoing connections from the node.
+
+4. **BufferConsumptionMode ConsumptionMode**:
+   - Determines whether the node processes a single value (Scalar) or the entire buffer (Vector).
+   - Genetically evolved per node.
+
+## Connection Definition
+
+A Connection represents a link between two nodes in the neural network. Each Connection has the following properties:
+
+1. **Node SourceNode**:
+   - The source node of the connection.
+
+2. **Node DestinationNode**:
+   - The destination node of the connection.
+
+3. **double Weight**:
+   - The weight of the connection.
+
+## Module Execution Strategy
+
+1. **Sequential Module Execution**:
+   - Modules execute **in order**, starting with the oldest.
+   - **Nodes from later modules cannot connect to earlier modules**, preventing contamination.
+   - The output of a module is stored in a **Pre-Activation Buffer** until all required values are computed.
+   
+2. **Parallel Layer Execution**:
+   - Within a module, nodes in the same layer execute **in parallel**.
+   - Nodes **wait for all necessary inputs** before activation.
+
+3. **Synchronization Barrier**:
+   - Later modules **cannot start execution** until all computations from earlier modules are complete.
+   - Ensures that precomputed results are **available for downstream processing**.
+
+## Activation Function
+
+The activation function is applied to the value in the destination node's buffer. The result of the activation function is passed to all outgoing connections until the output nodes are reached. The activation function respects:
+
+- **Layer-wise parallelism**.
+- **Module-wise sequential execution**.
+- **Pre-Activation Buffer storage until all inputs are received**.
+
+**End of file**
+

@@ -1,0 +1,321 @@
+﻿# TangoBotTrainer Project Knowledge Base
+
+## Table of Contents
+
+1. **Introduction**
+   1.1 Purpose of the Document
+   1.2 Project Overview
+   1.3 Goals and Objectives
+
+2. **Conceptual Overview**
+   2.1 Agent
+   2.2 Neural Network (NN)
+   2.3 Genome
+   2.4 Neural Network Runtime (NNRT)
+
+3. **Design Guidelines**
+   3.1 Agent Design
+   3.2 Neural Network Design
+   3.3 Genome Design
+   3.4 Neural Network Runtime Design
+
+4. **Implementation Details**
+   4.1 Agent Implementation
+   4.2 Neural Network Implementation
+   4.3 Genome Implementation
+   4.4 Neural Network Runtime Implementation
+
+5. **Abstract Concepts**
+   5.1 Evolutionary Algorithms
+   5.2 Neural Network Training
+   5.3 Perceptors and Actuators
+   5.4 Environment Interaction
+   5.5 Evaluators
+   5.6 Evolution Process
+
+6. **Development Practices**
+   6.1 Coding Standards
+   6.2 Testing and Validation
+   6.3 Version Control
+   6.4 Documentation
+
+7. **TangoBot Training Project (TBTP)**
+   7.1 Project Structure
+   7.2 Key Components
+
+8. **Application Components**
+   8.1 UI
+   8.2 Workflow
+   8.3 TestingBooth
+   8.4 Agent
+   8.5 Environment
+   8.6 Neural Network Runtime (NNRT)
+   8.7 Evaluators
+   8.8 DataManager
+
+9. **Appendices**
+   9.1 Glossary of Terms
+   9.2 References and Resources
+   9.3 Example Code Snippets
+
+## 1. Introduction
+
+### 1.1 Purpose of the Document
+The TangoBot Trainer Project Document serves as a central knowledge base for all technical teams involved in the design, development, and theoretical foundation of TangoBot. It provides a structured reference to ensure alignment across teams, offering a clear understanding of the project's goals, architecture, implementation, and evolutionary learning mechanisms.
+
+This document is intended for engineers, AI researchers, developers, and system architects working on the TangoBot ecosystem. It excludes corporate concerns such as accounting, marketing, budgeting, business development, and procurement, as these are outside the scope of technical execution.
+
+### 1.2 Project Overview
+Provide a brief overview of the TangoBotTrainer project, including its purpose and scope.
+
+### 1.3 Goals and Objectives
+Outline the primary goals and objectives of the project.
+
+## 2. Conceptual Overview
+
+### 2.1 Agent
+Describe the concept of an Agent, its properties, and its role in the project.
+
+### 2.2 Neural Network (NN)
+Explain the concept of a Neural Network, its structure, and its purpose.
+
+### 2.3 Genome
+Define the concept of a Genome, its properties, and its significance in the project.
+
+### 2.4 Neural Network Runtime (NNRT)
+Describe the Neural Network Runtime component, its role, and how it brings the static NN metadata to life.
+
+## 3. Design Guidelines
+
+### 3.1 Agent Design
+Provide design guidelines for the Agent, including its properties, methods, and interactions.
+
+### 3.2 Neural Network Design
+Outline the design principles for the Neural Network, including node and connection structures.
+
+### 3.3 Genome Design
+Detail the design guidelines for the Genome, including gene properties and mutation mechanisms.
+
+### 3.4 Neural Network Runtime Design
+Describe the design principles for the Neural Network Runtime, including input processing and output generation.
+
+## 4. Implementation Details
+
+### 4.1 Agent Implementation
+Provide implementation details for the Agent, including code examples and best practices.
+
+### 4.2 Neural Network Implementation
+Detail the implementation of the Neural Network, including node and connection handling.
+
+### 4.3 Genome Implementation
+Describe the implementation of the Genome, including gene creation and mutation processes.
+
+### 4.4 Neural Network Runtime Implementation
+Provide implementation details for the Neural Network Runtime, including input processing and output handling.
+
+## 5. Abstract Concepts
+
+### 5.1 Evolutionary Algorithms
+Explain the concept of evolutionary algorithms and their application in the project.
+
+### 5.2 Neural Network Training
+Describe the process of training neural networks and its significance in the project.
+
+### 5.3 Perceptors and Actuators
+Define the roles of Perceptors and Actuators in the project and their interactions with the Agent.
+
+### 5.4 Environment Interaction
+Explain how the Agent interacts with the environment and the importance of this interaction.
+
+### 5.5 Evaluators
+Learning is guided by Evaluators that are introduced in the process at cycles of development or evolution. At each cycle, one or more Evaluators are introduced. The Evaluators curate certain behaviors and discourage others by providing rewards or punishments to the running NN as fitness scores. Such fitness scores will eventually be held by the neural network's genome. Learning concentrates on what is encouraged or discouraged by means of the Evaluators.
+
+### 5.6 Evolution Process
+The evolution process is divided into periods or timeframes at different levels.
+
+#### 5.6.1 Epoch
+An Epoch is a period where the final product is a fully functional NN. Generally, a single Epoch should be enough to produce a production-ready NN. However, if previously developed skills need to be improved or change their behavior, a new Epoch can be started with revised versions of the evaluators or even adding new input nodes to the Agent. In any case, the Epoch starts and cycles are run.
+
+#### 5.6.2 Cycle
+There can be one or many cycles within an Epoch. A cycle's purpose is for the NN to develop one or more discrete skills, enabling the trainer to gradually develop simple skills that over time will manifest into more complex skills and behaviors. Associated with each cycle is one or more Evaluators designed to observe the performance of the NN regarding a specific skill or set of skills. Once the established metrics in the evaluator are reached, the cycle is over, and control passes to the Epoch again. The cycle comprises steps where a genome created at the project initialization or inherited from previous cycles is submitted for iterations, which are periods executed as many times as needed within a Cycle period until the NN reaches the expected performance.
+
+#### 5.6.3 Iteration
+Each iteration comprises the following steps: Evaluation, Selection, Crossover, Mutation, and deployment for evaluation. Evaluation is done by the Evaluators. Selection consists of selecting the best performers from each species, crossover is the reproduction of the best performers' couples. The children are mutated and then deployed for testing. This iteration is repeated as needed until the goal of the Evaluators is reached. If reached, then the cycle ends. Another cycle starts, or if it is the final cycle, then control is passed to Epoch.
+
+#### 5.6.4 Cursor
+Within the Iteration, another recursive set of steps is executed, called Cursor. Cursor is repeated as long as there is testing data in the data set. When there is no more data or the end of data is reached, then control is passed to Iteration. Cursor happens during the Evaluation phase of Iteration. At each Cursor phase, data is passed to the agent, normalized, input to the NNRT, and the agent captures the output through its corresponding Actuators, turning it into action. Some evaluators might evaluate performance at the cursor level to provide feedback. Once the Cursor phase ends, a new data point is prepared and sent to the agent perceptors, and so on. Cursor processes one data point at a time in the case that it is databased. If the data is contained in a query table, then each record is a data point. The training booth picks one data point at a time, sends it to the agent as a single package. The agent is responsible for separating each field and directing it to the matching perceptor.
+
+## 6. Development Practices
+
+### 6.1 Coding Standards
+Outline the coding standards and best practices to be followed by the development team.
+
+### 6.2 Testing and Validation
+Describe the testing and validation processes to ensure the quality and reliability of the project.
+
+### 6.3 Version Control
+Provide guidelines for version control and collaboration using tools like Git.
+
+### 6.4 Documentation
+Emphasize the importance of documentation and provide guidelines for maintaining comprehensive project documentation.
+
+## 7. TangoBot Training Project (TBTP)
+
+### 7.1 Project Structure
+
+A TangoBot Training Project (TBTP) is a set of artifacts that encompasses the necessary objects, metadata, scripts, DLL libraries, configurations, etc., needed to produce a neural network (NN) capable of production deployment.
+
+#### 7.1.1 Static Elements
+
+1. **Agent Definition Metadata**:
+   - Metadata files that define the agent's properties, perceptors, and actuators.
+   - These files are used to initialize the agent and its interactions with the environment.
+
+2. **Scripts and/or DLL Libraries**:
+   - Scripts and DLL libraries that implement the evaluators.
+   - These evaluators are responsible for assessing the performance of the neural network during training.
+
+3. **Training Environment**:
+   - The environment in which the training takes place.
+   - For example, in a trading training project, this would be the Trading Platform.
+
+4. **Data Provider Definition Metadata**:
+   - Metadata files that define the data providers.
+   - These files specify the sources of data used for training the neural network.
+
+#### 7.1.2 Non-Static Elements
+
+These elements will appear during and after the training process.
+
+1. **Genome Definitions**:
+   - Definitions of the genomes used in the training process.
+   - These files contain the genetic information of the neural networks being evolved.
+
+2. **Neural Network Definitions**:
+   - Definitions of the neural networks produced during training.
+   - These files contain the architecture and weights of the trained neural networks.
+
+3. **Logs**:
+   - Log files generated during the training process.
+   - These logs provide detailed information about the training progress, performance metrics, and any issues encountered.
+
+4. **Other Artifacts**:
+   - Additional files and artifacts generated during the training process.
+   - These may include intermediate results, checkpoints, and other relevant data.
+
+### 7.2 Directory Structure
+
+A typical TBTP directory structure may look like this:
+
+/TBTP
+|-- /AgentDefinition
+|-- /Scripts
+|-- /Libraries
+|-- /TrainingEnvironment
+|-- /DataProviders
+|-- /Genomes
+|-- /NeuralNetworks
+|-- /Logs
+|-- /Artifacts
+
+### 7.3 Key Components
+
+1. **Agent**:
+   - The agent is the entity being trained. It interacts with the environment through its perceptors and actuators.
+   - The agent definition metadata specifies the agent's properties and configuration.
+
+2. **Evaluator**:
+   - The evaluator assesses the performance of the neural network during training.
+   - It can be implemented as scripts or DLL libraries.
+
+3. **Training Environment**:
+   - The environment in which the agent operates and learns.
+   - It provides the context and data necessary for training the neural network.
+
+4. **Data Provider**:
+   - The source of data used for training the neural network.
+   - The data provider definition metadata specifies the data sources and their configuration.
+
+5. **Genomes**:
+   - The genetic representations of the neural networks being evolved.
+   - These definitions are used to create and modify neural networks during training.
+
+6. **Neural Networks**:
+   - The trained neural networks produced during the training process.
+   - These definitions contain the architecture and weights of the neural networks.
+
+7. **Logs**:
+   - Detailed records of the training process, including performance metrics and any issues encountered.
+
+8. **Other Artifacts**:
+   - Additional files and artifacts generated during the training process, such as intermediate results and checkpoints.
+
+## 8. Application Components
+
+### 8.1 UI
+The UI is a Visual Studio-like interface that presents the project as a tree structure and provides a work area to configure each artifact in the project. For instance, among the listed artifacts, there is an Agent artifact. When focused, it presents a form with necessary fields to edit its configuration. A property pane might also display contextual information about the artifact. These can be static or dynamic as defined in the TBTP section.
+
+### 8.2 Workflow
+This component orchestrates the training actions from the beginning based on the TBTP artifacts.
+
+### 8.3 TestingBooth
+Wraps an Agent being evaluated, providing access to data and injecting context information, fitness, etc., to the Agent being tested. The TestingBooth is responsible for serving one data point at a time regardless of the source of the data. This is done by accessing a component named DataManager that is in charge of sourcing the data, performing any data operations like merging, aggregation, segregation, etc., and making it available for the TestingBooth. Downstream from the TestingBooth, the process should remain standard for the agent, which receives a package of data containing the data point. The agent has the responsibility to digest the data and perform pertinent granulations.
+
+### 8.4 Agent
+Wraps the Neural Network runtime. Normalizes data for input, interprets output nodes activation to turn them into actions.
+
+### 8.5 Environment
+Is what the agent interacts with. The agent gets information from the outside world (the training booth) and executes actions on the environment. In this case, the environment is a Trading Platform Interface that accepts specific actions and can expose data (like account balance) that the agent can pick.
+
+### 8.6 Neural Network Runtime (NNRT)
+The Neural Network Runtime (NNRT) component brings the static Neural Network (NN) metadata to life. The NN metadata, which is built after the corresponding genome, defines nodes and connections. The NN is effectively the phenotype, or the result of the genotype, which is the genome.
+
+#### 8.6.1 Properties of the NNRT
+
+1. **Dictionary<string, double> Input**:
+   - A collection of input values received from the agent's perceptors.
+   - Each input node maintains a **buffer** of past values for historical context.
+   - The buffer size is **genetically determined** and varies per node.
+   - When new data arrives, the oldest value is purged, maintaining a rolling set of entries.
+
+2. **Dictionary<string, double> Output**:
+   - A collection of output values processed by the output nodes.
+   - The result of the activation function is passed to all outgoing connections until the output nodes are reached.
+   - The change in the output property is notified so that the agent can listen to the property change and pass the values contained in the output to the respective Actuator.
+   - Outputs from earlier modules are **retained in Pre-Activation Buffers** until all dependent computations are complete.
+
+3. **List<Node> Nodes**:
+   - A collection of nodes in the neural network.
+   - Each node has a unique identifier, a bias, and a list of outgoing connections.
+   - Each node has a **genetic property determining how it consumes buffered input data**:
+     - **Scalar Mode**: Uses only the latest value.
+     - **Vector Mode**: Processes the entire buffer as an input array.
+   - The consumption mode is **determined by genetic mutation and evolves over time**.
+
+4. **List<Connection> Connections**:
+   - A collection of connections between nodes in the neural network.
+   - Each connection has a source node, a destination node, and a weight.
+
+5. **Modules**:
+   - The network is developed in **modules**, each assigned a unique **ModuleId**.
+   - Modules are trained **sequentially** and cannot be altered by later modules.
+   - **Nodes from newer modules cannot modify nodes in older modules**.
+   - Some modules are **truncated**, meaning they do not reach an output node but serve as intermediary computation layers.
+   - Each module is developed within a cycle that defines **evaluation metrics, output criteria, and learning objectives**.
+
+### 8.7 Evaluators
+Evaluate the behavior of the neural network or parts (modules) of the neural network and provide fitness scores to direct the evolution of the NN.
+
+### 8.8 DataManager
+Is in charge of providing the data against which the NN will be tested.
+
+## 9. Appendices
+
+### 9.1 Glossary of Terms
+Provide a glossary of terms used in the project to ensure a common understanding among team members.
+
+### 9.2 References and Resources
+List references and resources for further reading and research.
+
+### 9.3 Example Code Snippets
+Include example code snippets to illustrate key concepts and implementation details.

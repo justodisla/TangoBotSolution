@@ -36,7 +36,7 @@ This document defines the structure and properties of the Agent object in the Ta
    - The testing booth used to evaluate the agent's performance.
    - This component is responsible for running tests and collecting performance metrics.
 
-## Methods of the Agent
+## Methods of the Agentd
 
 1. **void Initialize()**:
    - Initializes the agent and its components.
@@ -59,6 +59,45 @@ This document defines the structure and properties of the Agent object in the Ta
 - The agent constantly listens to the `Output` property of the Neural Network Runtime. This property is an observable object (Dictionary<outputNode, double>).
 - When the `Output` property is updated within the Neural Network Runtime, the agent interprets the data contained and turns it into actions.
 - For each item in the `Output` object (Dictionary<outputNode, double>), the designer must include a script that will interpret the value and turn it into action performed on the Environment Object, which is passed as context to the script.
+
+
+## Perceptor Definition
+
+A Perceptor is a sensor associated with the agent that receives input from the environment. Each Perceptor has the following properties:
+
+1. **string Name**:
+   - The name of the Perceptor for reporting purposes.
+
+2. **string Description**:
+   - A description of the Perceptor.
+
+3. **Type DataType**:
+   - The data type that is going to be received by the Perceptor (e.g., double, int, array, image, etc.).
+
+Perceptors are responsible for capturing environmental data and passing it to the agent for processing. The data received by the Perceptors is normalized and used as input for the Neural Network Runtime.
+
+
+
+## Actuator Definition
+
+An Actuator is a component associated with the agent that performs actions on the environment based on the data received from the neural network's output nodes. Each Actuator has the following properties:
+
+1. **string Name**:
+   - The name of the Actuator for reporting purposes.
+
+2. **string Description**:
+   - A description of the Actuator.
+
+3. **double Output**:
+   - The output value from the neural network, ranging from -1 to 1. This value is interpreted by the agent's runtime component to perform an action on the environment.
+
+4. **string Script**:
+   - A script that interprets the output value and turns it into an action performed on the Environment Object. This script can be a non-compiled source.
+
+The agent runtime component must implement an interpreter that converts the output value into a specific action that it will exercise on the Environment interface (e.g., a Trading Platform). For each item in the `Output` object (Dictionary<outputNode, double>), the designer must include a script that will interpret the value and turn it into action performed on the Environment Object, which is passed as context to the script.
+
+
+
 
 ## Using Partial Classes
 
