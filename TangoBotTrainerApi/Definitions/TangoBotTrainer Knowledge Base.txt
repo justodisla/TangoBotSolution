@@ -129,7 +129,12 @@ Explain how the Agent interacts with the environment and the importance of this 
 
 ### 5.5 Evaluators
 Learning is guided by Evaluators that are introduced in the process at cycles of development or evolution. At each cycle, one or more Evaluators are introduced. The Evaluators curate certain behaviors and discourage others by providing rewards or punishments to the running NN as fitness scores. Such fitness scores will eventually be held by the neural network's genome. Learning concentrates on what is encouraged or discouraged by means of the Evaluators.
-
+Evaluators are not intended to be modified between cycles but between Epochs. Generally, it is not known to what extent an evaluator is responsible for the performance of the neural network until the Epoch ends. The adjustment of an evaluator that works on cycle 5 of a 10-cycle Epoch can be adjusted. This means that the training during other cycles besides cycle 5 will run very fast because the NN is already fit, but during cycle 5, it will have to be developed. Therefore, there is no difference in modifying the Evaluator. In conclusion, it is preferable to study the performance reports and how each evaluator directed the development at the end of the Epoch.
+Evaluators direct the development of the Neural Network by rewarding or penalizing observed behavior.
+They assess the performance by executing a logic that, in general, compares some information produced by the NN's work against its metrics for that specific case. For instance, an Evaluator that focuses on account drawdown might have a metric that tolerates a max drawdown of -8%. If at any time during the Iteration the drawdown falls to -8% or below, the Evaluator stores a score that will be injected into the current NN's genome. Later, when selection comes, the affected genome is compared to its siblings by the fitness score. This is done when the iteration ends because it makes no sense to qualify the performance amid the Iteration since the evolution selection, crossover, and mutation happen at the last phases of the Iteration.
+Evaluators can be set to assess the performance at the end of each Cursor process. This responds to the need of providing feedback to the NN to develop a predictive behavior. This type of Evaluator assesses decisions taken amid the Iteration and provides the NN with feedback. This kind of Evaluator can teach the NN to determine how likely it is that something happens before it happens by observing patterns that normally precede such occurrences. For example, an Evaluator can teach the NN to predict a real breakout from a resistance level by notifying the NN of the occurrence. This will prompt a mechanism to associate the feedback with the patterns registered in previous input data context by means of an Anticipatory Memory System. This system maintains a context of what happens periods before the feedback occurs. A memory management mechanism creates an entry in a memory repository that is associated with the feedback. The next time the same pattern becomes present, the feedback will be triggered but this time as a special input node that eventually other parts of the NN will feed from to make decisions that deal with the occurrence.
+Other types of Evaluators are designed to develop skills that do not end up in output nodes because these are intended to produce a value that should be used by other NN structures as input. The Evaluator defines the Module Output Node (MON). Other NN structures can connect to this MON.
+An Evaluator is a metadata that defines: Name, Description for reporting purposes, type (Iteration, feedback, partial module), Metrics, and a logic (JavaScript, Python, DLL, etc.) that is injected with a wide context of the system, the data, the environment, etc., and is responsible for performing the comparisons and publishing scores to the TestingBooth.
 ### 5.6 Evolution Process
 The evolution process is divided into periods or timeframes at different levels.
 
@@ -144,6 +149,78 @@ Each iteration comprises the following steps: Evaluation, Selection, Crossover, 
 
 #### 5.6.4 Cursor
 Within the Iteration, another recursive set of steps is executed, called Cursor. Cursor is repeated as long as there is testing data in the data set. When there is no more data or the end of data is reached, then control is passed to Iteration. Cursor happens during the Evaluation phase of Iteration. At each Cursor phase, data is passed to the agent, normalized, input to the NNRT, and the agent captures the output through its corresponding Actuators, turning it into action. Some evaluators might evaluate performance at the cursor level to provide feedback. Once the Cursor phase ends, a new data point is prepared and sent to the agent perceptors, and so on. Cursor processes one data point at a time in the case that it is databased. If the data is contained in a query table, then each record is a data point. The training booth picks one data point at a time, sends it to the agent as a single package. The agent is responsible for separating each field and directing it to the matching perceptor.
+
+### 5.7 Anticipatory Memory System (AMS)
+The Anticipatory Memory System (AMS) is a contextual, evolutionary memory system that enables TangoBot to anticipate extraordinary market events before they occur. Unlike classical neural network memory mechanisms (e.g., LSTMs, RNNs), AMS functions by storing pre-event conditions and recalling them when similar patterns emerge, influencing decision-making through predictive feedback.
+AMS is genetically controlled, meaning its structure evolves over generations. If AMS proves beneficial to TangoBot’s trading success, it persists and refines itself. If it does not contribute meaningfully, it mutates out of the genome, preventing unnecessary complexity.
+
+#### 5.7.1 Core Principles
+| Feature | Description | |------------|----------------| | Contextual Learning | AMS stores market conditions preceding major events (e.g., price crashes, volatility spikes). | | Predictive Feedback | When similar conditions reappear, AMS generates anticipatory warnings with a strength proportional to pattern similarity. | | Self-Generated Input | AMS feeds its warnings into a Feedback Node (FN), which acts as the neural network’s "pain/pleasure receptor." | | Evolutionary Refinement | AMS adapts over generations, optimizing what it stores and when it triggers warnings. | | Genetic Control | AMS’s memory slot capacity is determined by genetic mutations, preventing unnecessary memory depth. | | Taxation for Efficiency | AMS is heavily taxed per slot and per recall event to ensure it is only retained when truly beneficial. |
+
+#### 5.7.2 AMS Structure and Components
+A. Memory Nodes (MN) - Storing Context and Feedback
+Memory Nodes are not standard NN nodes; they operate as context-capturing elements that associate market conditions with positive or negative feedback.
+Each Memory Node consists of:
+•	Stored Context Elements – Historical data points leading up to an event.
+•	Feedback Association – A memory’s correlation to past profits/losses.
+•	Context Matching Algorithm – Determines how closely a new market condition matches a past one.
+•	Feedback Strength Calculation – Generates anticipatory warnings scaled by similarity to past events.
+Context Storage Example
+AMS records the last N timeframes before a large price drop (-3%).
+| Timeframe | Input Node | Value | |-----------|-----------|--------| | T-10      | Resistance Level | 4200 | | T-8       | RSI | 80 | | T-6       | Volatility | 25% | | T-4       | Downward Volume Spike | 1.5x avg | | T-2       | VIX | 30 |
+This context is stored with an initial correlation of 1.0 to the loss event. Over time, AMS refines correlation values to retain only the most predictive elements.
+B. Feedback Nodes (FN) - Pain/Pleasure Receptors
+Since TangoBot lacks biological pain receptors, Feedback Nodes (FN) serve as dedicated inputs that receive both:
+1.	Direct feedback from Evaluators (realized profit/loss).
+2.	Predicted feedback from AMS (anticipated market conditions).
+Each Feedback Node:
+•	Injects memory-driven anticipation as a self-generated input.
+•	Distributes feedback to influence trading decisions.
+•	Competes for survival through evolutionary selection.
+Example FN Output in a Market Downturn
+| Timeframe | Matching Context % | AMS Feedback Output | |-----------|-----------------|------------------| | T-10      | 35% match | Weak warning (0.2) | | T-5       | 65% match | Moderate warning (0.5) | | T-2       | 90% match | Strong warning (0.9) | | T-1       | 98% match | Critical warning (1.0) |
+This feedback is used by the NN to adjust position sizing, hedge risk, or avoid trades entirely.
+C. Context Matching and Feedback Scaling
+AMS uses pattern recognition to determine if an incoming market condition resembles a past extreme event. It employs:
+•	Vector Similarity (Cosine, Euclidean Distance)
+•	Feature Weighting (Some signals matter more than others)
+•	Adaptive Learning (Correlations adjust over time)
+Full vs. Partial Matching:
+•	Full Match → Memory is fully relevant, feedback is strong.
+•	Partial Match → Feedback is scaled proportionally.
+•	No Match → No feedback is produced.
+Example: AMS detects a 75% match to a past loss event → Generates 0.75 intensity warning.
+
+feedback_strength = memory_node.calculate_feedback_strength(current_context)
+feedback_node.receive_feedback(feedback_strength)
+
+#### 5.7.3 AMS Evolutionary Process
+AMS does not randomly evolve like traditional NN structures. Instead, it competes for survival in an evolutionary framework.
+Genetic Mutation of AMS
+•	Memory Slot Count is Genetically Determined → More slots allow deeper memory but increase computational cost.
+•	Slot Count Mutations → AMS may gain or lose slots based on utility.
+•	Structural Evolution → If AMS proves beneficial, its structure refines across generations.
+Selection Criteria for AMS Survival
+| Condition | Action | |-----------|--------| | AMS reduces losses or increases gains | Retain in genome | | AMS rarely activates | Reduce slot count | | AMS activates too late to be useful | Improve recall weighting | | AMS increases caution to an unnecessary degree | Adjust correlation parameters | | AMS proves ineffective over generations | Mutation removes AMS |
+
+#### 5.7.4 AMS Taxation for Efficiency
+Since AMS is computationally expensive, it incurs a heavy tax, discouraging wasteful memory retention.
+Taxation Model
+[ T(AMS) = C_1 + C_2 \times \text{Slot Count} + C_3 \times \text{Recall Frequency} + C_4 \times \text{Complexity} ]
+Where:
+•	( C_1 ) = Base AMS tax.
+•	( C_2 ) = Cost per memory slot.
+•	( C_3 ) = Cost per feedback recall.
+•	( C_4 ) = Complexity penalty for deep memory systems.
+Example Tax Calculation
+•	AMS with 20 slots, recalls 5 times per day, and tracks 10 context elements:
+
+ T(AMS) = 10 + 0.5 \times 20 + 0.1 \times 5 + 0.2 \times 10 = 10 + 10 + 0.5 + 2 = 22.5
+
+•	If AMS fails to improve trading, this cost forces its removal.
+
+#### 5.7.5 AMS Summary Table
+| Feature | Description | |---------|------------| | Predictive Capability | Warns the NN of extreme market events before they happen. | | Contextual Learning | Stores market conditions before feedback events to recognize future patterns. | | Self-Generated Inputs | Feeds predictive feedback to the NN via Feedback Nodes (FN). | | Genetic Mutation Control | AMS evolves or disappears based on its usefulness. | | Memory Slot Taxation | Slots are taxed per unit to prevent unnecessary depth. | | Selection Pressure | AMS is removed if it does not improve TangoBot’s performance. |
 
 ## 6. Development Practices
 
