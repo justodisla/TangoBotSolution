@@ -74,13 +74,439 @@ Outline the primary goals and objectives of the project.
 ## 2. Conceptual Overview
 
 ### 2.1 Agent
-Describe the concept of an Agent, its properties, and its role in the project.
+
+An Agent in the TangoBotTrainer project is a metadata definition created by the user through a GUI. It represents the physical body of a specimen, while the Neural Network (NN) represents the brain. The Agent interacts with the environment through its perceptors and actuators, which serve as its senses and limbs, respectively.
+
+#### Properties of the Agent
+
+1. **string Name**:
+   - The name of the agent.
+   - This value is assigned at the time of agent creation and remains constant.
+
+2. **string Description**:
+   - A description of the agent.
+   - This value provides information about the agent's purpose and functionality.
+
+3. **List<IPerceptor> Perceptors**:
+   - A collection of perceptors associated with the agent.
+   - Perceptors are sensors that receive input from the environment.
+   - Each perceptor specifies:
+     - **string Name**: The name of the perceptor for reporting purposes.
+     - **string Description**: A description of the perceptor.
+     - **Type DataType**: The data type that is going to be received (e.g., double, int, array, image, etc.).
+
+4. **List<IActuator> Actuators**:
+   - A collection of actuators associated with the agent.
+   - Actuators perform actions on the environment based on the data received by the agent from the neural network's output nodes.
+   - Each actuator specifies:
+     - **string Name**: The name of the actuator for reporting purposes.
+     - **string Description**: A description of the actuator.
+     - The output is a double value from -1 to 1. The agent runtime component must implement an interpreter that converts the output value into an action that it will exercise on the Environment interface (e.g., a Trading Platform).
+
+5. **IEnvInterface EnvInterface**:
+   - The environment interface that the agent interacts with.
+   - This interface defines how the agent communicates with the environment.
+
+6. **ITestingBooth TestingBooth**:
+   - The testing booth used to evaluate the agent's performance.
+   - This component is responsible for running tests and collecting performance metrics.
+
+#### Methods of the Agent
+
+1. **void Initialize()**:
+   - Initializes the agent and its components.
+   - Sets up the perceptors, actuators, and environment interface.
+
+2. **void UpdatePerceptors(Dictionary<string, object> data)**:
+   - Updates the agent's perceptors with new input data from the environment.
+   - Processes the input data, normalizes it, and stores it in the perceptors.
+   - The normalization of all the values received through the perceptors is the responsibility of the Agent's runtime component.
+   - The agent waits passively for the data to come from the TestingBooth. The update frequency of the agent's perceptors is determined by the TestingBooth.
+   - The agent preprocesses and normalizes the data and distributes these values to the NN input nodes by passing them to the Neural Network Runtime exposed method `Input(Dictionary<string, double> processedData)`.
+
+#### Runtime Component
+
+- At runtime, a `RuntimeAgentComponent` is instantiated using the metadata as input for the instantiated agent class.
+- On each project, only one agent should be defined, although many agents will be instantiated at runtime, each one with its respective Neural Network as a brain.
+- The agent represents the physical body of a specimen, while the Neural Network represents the brain.
+- The perceptors represent the senses, while the actuators represent the arms, hands, legs, or any other means by which the specimen can interact with the environment.
+- Inside the agent lives a Neural Network. The NN is a metadata that describes nodes and connections created after the genome. To execute the NN, it is wrapped in a Neural Network Runtime that processes the received information through the input and updates a property to which the Agent listens.
+- The agent constantly listens to the `Output` property of the Neural Network Runtime. This property is an observable object (Dictionary<outputNode, double>).
+- When the `Output` property is updated within the Neural Network Runtime, the agent interprets the data contained and turns it into actions.
+- For each item in the `Output` object (Dictionary<outputNode, double>), the designer must include a script that will interpret the value and turn it into action performed on the Environment Object, which is passed as context to the script.
+
+#### Perceptor Definition
+
+A Perceptor is a sensor associated with the agent that receives input from the environment. Each Perceptor has the following properties:
+
+1. **string Name**:
+   - The name of the Perceptor for reporting purposes.
+
+2. **string Description**:
+   - A description of the Perceptor.
+
+3. **Type DataType**:
+   - The data type that is going to be received by the Perceptor (e.g., double, int, array, image, etc.).
+
+Perceptors are responsible for capturing environmental data and passing it to the agent for processing. The data received by the Perceptors is normalized and used as input for the Neural Network Runtime.
+
+#### Actuator Definition
+
+An Actuator is a component associated with the agent that performs actions on the environment based on the data received from the neural network's output nodes. Each Actuator has the following properties:
+
+1. **string Name**:
+   - The name of the Actuator for reporting purposes.
+
+2. **string Description**:
+   - A description of the Actuator.
+
+3. **double Output**:
+   - The output value from the neural network, ranging from -1 to 1. This value is interpreted by the agent's runtime component to perform an action on the environment.
+
+4. **string Script**:
+   - A script that interprets the output value and turns it into an action performed on the Environment Object. This script can be a non-compiled source.
+
+The agent runtime component must implement an interpreter that converts the output value into a specific action that it will exercise on the Environment interface (e.g., a Trading Platform). For each item in the `Output` object (Dictionary<outputNode, double>), the designer must include a script that will interpret the value and turn it into action performed on the Environment Object, which is passed as context to the script.
 
 ### 2.2 Neural Network (NN)
 Explain the concept of a Neural Network, its structure, and its purpose.
 
 ### 2.3 Genome
-Define the concept of a Genome, its properties, and its significance in the project.
+
+A Genome in the TangoBotTrainer project defines the structure and properties of the genetic representation of a neural network. It is responsible for encoding the neural network's architecture and facilitating evolutionary processes such as mutation and crossover.
+
+#### Properties of the Genome
+
+1. **int CurrentModuleId**:
+   - This value is set by the Campaign object when a new cycle starts.
+   - Genes created during the current cycle will hold this number permanently.
+   - This value is an integer because at each cycle a new value (1, 2, 3, ...) is given.
+   - The cycle is a part of the evolutive stage where a skill or set of skills is developed by the genome.
+   - The value is called a module because it refers to the genes structure developed during a specific cycle.
+   - In the neural network, the genes structure developed during, for instance, Cycle 1, will carry the ModuleId 1.
+   - This helps during evolution mutations by preventing old modules that are already trained and well developed from being modified by later mutations, thus avoiding the issue of "forgetting."
+
+2. **DateTime TimeCreated**:
+   - The time at which the Genome was created. This helps determine the age of the genome.
+   - This value is entered at instantiation.
+
+3. **List<IGene> Genes**:
+   - The collection of genes in this genome.
+
+4. **string Species**:
+   - A random animal name given to the species this genome belongs to.
+   - This name is entered at the moment the genome's species is determined.
+   - This value is set by an external component.
+
+5. **double Fitness**:
+   - The score given to this genome by the Inspector component when its performance is evaluated.
+
+6. **IAgent Agent**:
+   - The agent is set by the factory in charge of creating genomes.
+   - The agent is important because in the Agent the perceptors and actuators are defined and that is how the minimal genome genes are determined (input and output nodes).
+
+#### Methods of the Genome
+
+1. **IGenome CreateBasicGenome(IAgent agent)**:
+   - Creates the basic genome based on the Agent's perceptors and actuators.
+   - Initializes input nodes based on the agent's perceptors.
+   - Initializes output nodes based on the agent's actuators.
+   - Initializes a bias node.
+   - No connections are created at this point; subsequent mutations will create connections.
+   - **Returns**: The created basic genome.
+
+2. **void Mutate(MutationLevels mutationLevel)**:
+   - Mutates the current genome instance.
+   - Applies mutations to genes based on the specified mutation level.
+   - Mutations can include changes to gene properties, enabling/disabling genes, and adding/removing genes.
+   - This method modifies the current instance and does not return any value.
+
+3. **IGenome Crossover(IGenome partner, MutationLevels mutationLevel = 0)**:
+   - Performs crossover with another genome to create a new genome.
+   - Combines genes from both parent genomes based on the specified mutation level.
+   - Ensures the resulting genome inherits traits from both parents.
+   - **Returns**: The new genome created from the crossover.
+
+4. **IGenome[] Speciate(int speciesCount, int siblingsCount = 0)**:
+   - Creates a number of species from the current genome, ensuring that new genomes are of different species.
+   - Divides the current genome into multiple species based on genetic diversity.
+   - Optionally creates siblings within each species.
+   - **Returns**: An array of new genomes representing different species.
+
+5. **IGenome[] SpawnSiblingGenomes(int count, MutationLevels mutationLevels = MutationLevels.DEFAULT)**:
+   - Creates a number of siblings from the current genome.
+   - Siblings are mutated versions of the current genome but remain in the same species.
+   - Applies mutations to create genetic diversity among siblings.
+   - **Returns**: An array of sibling genomes.
+
+6. **IGene.IConnectionGene AddConnection(int fromNode, int toNode, double weight)**:
+   - Adds a new connection gene to the genome.
+   - Creates a connection between the specified nodes with the given weight.
+   - Ensures the connection adheres to the established genome policies.
+   - **Returns**: The added connection gene.
+
+7. **void AddNewConnection()**:
+   - Adds a new connection gene to the genome.
+   - Randomly selects nodes to create a new connection.
+   - Ensures the connection adheres to the established genome policies.
+
+8. **IGene.INodeGene AddNewNode()**:
+   - Adds a new node gene to the genome.
+   - Creates a new node and integrates it into the genome's structure.
+   - Ensures the new node adheres to the established genome policies.
+   - **Returns**: The added node gene.
+
+9. **void FixStructure()**:
+   - Fixes the structure of the genome to ensure it adheres to the established policies.
+   - Resolves any structural issues, such as dangling genes or invalid connections.
+   - Ensures the genome remains functional and consistent.
+
+10. **double CalculateGeneticDifference(IGenome otherGenome)**:
+    - Calculates the genetic difference between the current genome and another genome.
+    - Evaluates genetic similarity and differences between the two genomes.
+    - Returns a number between 0 and 1, where 0 means no difference and 1 means completely different.
+    - **Returns**: A double indicating the genetic difference between the genomes.
+
+11. **void AddRandomGene(MutationLevels mutationLevel)**:
+    - Adds a random gene to the genome based on the mutation level.
+    - Randomly selects a gene type and integrates it into the genome.
+    - Ensures the new gene adheres to the established genome policies.
+
+#### Using Partial Classes
+
+To manage the complexity of the `Genome` class, we use partial classes to divide groups of functionalities by categories. This approach keeps related methods together while maintaining a clean and organized codebase.
+
+### Example Structure with Partial Classes
+
+1. **Genome.cs**: Core properties and methods.
+2. **Genome.Mutation.cs**: Methods related to mutations.
+3. **Genome.Structure.cs**: Methods related to structure management.
+
+
+### Genome Policies
+
+This document establishes the policies for dealing with genome structures in the TangoBotTrainer project. These policies serve as guidelines for creating and modifying genome structure elements.
+
+#### Connection Policies
+
+1. **About Cycles**:
+   - A cycle is a training routine where a discrete set of skills are developed by the genome's neural network.
+   - During a cycle, all genes created into the genome are marked with a ModuleId that indicates the cycle to which the gene belongs.
+   - During the cycle, many iterations of training are run to develop, by genome evolution (evaluating, segregating, crossover and mutation), the skills or set of skills designated to be developed during the cycle.
+   - After the cycle is completed, the genome's neural network should be proficient in executing the skills intended to be developed during such cycle.
+   - While during a cycle, a genome's property called ModuleId is assigned a new value to mark each gene created within the cycle, with such ModuleId. When the cycle is done, all genes created during it will have been marked with the corresponding ModuleId. This will prevent that on future cycles, older modules that comprise genes well fit for their tasks, to be altered causing them to forget their skills. It also helps the genome structure methods to implement rules that prevent new modules from contaminating old well-established modules.
+
+2. **About Modules**:
+   - Modules consist of a group of genes developed during a specific cycle. During such cycle, the genome's neural network was being developed to perform a specific task or series of tasks.
+   - Modules are used to separate the genome's neural network into different sections, each with its own set of genes.
+   - Each gene has a property ModuleId which indicates the module to which the gene belongs.
+   - New modules cannot influence older modules by creating connections from recent modules' nodes to older modules' nodes.
+   - New modules can use information from older modules (only read) by creating connections FROM older modules' nodes TO recent modules' nodes. This ensures that skills learned in older modules cannot be overwritten by new modules and ensures that new modules can benefit from the learned skills of older modules.
+   - Original nodes like input, output, and bias nodes are not part of any module. So any node of any module during any cycle can be connected from and to these nodes.
+
+3. **Connection Rules**:
+   - **Connection Direction**:
+     - Connections within the same module must go from left to right, from a node in a layer with a lower layer number to a node on a layer with a higher layer number.
+     - Connections can go from one node to another node on the same layer.
+     - Input nodes are on layer 0, hidden nodes are on layers 1 to 99, and output nodes are on layer 100.
+   - **Node Restrictions**:
+     - The origin node cannot be an output node.
+     - The origin node cannot be disabled.
+     - Connections can have the same node as input and output.
+   - **Existing Connections**:
+     - Connections cannot be created if another connection already exists between the same nodes unless the previous connection gene is disabled.
+     - A connection is considered as existing if the FromNode and ToNode properties are the same as the new connection.
+     - Connections from and to the same node cannot be repeated unless the previous connection is disabled.
+   - **Connection Weight**:
+     - If the weight is -99, a random weight (double) between -1 and 1 is assigned at the time of creation.
+   - **Connection State**:
+     - Connections cannot be created in a disabled state. They can only be disabled by gene mutation.
+   - **Connection Mutation**:
+     - A connection can be mutated by changing its weight, enabling or disabling it, or changing the FromNode or ToNode properties.
+     - The connection weight mutation consists of adding or subtracting a percentage value of the current weight. The percentage value is a random value between .0001 to a random value between 0.001 to a value that depends on the mutationLevel. A CLOSE_SIBLING mutationLevel will have a lower value than an INTERSPECIES mutationLevel, which might have a high value. This ensures that mutations are slight at low mutationLevels and more drastic at higher mutationLevels.
+
+#### Node Policies
+
+1. **Node Types**:
+   - Special nodes (input, output, bias) cannot be added.
+   - New nodes can be connected from and to nodes in the same layer.
+   - New nodes can have one recursive connection to itself.
+
+2. **Layer Assignment**:
+   - The layer where the node is added is random from 1 to 99. Layer 0 is reserved for input nodes, and layer 100 is reserved for output nodes.
+
+3. **Connections for New Nodes**:
+   - New nodes should be connected from a node to the left that can be an input node or a hidden node.
+   - New nodes can have connections from another node in another older module but cannot be connected to a node in another older module except output node.
+   - New nodes can fall amid an existing connection. In this case, the existing connection changes the ToNode for the new node, and a new connection is created to connect the new node to the node formerly connected to the severed connection. The weight of the new connection is the same as the severed connection.
+
+#### Removal Policies
+
+1. **Removing Genes**:
+   - Removing a gene of any type means setting the property enabled to false, effectively disabling the gene.
+   - Disabled genes cannot be disabled again.
+   - The removed genes keep their innovation number and are not removed from the genome.
+   - Removed (disabled) genes can be later re-enabled by mutation.
+   - When a gene is removed, the FixGenome method should be called to fix the genome structure.
+
+2. **Removing Nodes**:
+   - Only hidden nodes can be removed.
+   - When a node is removed:
+     - Connections that are connected to the node are also removed.
+     - Connections that are connected from the node are also removed.
+     - If the node is connected to itself, the connection is also removed.
+     - If removing the node leaves other nodes orphaned (no incoming connections), new connections are created to connect the orphaned node to the node that the removed node was connected to, ensuring no duplicate connections.
+     - If removing the node leaves other nodes leaf (no outgoing connections), new connections are created to connect the leaf node to the node to which the removed node was connected to, ensuring no duplicate connections.
+   - After removing a node, the FixGenome method should be called to fix the genome structure.
+
+3. **Removing Connections**:
+   - Connections can only be removed if they are enabled.
+
+#### Fixing Genome Structure
+
+1. **Fixing Dangling Genes**:
+   - The FixGenome method should be called to amend any dangling genes after any structural change in the genome.
+   - For dangling connections (connections missing one or both nodes), the method should:
+     - Reconnect the connection if it is missing the from node.
+     - Reconnect the connection if it is missing the to node.
+   - Remove nodes with no connections.
+   - Reconnect orphaned or leaf nodes to ensure they have incoming and outgoing connections.
+
+#### General Policies
+
+1. **Random Selection**:
+   - When selecting random nodes or connections, ensure the selection adheres to the specified restrictions (e.g., module, layer, side).
+
+2. **Validation**:
+   - Always validate the nodes and connections before creating or modifying them to ensure they adhere to the established policies.
+
+
+### Mutation Policies
+
+This document establishes the policies for mutating genome structures in the TangoBotTrainer project. These policies serve as guidelines for creating and modifying genome structure elements through mutation.
+
+#### General Mutation Policies
+
+1. **Mutation Levels**:
+   - Mutations are categorized into different levels based on their impact: CLOSE_SIBLINGS, FAR_SIBLINGS, SPECIATION, EXTREME, and RANDOM.
+   - CLOSE_SIBLINGS mutations are slight and have a lower impact, allowing the genome to mutate very gradually. This kind of mutation most likely will not render the mutated genome as another species.
+   - FAR_SIBLINGS mutations introduce serious changes that might render the mutated genome as one of the same species but very different. It might end up being a different species but with similarities.
+   - SPECIATION mutations have severe effects, rendering the mutated genome most likely into another species.
+   - EXTREME mutations will do the most radical changes to the mutated genome, introduced to search for an out-of-the-box solution.
+   - RANDOM mutations can be any of the previous mutation levels randomly.
+
+2. **Random Selection**:
+   - When selecting random nodes or connections for mutation, ensure the selection adheres to the specified restrictions (e.g., module, layer, side).
+
+3. **Validation**:
+   - Always validate the nodes and connections before and after mutation to ensure they adhere to the established policies.
+
+#### Connection Mutation Policies
+
+1. **Connection Weight Mutation**:
+   - A connection's weight can be mutated by adding or subtracting a random N% of the current weight.
+   - N% is established by selecting a random number between 1% to X%, where X% depends on the mutation level.
+   - CLOSE_SIBLINGS mutations have a lower percentage value.
+   - FAR_SIBLINGS mutations have a moderate percentage value.
+   - SPECIATION mutations have a higher percentage value.
+   - EXTREME mutations have the highest percentage value.
+
+2. **Connection State Mutation**:
+   - Connections can be enabled or disabled through mutation.
+   - Connections cannot be created in a disabled state. They can only be disabled by gene mutation.
+
+3. **Connection Node Mutation**:
+   - A connection can be mutated by changing its FromNode or ToNode properties.
+   - Ensure that the new nodes adhere to the connection rules specified in the Genome Policies.
+
+#### Node Mutation Policies
+
+1. **Node Addition**:
+   - New nodes can be added through mutation.
+   - The layer where the node is added is random from 1 to 99. Layer 0 is reserved for input nodes, and layer 100 is reserved for output nodes.
+   - New nodes can be connected from and to nodes in the same layer.
+   - New nodes can have one recursive connection to itself.
+
+2. **Node Removal**:
+   - Only hidden nodes can be removed through mutation.
+   - When a node is removed:
+     - Connections that are connected to the node are also removed.
+     - Connections that are connected from the node are also removed.
+     - If the node is connected to itself, the connection is also removed.
+     - If removing the node leaves other nodes orphaned (no incoming connections), new connections are created to connect the orphaned node to the node that the removed node was connected to, ensuring no duplicate connections.
+     - If removing the node leaves other nodes leaf (no outgoing connections), new connections are created to connect the leaf node to the node to which the removed node was connected to, ensuring no duplicate connections.
+   - After removing a node, the FixGenome method should be called to fix the genome structure.
+
+3. **Node Bias Mutation**:
+   - A node's bias can be mutated by adding or subtracting a random N% of the current bias.
+   - N% is established by selecting a random number between 1% to X%, where X% depends on the mutation level.
+   - CLOSE_SIBLINGS mutations have a lower percentage value.
+   - FAR_SIBLINGS mutations have a moderate percentage value.
+   - SPECIATION mutations have a higher percentage value.
+   - EXTREME mutations have the highest percentage value.
+
+4. **Node Layer Mutation**:
+   - Nodes can mutate by changing their layer number.
+   - The node can be "moved" one layer or more to the right or to the left depending on the level of mutation.
+   - This mutation should be rare and more rare to straddle over layers.
+   - After this mutation, the structure must be fixed.
+
+#### Gene Selection for Mutation
+
+1. **Selection Percentage**:
+   - The number of genes selected for mutation is determined by a percentage of the available genes.
+   - The percentage is calculated by selecting a number from 1% to N%, where N% is determined from a random range influenced by the MutationLevel.
+
+2. **MutationLevel Ranges**:
+   - CLOSE_SIBLINGS: 1% to 5%
+   - FAR_SIBLINGS: 1% to 10%
+   - SPECIATION: 1% to 20%
+   - EXTREME: 1% to 30%
+
+3. **Selection Process**:
+   - Determine the range for N% based on the MutationLevel.
+   - Select a random percentage within the range.
+   - Shuffle the Genes collection, excluding genes from other modules.
+   - Calculate the number of genes to be selected based on the percentage.
+   - Randomly select the calculated number of genes from the top of the shuffled list for mutation.
+   - Mutate each selected gene.
+
+#### Mutation Coefficients
+
+1. **ValueMutation Coefficients**:
+   - CLOSE_SIBLINGS: 0.1 to 0.2
+   - FAR_SIBLINGS: 0.2 to 0.5
+   - SPECIATION: 0.5 to 1.0
+   - EXTREME: 1.0 to 2.0
+
+2. **StructuralMutation Coefficients**:
+   - CLOSE_SIBLINGS: 0.05 to 0.1
+   - FAR_SIBLINGS: 0.1 to 0.3
+   - SPECIATION: 0.3 to 0.6
+   - EXTREME: 0.6 to 1.0
+
+#### Selecting Elements for Mutation
+
+1. **Selection Percentage**:
+   - A N% of the items of the shuffled eligible genes collection is selected for mutation.
+   - The N% is determined by randomly selecting a value from 1 to X, where X is determined by the structural mutation level.
+
+#### Mutating Gene Value (bias, weight)
+
+1. **Value Mutation**:
+   - A N% of the original value is added (or subtracted).
+   - The N% is determined by randomly selecting a value from 1 to X, where X is determined by the value mutation level.
+
+#### Fixing Genome Structure
+
+1. **Fixing Dangling Genes**:
+   - The FixGenome method should be called to amend any dangling genes after any structural change in the genome.
+   - For dangling connections (connections missing one or both nodes), the method should:
+     - Reconnect the connection if it is missing the from node.
+     - Reconnect the connection if it is missing the to node.
+   - Remove nodes with no connections.
+   - Reconnect orphaned or leaf nodes to ensure they have incoming and outgoing connections.
+
 
 ### 2.4 Neural Network Runtime (NNRT)
 Describe the Neural Network Runtime component, its role, and how it brings the static NN metadata to life.
@@ -151,11 +577,21 @@ Each iteration comprises the following steps: Evaluation, Selection, Crossover, 
 Within the Iteration, another recursive set of steps is executed, called Cursor. Cursor is repeated as long as there is testing data in the data set. When there is no more data or the end of data is reached, then control is passed to Iteration. Cursor happens during the Evaluation phase of Iteration. At each Cursor phase, data is passed to the agent, normalized, input to the NNRT, and the agent captures the output through its corresponding Actuators, turning it into action. Some evaluators might evaluate performance at the cursor level to provide feedback. Once the Cursor phase ends, a new data point is prepared and sent to the agent perceptors, and so on. Cursor processes one data point at a time in the case that it is databased. If the data is contained in a query table, then each record is a data point. The training booth picks one data point at a time, sends it to the agent as a single package. The agent is responsible for separating each field and directing it to the matching perceptor.
 
 ### 5.7 Anticipatory Memory System (AMS)
+
 The Anticipatory Memory System (AMS) is a contextual, evolutionary memory system that enables TangoBot to anticipate extraordinary market events before they occur. Unlike classical neural network memory mechanisms (e.g., LSTMs, RNNs), AMS functions by storing pre-event conditions and recalling them when similar patterns emerge, influencing decision-making through predictive feedback.
 AMS is genetically controlled, meaning its structure evolves over generations. If AMS proves beneficial to TangoBot’s trading success, it persists and refines itself. If it does not contribute meaningfully, it mutates out of the genome, preventing unnecessary complexity.
 
 #### 5.7.1 Core Principles
-| Feature | Description | |------------|----------------| | Contextual Learning | AMS stores market conditions preceding major events (e.g., price crashes, volatility spikes). | | Predictive Feedback | When similar conditions reappear, AMS generates anticipatory warnings with a strength proportional to pattern similarity. | | Self-Generated Input | AMS feeds its warnings into a Feedback Node (FN), which acts as the neural network’s "pain/pleasure receptor." | | Evolutionary Refinement | AMS adapts over generations, optimizing what it stores and when it triggers warnings. | | Genetic Control | AMS’s memory slot capacity is determined by genetic mutations, preventing unnecessary memory depth. | | Taxation for Efficiency | AMS is heavily taxed per slot and per recall event to ensure it is only retained when truly beneficial. |
+
+| Feature                | Description                                                                                                               |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| Contextual Learning    | AMS stores market conditions preceding major events (e.g., price crashes, volatility spikes).                             |
+| Predictive Feedback    | When similar conditions reappear, AMS generates anticipatory warnings with a strength proportional to pattern similarity. |
+| Self-Generated Input   | AMS feeds its warnings into a Feedback Node (FN), which acts as the neural network’s "pain/pleasure receptor."            |
+| Evolutionary Refinement| AMS adapts over generations, optimizing what it stores and when it triggers warnings.                                     |
+| Genetic Control        | AMS’s memory slot capacity is determined by genetic mutations, preventing unnecessary memory depth.                       |
+| Taxation for Efficiency| AMS is heavily taxed per slot and per recall event to ensure it is only retained when truly beneficial.                   |
+
 
 #### 5.7.2 AMS Structure and Components
 A. Memory Nodes (MN) - Storing Context and Feedback
@@ -167,7 +603,16 @@ Each Memory Node consists of:
 •	Feedback Strength Calculation – Generates anticipatory warnings scaled by similarity to past events.
 Context Storage Example
 AMS records the last N timeframes before a large price drop (-3%).
-| Timeframe | Input Node | Value | |-----------|-----------|--------| | T-10      | Resistance Level | 4200 | | T-8       | RSI | 80 | | T-6       | Volatility | 25% | | T-4       | Downward Volume Spike | 1.5x avg | | T-2       | VIX | 30 |
+
+| Timeframe | Input Node            | Value    |
+|-----------|-----------------------|----------|
+| T-10      | Resistance Level      | 4200     |
+| T-8       | RSI                   | 80       |
+| T-6       | Volatility            | 25%      |
+| T-4       | Downward Volume Spike | 1.5x avg |
+| T-2       | VIX                   | 30       |
+
+
 This context is stored with an initial correlation of 1.0 to the loss event. Over time, AMS refines correlation values to retain only the most predictive elements.
 B. Feedback Nodes (FN) - Pain/Pleasure Receptors
 Since TangoBot lacks biological pain receptors, Feedback Nodes (FN) serve as dedicated inputs that receive both:
@@ -178,13 +623,22 @@ Each Feedback Node:
 •	Distributes feedback to influence trading decisions.
 •	Competes for survival through evolutionary selection.
 Example FN Output in a Market Downturn
-| Timeframe | Matching Context % | AMS Feedback Output | |-----------|-----------------|------------------| | T-10      | 35% match | Weak warning (0.2) | | T-5       | 65% match | Moderate warning (0.5) | | T-2       | 90% match | Strong warning (0.9) | | T-1       | 98% match | Critical warning (1.0) |
+
+| Timeframe | Matching Context %  | AMS Feedback Output    |
+|-----------|---------------------|------------------------|
+| T-10      | 35% match           | Weak warning (0.2)     |
+| T-5       | 65% match           | Moderate warning (0.5) |
+| T-2       | 90% match           | Strong warning (0.9)   |
+| T-1       | 98% match           | Critical warning (1.0) |
+
+
 This feedback is used by the NN to adjust position sizing, hedge risk, or avoid trades entirely.
-C. Context Matching and Feedback Scaling
-AMS uses pattern recognition to determine if an incoming market condition resembles a past extreme event. It employs:
+
+C. Context Matching and Feedback Scaling AMS uses pattern recognition to determine if an incoming market condition resembles a past extreme event. It employs:
 •	Vector Similarity (Cosine, Euclidean Distance)
 •	Feature Weighting (Some signals matter more than others)
 •	Adaptive Learning (Correlations adjust over time)
+
 Full vs. Partial Matching:
 •	Full Match → Memory is fully relevant, feedback is strong.
 •	Partial Match → Feedback is scaled proportionally.
@@ -201,7 +655,15 @@ Genetic Mutation of AMS
 •	Slot Count Mutations → AMS may gain or lose slots based on utility.
 •	Structural Evolution → If AMS proves beneficial, its structure refines across generations.
 Selection Criteria for AMS Survival
-| Condition | Action | |-----------|--------| | AMS reduces losses or increases gains | Retain in genome | | AMS rarely activates | Reduce slot count | | AMS activates too late to be useful | Improve recall weighting | | AMS increases caution to an unnecessary degree | Adjust correlation parameters | | AMS proves ineffective over generations | Mutation removes AMS |
+
+| Condition                                      | Action                          |
+|------------------------------------------------|---------------------------------|
+| AMS reduces losses or increases gains          | Retain in genome                |
+| AMS rarely activates                           | Reduce slot count               |
+| AMS activates too late to be useful            | Improve recall weighting        |
+| AMS increases caution to an unnecessary degree | Adjust correlation parameters   |
+| AMS proves ineffective over generations        | Mutation removes AMS            |
+
 
 #### 5.7.4 AMS Taxation for Efficiency
 Since AMS is computationally expensive, it incurs a heavy tax, discouraging wasteful memory retention.
@@ -221,6 +683,25 @@ Example Tax Calculation
 
 #### 5.7.5 AMS Summary Table
 | Feature | Description | |---------|------------| | Predictive Capability | Warns the NN of extreme market events before they happen. | | Contextual Learning | Stores market conditions before feedback events to recognize future patterns. | | Self-Generated Inputs | Feeds predictive feedback to the NN via Feedback Nodes (FN). | | Genetic Mutation Control | AMS evolves or disappears based on its usefulness. | | Memory Slot Taxation | Slots are taxed per unit to prevent unnecessary depth. | | Selection Pressure | AMS is removed if it does not improve TangoBot’s performance. |
+
+#### 5.7.6 Potential Benefits of Implementing AMS
+1.	Predictive Capability:
+•	AMS can warn the neural network (NN) of extreme market events before they happen by recognizing patterns that precede such events. This allows TangoBot to take preemptive actions to mitigate risks or capitalize on opportunities.
+2.	Contextual Learning:
+•	AMS stores market conditions preceding major events (e.g., price crashes, volatility spikes) and uses this historical context to improve decision-making. This helps TangoBot to better understand and react to market dynamics.
+3.	Enhanced Decision-Making:
+•	By feeding predictive feedback into the NN via Feedback Nodes (FN), AMS helps the NN to make more informed decisions. This can lead to improved trading performance and reduced losses.
+4.	Evolutionary Refinement:
+•	AMS adapts over generations, optimizing what it stores and when it triggers warnings. This continuous improvement ensures that AMS remains relevant and effective in changing market conditions.
+5.	Genetic Control:
+•	AMS’s memory slot capacity is determined by genetic mutations, preventing unnecessary memory depth. This ensures that AMS remains efficient and does not consume excessive computational resources.
+6.	Taxation for Efficiency:
+•	AMS is heavily taxed per slot and per recall event to ensure it is only retained when truly beneficial. This discourages wasteful memory retention and promotes the use of only the most valuable memory slots.
+7.	Improved Risk Management:
+•	AMS can help TangoBot to better manage risks by providing early warnings of potential market downturns or other adverse events. This allows TangoBot to adjust its trading strategies accordingly.
+8.	Competitive Advantage:
+•	Implementing AMS can give TangoBot a competitive edge by enabling it to anticipate and react to market events more effectively than other trading systems that do not have such predictive capabilities.
+Overall, AMS enhances TangoBot's ability to learn from past market conditions, predict future events, and make more informed trading decisions, leading to improved performance and reduced risks.
 
 ## 6. Development Practices
 
