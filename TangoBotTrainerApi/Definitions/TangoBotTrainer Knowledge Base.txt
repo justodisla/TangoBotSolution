@@ -81,11 +81,11 @@ An Agent in the TangoBotTrainer project is a metadata definition created by the 
 
 1. **string Name**:
    - The name of the agent.
-   - This value is assigned at the time of agent creation and remains constant.
+   - This value is assigned at the time of agent creation and remains readonly.
 
 2. **string Description**:
    - A description of the agent.
-   - This value provides information about the agent's purpose and functionality.
+   - This value provides information about the agent's purpose and functionality and remain readonly.
 
 3. **List<IPerceptor> Perceptors**:
    - A collection of perceptors associated with the agent.
@@ -118,13 +118,13 @@ An Agent in the TangoBotTrainer project is a metadata definition created by the 
    - Sets up the perceptors, actuators, and environment interface.
 
 2. **void UpdatePerceptors(Dictionary<string, object> data)**:
-   - Updates the agent's perceptors with new input data from the environment.
+   - Receives input data and updates the agent's perceptors with new input data from the environment.
    - Processes the input data, normalizes it, and stores it in the perceptors.
    - The normalization of all the values received through the perceptors is the responsibility of the Agent's runtime component.
    - The agent waits passively for the data to come from the TestingBooth. The update frequency of the agent's perceptors is determined by the TestingBooth.
    - The agent preprocesses and normalizes the data and distributes these values to the NN input nodes by passing them to the Neural Network Runtime exposed method `Input(Dictionary<string, double> processedData)`.
 
-#### Runtime Component
+#### Agent's Runtime Component
 
 - At runtime, a `RuntimeAgentComponent` is instantiated using the metadata as input for the instantiated agent class.
 - On each project, only one agent should be defined, although many agents will be instantiated at runtime, each one with its respective Neural Network as a brain.
@@ -137,7 +137,7 @@ An Agent in the TangoBotTrainer project is a metadata definition created by the 
 
 #### Perceptor Definition
 
-A Perceptor is a sensor associated with the agent that receives input from the environment. Each Perceptor has the following properties:
+A Perceptor is like a sensor associated with the agent that receives input from the environment. Each Perceptor has the following properties:
 
 1. **string Name**:
    - The name of the Perceptor for reporting purposes.
@@ -272,8 +272,6 @@ A Genome in the TangoBotTrainer project defines the structure and properties of 
     - Randomly selects a gene type and integrates it into the genome.
     - Ensures the new gene adheres to the established genome policies.
 
-#### Using Partial Classes
-
 To manage the complexity of the `Genome` class, we use partial classes to divide groups of functionalities by categories. This approach keeps related methods together while maintaining a clean and organized codebase.
 
 ### Example Structure with Partial Classes
@@ -311,14 +309,14 @@ This document establishes the policies for dealing with genome structures in the
      - Input nodes are on layer 0, hidden nodes are on layers 1 to 99, and output nodes are on layer 100.
    - **Node Restrictions**:
      - The origin node cannot be an output node.
-     - The origin node cannot be disabled.
+     - The origin node cannot be disabled. A connection cannot be created having as FromNode a disabled node.
      - Connections can have the same node as input and output.
    - **Existing Connections**:
      - Connections cannot be created if another connection already exists between the same nodes unless the previous connection gene is disabled.
      - A connection is considered as existing if the FromNode and ToNode properties are the same as the new connection.
      - Connections from and to the same node cannot be repeated unless the previous connection is disabled.
    - **Connection Weight**:
-     - If the weight is -99, a random weight (double) between -1 and 1 is assigned at the time of creation.
+     - If the weight is -99, a random weight (double) between -1 and 1 is assigned at the time of creation of the connection.
    - **Connection State**:
      - Connections cannot be created in a disabled state. They can only be disabled by gene mutation.
    - **Connection Mutation**:
@@ -603,7 +601,7 @@ This document defines the structure and properties of the Gene object and its su
    - This value is set at the time of connection creation and remains constant.
 
 2. **int ToNode**:
-   - The identifier of the destination node for the connection.
+    - The identifier of the destination node for the connection.
    - This value is set at the time of connection creation and remains constant.
 
 3. **double Weight**:
@@ -656,7 +654,78 @@ Detail the implementation of the Neural Network, including node and connection h
 Describe the implementation of the Genome, including gene creation and mutation processes.
 
 ### 4.4 Neural Network Runtime Implementation
-Provide implementation details for the Neural Network Runtime, including input processing and output handling.
+The NNRT is an engine like component that implements the Neural Network.
+
+The Neural Network Definition is a static metadata representation that defines the components and their relationship as interpreted from the respective genome.
+The genome is the genotype, and the neural network definition is the phenotype or the materialization of the genotype.
+As in biology, the evolution pursues the fitness of the genome through successive mutations and selection of the fittest individuals.
+
+Since the NN is just a static metadata, the way to turn it into an operational implementation to test how fit it is and have an input to perform the selection of the fittest, the NNRT is a class that represents logic after the definition that the Neural Network is.
+
+When the Agent object is created, a new NNRT is instantiated receiving as parameter the NN that is going to be tested through the Agent.  It instantiates implementations of the elements defined in the NN like nodes, connections, etc. By the moment the object is readily instantiated, it contains a collection of input nodes, output nodes, special nodes and neural network modules (NNMRT) that are also engines that in turn contain a similar set of implementations as the NNRT. At this point the NNRT is ready to receive Agent's inputs.
+
+Each NNMRT defines one or more nodes as the Module's input nodes, hidden nodes and output nodes.
+
+Nodes within the neural network and within the modules are organized in layers this is important for the propagation sequence.
+
+Let's dissect the innerworkings of the discrete components defined by the neural network metadata:
+
+How the input nodes work?
+Input nodes at instantiation are ready to receive information from the Agent's perceptors. Such information is received as a double value normalized from -1 to 1. Later some other Input nodes capable of receiving information in other formats might be implemented.
+
+The perceptor is an object in the Agent class that contains a reference to the NNRT input node. Input node exposes a public property named Input. The perceptor on Agent's coordination, update the value of the Input property. In the way data is received at Input nodes, it differs from hidden nodes implementation as we'll see later.
+
+The Propagation:
+
+This is a process common to all nodes except output nodes. All nodes propagate their activation following the same procedure.
+
+Nodes, with the exception of the Output nodes of the NNRT, contains a collection of all the outgoing connections attached to it of type List<Connection> OutgoingConnection{get; set;}. This collection is populated at instantiation time. 
+
+Outgoing connection normally belong to the same module as the node that they are attached to, but they might connect to the first node of a distinct module or what would be known as the Module's Input node. Such connections are inter-module connections. that go from a node in one module to the node in another module. This means that the input node, in this case, will propagate the activation through that connection regardless to what module the destination node belongs to. It is necesary to remark that connections involving a module's input node or a hidden node from any other node outside the module, should driven by the module development only. As a rule, incoming connections to module nodes can only develop at the module's development process. Once the module is developed, only connections from the module nodes can be developed. Connections that are part of the neural network or of a later module that is.
+
+How the propagation from a node to an outgoing connection is implemented?
+Node propagation is the action by which the node pushes the Activation (the product of its calculations) to the next node downstream. This is done when the node's Activation is done and the NNRT/NNMRT engine the node belongs to, executes the Node's implementation's public method Propagate(). The Propagate() method iterates through the outgoing connections' collection and for each one, updates the public property Value of the Connection Implementation.
+
+The node at the right end of the connection is observer of the connection's Value property. At instantiation, all node implementations, except Input Nodes', subscribe as observers of all incoming connections' Value property. So, when the Connection's Value property is updated by the node to the left of the connection (the FromNode), first the value is multiplied by the connection's weight and the property is updated. Which means that the observer, the destination node, is notified that Value has changed.  Upon notification, the value of the property being observed, is temporarily stored in the Pre-Activation Buffer of the receiving node.
+
+Nodes might have one or any number of incoming connections from different layers and different modules. To propagate, the node needs a complete activation (a calculation involving all the incoming connections' Value propery value) to pass downstream but not all connections are updated simultaneously. Some might take longer to notify the change. So, the value incoming from each connection is saved to a buffer temporarily in the node.  When all connections have been updated then the node is ready to pass the sum of all connections' cached Value property values plus the node's bias, to the activation function. What comes out of the activation function is the node's Activation. In our case is a value from -1 to 1.
+
+At this point the node is ready propagate the Activation downstream. To do that, the node iterates through the collection of outgoing connections List<Connection> OutgoingConnections{get;set;} and set their public Value to the node's Activation.
+
+With this, the node propagation is done.
+
+In the case of an output node, everything is the same except that there are not outgoing connection. The Agent's Actuators are observers of the property Activation of the output nodes.  When the Activation property is updated, the Actuator proceeds to execute whatever logic there is to interpret the output's intention. Actuators will not collect the output nodes Activation until after each of the output nodes Activation property is populated.
+
+**Layer by layer propagation:
+
+Nodes inside the Neural Network and inner modules are organized in layers. each layer can be thought of a big node on how they implement their propagation sequence. When a layer is ready to propagate, meaning that all nodes in a layer are ReadyToPropagate, all the layer's nodes' Activations are propagated to the next layer nodes all at once.
+
+In the NN input nodes are in layer 0 while output nodes are in layer X (the maximum number of layers) The NN is created with mandatory input nodes as per each Agent's perceptor and an output nodes as per each Agent's Actuator. In the same way, each module is create with at least 2 nodes. One input node in layer 0 and a module output node in layer X. The number of output nodes is determined by the respective Evaluator.
+
+When all nodes in a layer are RTP ready to propagate (their activation is ready), the engine controlling such nodes execute each node's Propagate() public method. Even if the activation is ready for propagation, propagation will not procced until the Propagate() method is invoked.  At instantiation time, the engine creates a collection all nodes under its control. That is how the engine has access to all nodes controlled by it. 
+
+The NNRT and NNMRT implement the input nodes. At Neural Network level and Module level, there is the layer 0 which contains the input nodes. In the case of NN these are the regular input nodes. Modules can have one or more input nodes. In any case input nodes in modules are as well in layer 0.
+
+The engines are constantly monitoring the input node under their control. When all input nodes are RTP, it means that the layer 0 is RTP too, and the processing starts as a chain reaction until the last layers' (layers containing the output nodes) nodes' Activation property is updated. There is when the processing ends. When another load of data is delivered to the NN input nodes via the Agent's perceptors updating the input nodes Input property, the process starts all over again.
+
+**Modules concurrency:
+
+Modules inside the neural network are intended to deal with a discrete problem for whom discrete skills have been developed in the form of neural network structure isolated as a Neural Network Module.  Independent modules do not need to run in sequence, because one module does not depend of the information of another module as input. So they can run concurrently independent of one another.
+
+The first module develops without the help of any previous module because, since it is the first, there are no previous modules from which to get Module Processed Information if needed. Subsequent modules might develop connections From nodes in an older module.  Let's define how cuncurrency works when it comes to a scenario were there are two modules in a neural network whos output nodes, output their activation to a neural network's output node. Let's asume that each module has one input node, a hidden node and the module's output node. 
+
+At NNRT instantiation time, it creates an instance of the Module Implementation runtime (NNMRT) per each module defined in the NN. Each NNMRT instance runs in a separate thread. As soon as the NNMRT is instantiated, it is observer of each child node's Activation property. When all the nodes in layer 0 Activation property is updated, it is said that the layer is RTP and propagation is triggered by the engine by invoking method Propagate() of each layer's node. This continues until the last layer's nodes Activation property is updated.
+
+The Module Implementation runtime (NNMRT). Just like in the case of NNRT, NNMRT observes all nodes at each layer inside it. When the layer 0 is RTP the process start as chain reaction in the module.
+Module's output node contrary to NN output nodes, support outgoing connections. This means that other nodes can connect as clients of these module output nodes. A connection can appear from the module's output node to the NN output node(s) or to another module's input or hidden node.
+
+A newer module can develop connections FROM an older module's hidden or output node. Upon that node's activation the client node receives the activation and it and the layer it belongs to, become RTP.
+
+All nodes in the NN, whether as part of the NN o as part of a module, are instantiate as item of a collection property of the NNRT object. This way, since the NNMRT run in separate threads, can access any node and monitor and observe nodes' properties regardless of what module they belong to. The NN node collection is injected as a parameter to the NNMRT objects at instantiation.
+
+
+
+
 
 ## 5. Abstract Concepts
 This section delves into the theoretical foundations and key concepts that underpin the TangoBotTrainer project. It covers the principles of evolutionary algorithms, neural network training, the roles of perceptors and actuators, environment interaction, evaluators, and the overall evolution process. Understanding these abstract concepts is crucial for grasping how the TangoBotTrainer system operates and evolves over time.
