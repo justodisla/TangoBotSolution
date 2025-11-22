@@ -1,0 +1,390 @@
+﻿# TangoBot Solution Knowledge Base
+
+## Table of Contents
+- [SDK Structure](#sdk-structure)
+- [Dependency Injection](#dependency-injection)
+- [Configuration Management](#configuration-management)
+- [Environment Switching](#environment-switching)
+- [Best Practices & Patterns](#best-practices--patterns)
+- [Workflow for Creating New API Components](#workflow-for-creating-new-api-components)
+- [Deserialization Strategy](#deserialization-strategy)
+- [Planned Improvements: Common Deserializer](#planned-improvements-common-deserializer)
+- [Summary Dossier](#summary-dossier)
+
+---
+
+## SDK Structure
+
+### AccountComponent & BaseApiComponent
+
+- `BaseApiComponent` provides core HTTP functionality:
+  - Internal `HttpClient`
+  - Uses `ITokenProvider` for authentication
+  - Retry logic, error handling
+  - Observer pattern for HTTP events
+  - `SendRequestAsync` for authorized, retried requests
+
+- `AccountComponent`:
+  - Inherits from `BaseApiComponent`
+  - Implements `IAccountComponent`
+  - Handles account endpoints (balances, positions, snapshots)
+  - Uses deserializers for JSON responses
+  - Subscribes observers for diagnostics/logging
+
+- **Pattern ensures:**
+  - Separation of concerns
+  - Reusability/extensibility
+  - Centralized error handling/event notification
+  - Async methods for scalability (.NET 8)
+
+---
+
+## Dependency Injection
+
+- Custom service locator: `TangoBotServiceLocator` (in `DependecyInjection`)
+- Runtime registration/resolution via reflection:
+  - `GetSingletonService<T>(string name = "")`
+  - `GetTransientService<T>(string qualifiedName = "")`
+  - Type discovery scans assemblies; fully qualified name required if multiple implementations
+  - Thread-safe registration/provider rebuilds
+- DI container initialized with `TangoBotServiceLocator.Initialize()`
+- Differs from standard .NET DI by using runtime registration and a service locator
+
+---
+
+## Configuration Management
+
+- Managed via singleton `IConfigurationProvider` (resolved via service locator)
+- All configuration values loaded at startup in `StartUp.SetupConfigurations()`
+- Values set using constants for clarity
+
+### Environment Switching
+
+- Supports both production and sandbox environments
+- `RUN_MODE` determines active environment
+- Environment-specific values copied to "active" keys for runtime use
+- Easy switching without code changes
+- Additional settings (streaming endpoints, retry attempts, token expiration, API keys) set during initialization
+
+- **Benefits:**
+  - Centralized, flexible management
+  - Strong separation of environment-specific and active values
+
+---
+
+## Best Practices & Patterns
+
+- Use of observer pattern for event notification
+- Separation of HTTP/auth logic from business logic
+- Centralized configuration and DI for maintainability
+
+---
+
+## Workflow for Creating New API Components
+
+To add new API components for Tasty Trade API endpoints, follow these steps:
+
+1. **Review the API Endpoint**
+   - Consult the Swagger/OpenAPI documentation (e.g., `balances-and-position.json`) for endpoint details, parameters, and response schemas.
+
+2. **Define the Strongly Typed Model**
+   - Create a C# class that matches the JSON response structure using `[JsonPropertyName]` attributes.
+   - Use nullable types for optional fields and appropriate .NET types for dates, numbers, and strings.
+
+3. **Create the Component Class**
+   - Inherit from `BaseApiComponent`.
+   - Implement the relevant interface (e.g., `IAccountComponent`, `IOrderComponent`).
+   - Add methods that build the endpoint URL, handle path/query parameters, and call `SendRequestAsync`.
+
+4. **Deserialize the Response**
+   - Use `System.Text.Json.JsonSerializer` or a custom deserializer to convert the JSON response into the strongly typed model.
+   - Handle error cases and log as needed.
+
+5. **Integrate with Dependency Injection**
+   - Register the new component with the service locator (`TangoBotServiceLocator`) for singleton or transient usage.
+   - Ensure any required dependencies (e.g., token provider) are available.
+
+6. **Configure Environment Values**
+   - If the endpoint requires environment-specific configuration, add relevant keys to `IConfigurationProvider` in `StartUp.SetupConfigurations()`.
+
+7. **Add Observers (Optional)**
+   - Subscribe observers to the component for diagnostics, logging, or event handling.
+
+8. **Test the Component**
+   - Validate the component against the API, ensuring correct request construction and response parsing.
+
+---
+
+## Deserialization Strategy
+
+### Current Implementation
+
+- **Separate Deserializers**:
+  - Each model type has its own deserializer method in `AccountInfoDeserializer`.
+  - Examples:
+    - `DeserializeAccountBalances`: Converts JSON into a `Dictionary<string, object>` for account balances.
+    - `DeserializeBalanceSnapshots`: Converts JSON into an array of dictionaries for balance snapshots.
+    - `DeserializeAccountPositions`: Converts JSON into an array of dictionaries for account positions.
+    - `DeserializeCustomerAccounts`: Converts JSON into a list of `Account` objects.
+    - `DeserializeAccount`: Converts JSON into a single `Account` object.
+
+- **Error Handling**:
+  - Each method uses try-catch blocks to handle exceptions.
+  - Logs errors and returns `false` or `null` on failure.
+
+- **Limitations**:
+  - Code duplication across deserializer methods.
+  - Lack of flexibility for handling new or dynamic models.
+
+---
+
+## Planned Improvements: Common Deserializer
+
+### Goal
+
+- Replace separate deserializers with a **common deserializer** that can handle all model types dynamically.
+
+### Design
+
+- **Generic Method**:
+  - A single method that accepts the JSON response and the target model type.
+  - Uses `System.Text.Json.JsonSerializer` for deserialization.
+
+- **Implementation**:
+  
+  public static bool TryDeserialize<T>(string jsonResponse, out T result) where T : class
+  {
+      result = null;
+      try
+      {
+          result = JsonSerializer.Deserialize<T>(jsonResponse);
+          return result != null;
+      }
+      catch (Exception ex)
+      {
+          // Log error
+          return false;
+      }
+  }
+
+
+  - **Usage**:
+
+string jsonResponse = "{ "data": { "account-number": "12345" } }"; if (CommonDeserializer.TryDeserialize<Account>(jsonResponse, out var account)) { Console.WriteLine($"Account Number: {account.AccountNumber}"); }
+
+  ```
+
+  
+### Benefits
+
+- **Reusability**:
+  - A single method can handle all model types, reducing code duplication.
+
+- **Flexibility**:
+  - Works with any model type, including single objects, lists, or nested structures.
+
+- **Simplified Code**:
+  - Eliminates the need for multiple deserializer methods, making the codebase cleaner and easier to maintain.
+
+### Next Steps
+
+1. Implement the `CommonDeserializer` class.
+2. Refactor existing deserializer methods to use the common deserializer.
+3. Test the new implementation with all existing API endpoints.
+4. Update the knowledge base with the new deserialization strategy.
+
+---
+
+## Summary Dossier
+
+- The SDK abstracts Tasty Trade API endpoints into reusable, strongly typed C# components.
+- Each component follows a pattern: inherit from `BaseApiComponent`, use DI for dependencies, and deserialize JSON responses into models.
+- Configuration and environment switching are centralized and flexible.
+- The workflow above ensures new endpoints can be added consistently and maintainably.
+- Current deserialization uses separate methods for each model type, but a common deserializer is planned to simplify and unify the process.
+- This knowledge base preserves the architectural logic and best practices for future development and onboarding.
+
+
+
+
+# dxLink WebSocket 1.0.2 Knowledge Base: C# Implementation Guide for Tasty Trade  
+**Document Version:** 1.1 | **Last Updated:** November 23, 2025  
+**Applies To:** .NET 7+ applications using dxLink WebSocket API with Tasty Trade accounts  
+
+---
+
+## 📌 Executive Summary  
+This document provides the definitive implementation pattern for **entitlement-aware dxLink integration** in C# applications targeting Tasty Trade market data. It covers critical entitlement verification workflows, Tasty Trade-specific symbol conventions, and production-hardened architecture patterns. **Failure to implement entitlement checks will cause runtime failures with `403 MissingPermission` errors.**
+
+---
+
+## 🔑 Critical Architecture Components  
+### Core Class Structure
+```csharp
+public class DxLinkSystem
+{
+    public TastyTradeAuth Auth { get; }        // Handles token lifecycle
+    public DxLinkClient Client { get; }        // WebSocket connection manager
+    public SubscriptionRegistry Registry { get; } // Dynamic source management
+    public EventRouter Router { get; }         // Type-safe event routing
+}
+```
+
+### Dependencies
+- `System.Net.WebSockets` (built-in)
+- `System.Text.Json` (built-in)
+- `Microsoft.Extensions.Http` (for resilient HTTP clients)
+- *Optional:* `Polly` for retry policies
+
+---
+
+## ⚠️ Mandatory Entitlement Verification Workflow  
+**Never assume entitlements exist.** Always verify before subscribing.
+
+### Step 1: Check Permissions via API
+```csharp
+// Call BEFORE establishing dxLink connection
+var entitlements = await auth.GetEntitlementsAsync();
+
+if (!entitlements["TT_OPTIONS_PRO"])
+{
+    throw new MissingEntitlementException(
+        "TT_OPTIONS_PRO required for options greeks. " +
+        "Enable in Tasty Trade settings: https://trade.tastytrade.com/account/settings/market-data");
+}
+```
+
+### Step 2: Interpret Permission Response
+| Required Permission | API Response Value | Entitlement Tier |
+|---------------------|--------------------|------------------|
+| Basic equities      | `"equities"`       | `TT_BASIC`       |
+| Options greeks      | `"option_greeks"`  | `TT_OPTIONS_PRO` |
+| Futures data        | `"futures"`        | `TT_FUTURES_MAX` |
+
+> **❗ Critical Reality Check:**  
+> - `TT_OPTIONS_PRO` requires **explicit activation** in Tasty Trade account settings  
+> - Standard accounts have **delayed data only** by default  
+> - Exchange fees apply ($10-$15/month for OPRA real-time data)  
+
+---
+
+## 🔤 Tasty Trade Symbol Format Rules  
+**Incorrect formatting causes `4004 SymbolNotFound` errors.**
+
+| Asset Type | Format Example | Critical Details |
+|------------|----------------|------------------|
+| **Options** | `@"SPX   241220C00450000"` | **3 spaces** after root symbol (`SPX` + 3 spaces) |
+| **Futures** | `"/ESM4"` | **Must prefix with `/`** (CME E-mini S&P June 2024) |
+| **Equities** | `"AAPL"` | Standard tickers (no special formatting) |
+
+```csharp
+// CORRECT Tasty Trade option symbol (verbatim string preserves spaces)
+var validOption = @"SPX   241220C00450000"; 
+
+// WRONG (will fail):
+var invalidOption = "SPX 241220C00450000"; // Only 1 space
+```
+
+---
+
+## 🚨 Error Handling Patterns  
+### Handle Entitlement Errors Gracefully
+```csharp
+private void HandleDxLinkError(ApiError error)
+{
+    if (error.Code == 403 && error.Details?.RequiredPermission == "option_greeks")
+    {
+        // 1. Log detailed error
+        logger.Error("MISSING TT_OPTIONS_PRO ENTITLEMENT. Required for: {Symbols}", 
+            activeSubscription.Symbols);
+        
+        // 2. Notify UI
+        eventAggregator.Publish(new EntitlementWarning(
+            "Real-time options data disabled. Enable in Account Settings > Market Data"));
+        
+        // 3. Fallback to delayed data if available
+        SwitchToDelayedDataFallback();
+    }
+}
+```
+
+### Common Error Codes
+| Code | Meaning | Resolution |
+|------|---------|------------|
+| `403` | `MissingPermission` | Verify entitlements + symbol format |
+| `4004` | `SymbolNotFound` | Check Tasty Trade symbol conventions |
+| `401` | `TokenExpired` | Refresh JWT token immediately |
+| `1006` | `ConnectionReset` | Reconnect with exponential backoff |
+
+---
+
+## 🛡️ Production Hardening Checklist  
+Complete these before deployment:
+
+- **[ ] Token Auto-Refresh**  
+  Implement background token refresh at 1h 50m intervals (tokens expire at 2h)
+  ```csharp
+  _ = Task.Run(async () => {
+      while (!cancellationToken.IsCancellationRequested) {
+          await Task.Delay(TimeSpan.FromHours(1).Add(TimeSpan.FromMinutes(50)));
+          await auth.RefreshTokenAsync();
+      }
+  });
+  ```
+
+- **[ ] WebSocket Heartbeats**  
+  Send `PING` every 30 seconds to prevent timeouts:
+  ```json
+  {"id": 999, "method": "PING"}
+  ```
+
+- **[ ] Rate Limiting**  
+  Enforce Tasty Trade's limits:
+  - Max 50 subscriptions per connection
+  - Max 10 messages/sec per client
+
+- **[ ] Secure Credential Storage**  
+  Use `ProtectedData` for Windows or Keychain for macOS:
+  ```csharp
+  var encryptedPass = ProtectedData.Protect(
+      Encoding.UTF8.GetBytes("password"), 
+      null, 
+      DataProtectionScope.CurrentUser
+  );
+  ```
+
+- **[ ] Graceful Degradation**  
+  Implement fallback to delayed data when entitlements fail
+
+---
+
+## 🔗 Official References  
+| Resource | URL | Access Requirements |
+|----------|-----|---------------------|
+| Tasty Trade Developer Portal | https://developer.tastytrade.com/ | Partner account login |
+| Market Data Subscriptions Guide | https://support.tastytrade.com/hc/en-us/articles/360001360233 | Public |
+| dxLink Protocol Spec v1.0.2 | https://kb.dxfeed.com/display/DRD/dxLink+API+1.0.2 | dxFeed customer account |
+| C# dxLink SDK (GitHub) | https://github.com/dxfeed/dxlink-dotnet | Public |
+
+---
+
+## 📞 Critical Support Contacts  
+| Issue Type | Contact Method | Expected Response Time |
+|------------|----------------|------------------------|
+| Entitlement verification | api-support@tastytrade.com (Subject: `dxLink Entitlement Verification - Account #XXXXX`) | 4-6 business hours |
+| Symbol format issues | developer-support@dxfeed.com | 24 business hours |
+| Emergency production outage | +1 (800) 822-8947 (Press 3 for data permissions) | 1-2 hours |
+
+> **💡 Pro Tip:** When contacting support, include:  
+> - Your Tasty Trade account number  
+> - Full dxLink error message with `code` and `details`  
+> - Timestamp of failure (UTC)  
+> - Sample symbol causing failure (e.g., `SPX   241220C00450000`)
+
+---
+
+**Document Approved By:** dxLink Integration Team  
+**Next Review Date:** February 23, 2026  
+**Classification:** PROPRIETARY - INTERNAL USE ONLY  
+
+> This knowledge base document supersedes all prior internal documentation regarding dxLink entitlement management. Always verify entitlements at runtime – never assume permissions based on account type. When in doubt, contact Tasty Trade API support with the exact error codes shown in this document.
