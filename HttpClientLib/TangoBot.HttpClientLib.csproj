@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="AccountStatusApi\" />
     <Folder Include="OrderApi\Models\" />
   </ItemGroup>
 
