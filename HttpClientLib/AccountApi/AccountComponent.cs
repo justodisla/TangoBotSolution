@@ -7,17 +7,25 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TangoBot.API.Configuration;
+using TangoBot.API.Toolkit;
 using TangoBot.API.TTServices;
+using TangoBot.DependecyInjection;
 
 namespace TangoBot.HttpClientLib.AccountApi
 {
     public class AccountComponent : BaseApiComponent, IAccountComponent
     {
-        private const string BaseAccountUrl = "https://api.cert.tastyworks.com/accounts";
+        private readonly string _baseAccountUrl;
 
         public AccountComponent()
             : base()
         {
+            // Resolve the base URL dynamically from the configuration provider
+            var configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>()
+                ?? throw new Exception("ConfigurationProvider is not available.");
+            _baseAccountUrl = $"{configurationProvider.GetConfigurationValue(Constants.ACTIVE_API_URL)}/accounts";
+
             Subscribe(new AccountObserver());
         }
 
@@ -26,11 +34,8 @@ namespace TangoBot.HttpClientLib.AccountApi
         /// </summary>
         public async Task<Dictionary<string, object>> GetAccountBalancesAsync(string accountNumber)
         {
-            string url = $"{BaseAccountUrl}/{accountNumber}/balances";
-            //var response = await SendGetRequestAsync(url);
-
+            string url = $"{_baseAccountUrl}/{accountNumber}/balances";
             var response = await SendRequestAsync(url, HttpMethod.Get);
-
 
             if (response != null && response.IsSuccessStatusCode)
             {
@@ -62,7 +67,7 @@ namespace TangoBot.HttpClientLib.AccountApi
         /// </summary>
         public async Task<Dictionary<string, object>[]?> GetBalanceSnapshotAsync(string accountNumber)
         {
-            string url = $"{BaseAccountUrl}/{accountNumber}/balance-snapshots";
+            string url = $"{_baseAccountUrl}/{accountNumber}/balance-snapshots";
             var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)
@@ -95,7 +100,7 @@ namespace TangoBot.HttpClientLib.AccountApi
         /// </summary>
         public async Task<Dictionary<string, object>[]> GetAccountPositionsAsync(string accountNumber)
         {
-            string url = $"{BaseAccountUrl}/{accountNumber}/positions";
+            string url = $"{_baseAccountUrl}/{accountNumber}/positions";
             var response = await SendRequestAsync(url, HttpMethod.Get);
 
             if (response != null && response.IsSuccessStatusCode)

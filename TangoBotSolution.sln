@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35312.102
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TangoBot", "TangoBot\TangoBot.csproj", "{88C48BC7-443D-4F3E-AC77-0FD2EB22DC39}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -47,16 +47,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TangoBot.Core.Api", "TangoBot.Core.Api\TangoBot.Core.Api.csproj", "{21588DDE-3BFC-4D52-B8D0-F09FFFC76EE2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
-	ProjectSection(SolutionItems) = preProject
-		account-status.json = account-status.json
-		AccountStatusApi.json = AccountStatusApi.json
-		balances-and-position.json = balances-and-position.json
-		KnowledgeBase.txt = KnowledgeBase.txt
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReferenceApis", "ReferenceApis", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
-		AccountStatusApi.json = AccountStatusApi.json
+		..\..\..\AppData\Local\Temp\MicrosoftEdgeDownloads\f9e9ad9d-1454-4b66-85da-9a647fb10e6d\account-status.json = ..\..\..\AppData\Local\Temp\MicrosoftEdgeDownloads\f9e9ad9d-1454-4b66-85da-9a647fb10e6d\account-status.json
 	EndProjectSection
 EndProject
 Global

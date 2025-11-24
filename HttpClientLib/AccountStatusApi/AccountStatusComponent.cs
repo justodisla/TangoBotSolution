@@ -1,15 +1,26 @@
+using HttpClientLib;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HttpClientLib;
+using TangoBot.API.Configuration;
+using TangoBot.API.Toolkit;
+using TangoBot.DependecyInjection;
 
 public class AccountStatusComponent : BaseApiComponent
 {
-    private const string BaseAccountUrl = "https://api.tastyworks.com/accounts";
+    private readonly string _baseAccountUrl;
+    
+    public AccountStatusComponent()
+    {
+        // Resolve the base URL dynamically from the configuration provider
+        var configurationProvider = TangoBotServiceLocator.GetSingletonService<IConfigurationProvider>()
+            ?? throw new Exception("ConfigurationProvider is not available.");
+        _baseAccountUrl = $"{configurationProvider.GetConfigurationValue(Constants.ACTIVE_API_URL)}/accounts"; 
+    }
 
     public async Task<TradingStatus?> GetTradingStatusAsync(string accountNumber)
     {
-        string url = $"{BaseAccountUrl}/{accountNumber}/trading-status";
+        string url = $"{_baseAccountUrl}/{accountNumber}/trading-status";
         var response = await SendRequestAsync(url, HttpMethod.Get);
 
         if (response != null && response.IsSuccessStatusCode)

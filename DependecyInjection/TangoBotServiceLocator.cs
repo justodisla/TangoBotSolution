@@ -13,6 +13,79 @@ using TangoBot.API.Logging;
 
 namespace TangoBot.DependecyInjection
 {
+    /// <summary>
+    /// The `TangoBotServiceLocator` is a custom implementation of the Service Locator pattern designed to manage the lifecycle 
+    /// and resolution of services in the TangoBot application. It dynamically discovers, registers, and resolves services 
+    /// at runtime, supporting both singleton and transient lifecycles. This class is built on top of the 
+    /// `Microsoft.Extensions.DependencyInjection` framework and provides additional functionality for dynamic service discovery 
+    /// and logging.
+    /// 
+    /// <h3>Features:</h3>
+    /// - **Dynamic Service Discovery**: Automatically discovers and registers services based on their interface and implementation.
+    /// - **Singleton and Transient Lifecycles**: Supports both singleton and transient service lifecycles.
+    /// - **Thread-Safe**: Ensures thread safety during service registration and resolution.
+    /// - **Custom Logging**: Integrates with `ILoggingService` for structured logging, with a fallback to `Console.WriteLine`.
+    /// - **Assembly Scanning**: Dynamically scans assemblies in the solution to locate service implementations.
+    /// 
+    /// <h3>Usage Instructions:</h3>
+    /// 
+    /// <h4>1. Initialization</h4>
+    /// Before using the `TangoBotServiceLocator`, it must be initialized. This sets up the internal service collection 
+    /// and resolves the logging service.
+    /// 
+    /// <code>
+    /// TangoBotServiceLocator.Initialize();
+    /// </code>
+    /// 
+    /// <h4>2. Resolving Singleton Services</h4>
+    /// To resolve a singleton service, use the `GetSingletonService<T>()` method. If the service is not already registered, 
+    /// it will be discovered, registered, and instantiated.
+    /// 
+    /// <code>
+    /// var myService = TangoBotServiceLocator.GetSingletonService<IMyService>();
+    /// </code>
+    /// 
+    /// Optionally, you can specify the fully qualified name of the implementation if multiple implementations exist:
+    /// 
+    /// <code>
+    /// var myService = TangoBotServiceLocator.GetSingletonService<IMyService>("MyNamespace.MyServiceImplementation");
+    /// </code>
+    /// 
+    /// <h4>3. Resolving Transient Services</h4>
+    /// To resolve a transient service, use the `GetTransientService<T>()` method. A new instance of the service will be created 
+    /// each time it is resolved.
+    /// 
+    /// <code>
+    /// var myService = TangoBotServiceLocator.GetTransientService<IMyService>();
+    /// </code>
+    /// 
+    /// <h4>4. Logging</h4>
+    /// The `TangoBotServiceLocator` uses an `ILoggingService` for structured logging. If the logging service is unavailable, 
+    /// it falls back to `Console.WriteLine`.
+    /// 
+    /// Example of logging:
+    /// <code>
+    /// TangoBotServiceLocator.LogInfo("Service initialized successfully", null);
+    /// </code>
+    /// 
+    /// <h3>Implementation Details:</h3>
+    /// - **Service Registration**: Services are registered dynamically when they are first resolved. The `DiscoverServiceType<T>()` 
+    ///   method scans assemblies to locate the implementation of the requested interface.
+    /// - **Thread Safety**: The `serviceCollectionLock` ensures that service registration and resolution are thread-safe.
+    /// - **Caching**: Singleton instances are cached in the `singletonInstances` dictionary to avoid redundant instantiations.
+    /// - **Error Handling**: Throws detailed exceptions if a service cannot be resolved or if multiple implementations are found 
+    ///   without a specified name.
+    /// 
+    /// <h3>Limitations:</h3>
+    /// - **Performance Overhead**: Rebuilding the `IServiceProvider` during runtime can be expensive.
+    /// - **Service Locator Anti-Pattern**: While functional, the Service Locator pattern is generally discouraged in favor of 
+    ///   dependency injection frameworks.
+    /// - **Assembly Scanning**: Service discovery is limited to assemblies in the solution directory.
+    /// 
+    /// <h3>Recommendations:</h3>
+    /// - Use `TangoBotServiceLocator` for dynamic service resolution in scenarios where traditional dependency injection is not feasible.
+    /// - For new development, consider migrating to a standard dependency injection framework like `Microsoft.Extensions.DependencyInjection`.
+    /// </summary>
     public class TangoBotServiceLocator
     {
 
@@ -113,8 +186,6 @@ namespace TangoBot.DependecyInjection
 
             return singletonInstances[name] as T;
         }
-
-
 
 
         private static string LevelName(string? name, Type serviceType)
