@@ -42,3 +42,5 @@ Expected Benefits
 2.	Reusability: Reduces code duplication and improves maintainability.
 3.	Consistency: Ensures uniform handling of API responses across the solution.
 4.	Performance: Improves deserialization efficiency by using System.Text.Json.
+
+
