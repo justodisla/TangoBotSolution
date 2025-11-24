@@ -18,7 +18,7 @@ namespace TangoBot.App.App
             #region Environment configuration
 
             #region Production Configuration
-            configurationProvider.SetConfigurationValue(AppConstants.PRODUCTION_URL, "https://api.tastyworks.com");
+            configurationProvider.SetConfigurationValue(AppConstants.PRODUCTION_URL, "https://api.tastyworks.comx");
             configurationProvider.SetConfigurationValue(AppConstants.PRODUCTION_USER, "justodisla");
             configurationProvider.SetConfigurationValue(AppConstants.PRODUCTION_PASSWORD, "?");
             configurationProvider.SetConfigurationValue(AppConstants.PRODUCTION_ACCOUNT_NUMBER, "?");

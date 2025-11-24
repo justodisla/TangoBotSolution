@@ -209,7 +209,7 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
         /// <returns></returns>
         public static IGene RemoveGene(IGenome genome, IGene gene = null)
         {
-            
+            return null;
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
         /// <returns></returns>
         public static IGene RemoveGene(IGenome genome, int geneId = -1)
         {
-
+            return null;
         }
 
         /// <summary>
@@ -249,12 +249,12 @@ namespace TangoBotTrainerCoreLib.GenomeExtensions
         /// <returns></returns>
         public static INodeGene? RemoveNode(IGenome genome, INodeGene? node = null, bool onlyCurrentModule = true)
         {
-            
+            return null;
         }
 
         public static IGene.IConnectionGene? RemoveConnection(IGenome genome, IConnectionGene connection = null)
         {
-
+                        return null;
         }
         /// <summary>
         /// Fixes the genome structure after any change.
